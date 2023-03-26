@@ -3,6 +3,7 @@ import css from "./Player.module.scss";
 
 type Props = {
   src: string;
+  id: string;
   title: string;
   date: string;
 };
@@ -12,7 +13,7 @@ type Progress = {
   duration: number;
 };
 
-const AudioPlayer: React.FC<Props> = ({ src, title, date }) => {
+const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
   const [progress, setProgress] = useState<Progress>({
     currentTime: 0,
     duration: 0,
@@ -20,7 +21,7 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    const storedProgress = localStorage.getItem(`${src}-progress`);
+    const storedProgress = localStorage.getItem(`${id}-progress`);
     if (storedProgress) {
       const { currentTime } = JSON.parse(storedProgress);
       setProgress(JSON.parse(storedProgress));
@@ -35,7 +36,7 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date }) => {
     const duration = e.currentTarget.duration;
     setProgress({ currentTime, duration });
     localStorage.setItem(
-      `${src}-progress`,
+      `${id}-progress`,
       JSON.stringify({ currentTime, duration })
     );
   };

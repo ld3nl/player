@@ -29,6 +29,23 @@ export default function Home({ posts, totalPosts }: HomeProps) {
     DEFAULT_NUMBER_OF_POSTS
   );
 
+  const [filteredPost, setFilteredPost] = useState<Post[]>();
+
+  useEffect(() => setFilteredPost(posts), []);
+
+  const filterPosts = (posts: Post[], words: string[]): Post[] => {
+    return posts.filter((post) => {
+      const title = post.title.rendered.toLowerCase();
+      return (
+        words.length > 0 &&
+        words.every(
+          (word) =>
+            typeof word === "string" && title.includes(word.toLowerCase())
+        )
+      );
+    });
+  };
+
   return (
     <>
       <Head>
@@ -37,21 +54,34 @@ export default function Home({ posts, totalPosts }: HomeProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>hello</div>
       <input
         type="number"
+        defaultValue={numberOfPost}
         onChange={(e) => setNumberOfPost(Number(e.target.value))}
       />
-      {posts &&
-        posts.slice(0, numberOfPost).map((post, id) => {
-          const { audioUrl, title, date } = post;
+
+      <input
+        type="text"
+        placeholder="Search"
+        onChange={(e) => {
+          const string = e.target.value;
+          const array = string.split(" ");
+          setFilteredPost(filterPosts(posts, array));
+          // setFilteredPost(filterPosts(posts, array));
+        }}
+      />
+
+      {filteredPost &&
+        filteredPost.slice(0, numberOfPost).map((post, i) => {
+          const { audioUrl, title, date, id } = post;
 
           return (
-            <div key={`item-${id}`} className="col-md-6">
+            <div key={`item-${i}`} className="col-md-6">
               <AudioPlayer
                 title={title.rendered}
                 src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                 date={date}
+                id={id}
               />
             </div>
           );
@@ -81,7 +111,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const postsFromServer = await Promise.all(promises).then((results) =>
-    results.flat().map(({ excerpt, title, date }) => {
+    results.flat().map(({ excerpt, title, date, id }) => {
       const pattern = /src="([^"]*)/;
       const match = excerpt.rendered.match(pattern);
       const audioUrl = match
@@ -95,6 +125,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         audioUrl: audioUrl,
         title,
         date,
+        id,
       };
     })
   );

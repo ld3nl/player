@@ -21,10 +21,11 @@ interface Post {
   categories: number[];
   featured_media: number;
   author: number;
+  date: string;
 }
 
 export const getAllPostsFromServer = async (
-  term: string | null = null,
+  term: number | null = null,
   per_page: number | null = null,
   offset: number | null = null
 ): Promise<Post[]> => {

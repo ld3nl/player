@@ -5,9 +5,14 @@ $main-color: #4caf50;
 
 /* Define styles for the audio player */
 .audio-player {
-  :global {
-    @import "~/normalize.css/normalize.css";
-  }
+  //   :global {
+  //     @import "~/normalize.css/normalize.css";
+  //   }
+
+  --audio-element-background-color: #f0f0f0;
+  --audio-element-progress-color: #333;
+  --audio-element-progress-hover-color: #666;
+  --audio-element-progress-height: 0.5rem;
 
   display: flex;
   flex-direction: column;
@@ -25,7 +30,67 @@ $main-color: #4caf50;
   }
 
   .audio-element {
-    width: 100%;
+    background-color: var(--audio-element-background-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+
+    &::-webkit-media-controls-panel {
+      background-color: transparent;
+    }
+
+    &::-webkit-media-controls-timeline-container {
+      height: var(--audio-element-progress-height);
+    }
+
+    &::-webkit-media-controls-timeline-progress-bar {
+      height: var(--audio-element-progress-height);
+      background-color: var(--audio-element-progress-color);
+    }
+
+    &::-webkit-media-controls-timeline-progress-bar:hover {
+      background-color: var(--audio-element-progress-hover-color);
+    }
+
+    &::-webkit-media-controls-timeline-progress-buffer {
+      height: var(--audio-element-progress-height);
+      background-color: var(--audio-element-progress-color);
+    }
+
+    &::-webkit-media-controls-timeline-progress-buffer-bar {
+      height: var(--audio-element-progress-height);
+      background-color: var(--audio-element-progress-hover-color);
+    }
+
+    &::-webkit-media-controls-timeline-webkit-media-slider {
+      height: var(--audio-element-progress-height);
+    }
+
+    &::-webkit-media-controls-timeline-webkit-media-slider-thumb {
+      width: 1rem;
+      height: 1rem;
+      background-color: var(--audio-element-progress-color);
+      border-radius: 50%;
+      margin-top: calc(var(--audio-element-progress-height) / -2);
+    }
+
+    &::-webkit-media-controls-current-time-display,
+    &::-webkit-media-controls-time-remaining-display {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    &::-webkit-media-controls-volume-slider {
+      height: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    &::-webkit-media-controls-volume-slider-thumb {
+      width: 1.5rem;
+      height: 1.5rem;
+      background-color: var(--audio-element-progress-color);
+      border-radius: 50%;
+      margin-top: calc(1.5rem / -2);
+    }
   }
 
   .progress-bar {
