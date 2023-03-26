@@ -7,6 +7,8 @@ import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
 import AudioPlayer from "@/components/Player/Player";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 
+import css from "../styles/Home.module.scss";
+
 type Post = {
   id: any;
   audioUrl: any;
@@ -58,29 +60,36 @@ export default function Home({ posts, totalPosts }: HomeProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <input
-        type="number"
-        defaultValue={numberOfPost}
-        onChange={(e) => setNumberOfPost(Number(e.target.value))}
-      />
+      <div className={css["input-container"]}>
+        <label htmlFor="numberOfPost">Number of posts:</label>
+        <input
+          id="numberOfPost"
+          type="number"
+          defaultValue={numberOfPost}
+          onChange={(e) => setNumberOfPost(Number(e.target.value))}
+        />
+      </div>
 
-      <input
-        type="text"
-        placeholder="Search"
-        onChange={(e) => {
-          const string = e.target.value;
-          const array = string.split(" ");
-          setFilteredPost(filterPosts(posts, array));
-          // setFilteredPost(filterPosts(posts, array));
-        }}
-      />
+      <div className={css["input-container"]}>
+        <label htmlFor="search">Search:</label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search"
+          onChange={(e) => {
+            const string = e.target.value;
+            const array = string.split(" ");
+            setFilteredPost(filterPosts(posts, array));
+          }}
+        />
+      </div>
 
       {filteredPost &&
         filteredPost.slice(0, numberOfPost).map((post, i) => {
           const { audioUrl, title, date, id } = post;
 
           return (
-            <div key={`item-${i}`} className="col-md-6">
+            <div key={`item-${i}`}>
               <AudioPlayer
                 title={title.rendered}
                 src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
