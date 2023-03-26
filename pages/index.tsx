@@ -26,7 +26,7 @@ const cache = new LRUCache({
   // maxAge: 1000 * 60 * 60, // maximum age of an entry in milliseconds (1 hour)
 });
 
-const DEFAULT_NUMBER_OF_POSTS = 1;
+const DEFAULT_NUMBER_OF_POSTS = 12;
 
 export default function Home({ posts, totalPosts }: HomeProps) {
   const [numberOfPost, setNumberOfPost] = useState<number>(

@@ -3,8 +3,8 @@ $input-bg-color: #fff;
 $input-border-radius: 5px;
 
 .input-container {
-  --input-border-color: #fff;
-  --input-bg-color: ccc;
+  --input-border-color: #ccc;
+  --input-bg-color: #fff;
 
   display: flex;
   flex-direction: column;
@@ -13,6 +13,7 @@ $input-border-radius: 5px;
   label {
     font-weight: bold;
     margin-bottom: 5px;
+    margin: auto;
   }
 
   input {
@@ -22,6 +23,7 @@ $input-border-radius: 5px;
     font-size: 16px;
     outline: none;
     background-color: var(--input-bg-color, $input-bg-color);
+    margin: auto;
 
     &[type="number"] {
       width: 100px;
