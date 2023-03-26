@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import { GetServerSideProps, GetStaticProps } from "next";
+import LRUCache from "lru-cache";
+
 import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
 import AudioPlayer from "@/components/Player";
 
@@ -14,6 +16,11 @@ type HomeProps = {
   posts: Post[];
   totalPosts: number;
 };
+
+const cache = new LRUCache({
+  max: 500, // maximum number of entries
+  maxAge: 1000 * 60 * 60, // maximum age of an entry in milliseconds (1 hour)
+});
 
 const DEFAULT_NUMBER_OF_POSTS = 1;
 
@@ -54,6 +61,14 @@ export default function Home({ posts, totalPosts }: HomeProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const key = "posts";
+  const cachedData = cache.get(key);
+
+  if (cachedData) {
+    console.log(`Cache hit for key: ${key}`);
+    return { props: cachedData };
+  }
+
   const categoriesCount = await getCategoryCount(80);
   const totalPosts = categoriesCount; // assuming total number of posts is the same as the total number of categories
 
@@ -80,10 +95,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     })
   );
 
-  return {
-    props: {
-      posts: postsFromServer,
-      totalPosts,
-    },
+  const data = {
+    posts: postsFromServer,
+    totalPosts,
   };
+
+  cache.set(key, { ...data }); // store the data in cache
+  console.log(`Cache miss for key: ${key}`);
+
+  return { props: data };
 };
