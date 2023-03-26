@@ -85,8 +85,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       const pattern = /src="([^"]*)/;
       const match = excerpt.rendered.match(pattern);
       const audioUrl = match
-        ? match[1].replace("https://www.paullowe.org/wp-content/uploads/", "")
+        ? match[1].replace(
+            /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+            ""
+          )
         : "";
+
       return {
         audioUrl: audioUrl,
         title,

@@ -1,0 +1,63 @@
+/* Import normalize.css */
+
+/* Define variables */
+$main-color: #4caf50;
+
+/* Define styles for the audio player */
+.audio-player {
+  :global {
+    @import "~/normalize.css/normalize.css";
+  }
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  p {
+    margin-bottom: 0;
+    color: #888;
+  }
+
+  .audio-element {
+    width: 100%;
+  }
+
+  .progress-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 12px;
+
+    .current-time,
+    .duration {
+      font-weight: bold;
+    }
+
+    .progress {
+      width: 100%;
+      height: 3px;
+      background-color: #ddd;
+
+      &::-webkit-progress-bar {
+        background-color: #ddd;
+      }
+
+      &::-webkit-progress-value {
+        background-color: $main-color;
+      }
+
+      &::-moz-progress-bar {
+        background-color: $main-color;
+      }
+    }
+  }
+}

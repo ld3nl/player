@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import css from "./Player.module.scss";
 
 type Props = {
   src: string;
@@ -40,19 +41,26 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date }) => {
   };
 
   return (
-    <div>
+    <div className={css["audio-player"]}>
       <h2>{title}</h2>
       <p>{date}</p>
       <audio
+        className={css["audio-element"]}
         src={src}
         onTimeUpdate={handleTimeUpdate}
         ref={audioRef}
         controls
       />
-      <div>
-        <span>{Math.floor(progress.currentTime)}</span>
-        <progress value={progress.currentTime} max={progress.duration} />
-        <span>{Math.floor(progress.duration)}</span>
+      <div className={css["progress-bar"]}>
+        <span className={css["current-time"]}>
+          {Math.floor(progress.currentTime)}
+        </span>
+        <progress
+          className={css["progress"]}
+          value={progress.currentTime}
+          max={progress.duration}
+        />
+        <span className={css["duration"]}>{Math.floor(progress.duration)}</span>
       </div>
     </div>
   );

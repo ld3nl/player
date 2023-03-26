@@ -9,6 +9,7 @@ specifiers:
   eslint-config-next: 13.2.4
   lru-cache: ^8.0.4
   next: 13.2.4
+  normalize.css: ^8.0.1
   react: 18.2.0
   react-dom: 18.2.0
   sass: ^1.60.0
@@ -23,6 +24,7 @@ dependencies:
   eslint-config-next: 13.2.4_j4766f7ecgqbon3u7zlxn5zszu
   lru-cache: 8.0.4
   next: 13.2.4_5y7qh6ykubtj2qr2evk3di7hpa
+  normalize.css: 8.0.1
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   typescript: 5.0.2
@@ -1723,6 +1725,10 @@ packages:
   /normalize-path/3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
+
+  /normalize.css/8.0.1:
+    resolution: {integrity: sha512-qizSNPO93t1YUuUhP22btGOo3chcvDFqFaj2TRybP0DMxkHOCTYwp3n34fel4a31ORXy4m1Xq0Gyqpb5m33qIg==}
+    dev: false
 
   /object-assign/4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
