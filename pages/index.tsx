@@ -4,9 +4,11 @@ import { GetServerSideProps, GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 
 import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
-import AudioPlayer from "@/components/Player";
+import AudioPlayer from "@/components/Player/Player";
+import MainPlayer from "@/components/MainPlayer/MainPlayer";
 
 type Post = {
+  id: any;
   audioUrl: any;
   title: any;
   date: string;
@@ -19,7 +21,7 @@ type HomeProps = {
 
 const cache = new LRUCache({
   max: 500, // maximum number of entries
-  maxAge: 1000 * 60 * 60, // maximum age of an entry in milliseconds (1 hour)
+  // maxAge: 1000 * 60 * 60, // maximum age of an entry in milliseconds (1 hour)
 });
 
 const DEFAULT_NUMBER_OF_POSTS = 1;
@@ -28,6 +30,8 @@ export default function Home({ posts, totalPosts }: HomeProps) {
   const [numberOfPost, setNumberOfPost] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS
   );
+
+  const [selectedAudio, setSelectedAudio] = useState<any>(null);
 
   const [filteredPost, setFilteredPost] = useState<Post[]>();
 
@@ -82,10 +86,17 @@ export default function Home({ posts, totalPosts }: HomeProps) {
                 src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                 date={date}
                 id={id}
+                selectAudio={(val: any) => setSelectedAudio(val)}
               />
             </div>
           );
         })}
+
+      <MainPlayer
+        title={selectedAudio?.title}
+        src={selectedAudio?.src}
+        id={selectedAudio?.id}
+      />
     </>
   );
 }

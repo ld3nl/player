@@ -19,6 +19,14 @@ $main-color: #4caf50;
   align-items: center;
   width: 100%;
   max-width: 500px;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.5s linear;
+  padding: 1rem;
+
+  &:hover {
+    background-color: #fed064;
+  }
 
   h2 {
     margin-top: 0;
