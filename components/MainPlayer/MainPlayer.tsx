@@ -94,7 +94,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div className={css.artWork}>
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
-        <h2>{he.decode(title)}</h2>
+        <h2>{title ? he.decode(title) : ""}</h2>
+
         <audio
           className={css["audio-element"]}
           src={src}
