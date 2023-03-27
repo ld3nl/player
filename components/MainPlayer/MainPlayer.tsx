@@ -1,6 +1,6 @@
 import { FC, useEffect, useState, useRef } from "react";
 import css from "./MainPlayer.module.scss";
-import Image from "next/image";
+import useLockScroll from "../../lib/hooks";
 
 interface Props {
   title?: string;
@@ -29,6 +29,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
 
+  useLockScroll(isOpen);
+
   useEffect(() => {
     const imgSrc = imgArray[Math.floor(Math.random() * imgArray.length)];
     setSrc(imgSrc);
@@ -43,7 +45,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         audioRef.current.currentTime = currentTime;
       }
     }
-  }, [src]);
+  }, [src, id]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -51,6 +53,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const handleClose = () => {
     setIsOpen(false);
+
     if (audioRef.current) {
       audioRef.current.pause();
     }
