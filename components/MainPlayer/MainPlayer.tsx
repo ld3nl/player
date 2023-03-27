@@ -1,6 +1,7 @@
-import { FC, useEffect, useState, useRef } from "react";
+import { FC, useEffect, useState, useRef, useContext } from "react";
 import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
+import { GlobalContext } from "../../pages/_app";
 
 interface Props {
   title?: string;
@@ -29,6 +30,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
 
+  const { globalContext, setGlobalContext } = useContext(GlobalContext);
+
   useLockScroll(isOpen);
 
   useEffect(() => {
@@ -49,6 +52,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const handleOpen = () => {
     setIsOpen(true);
+    setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
   };
 
   const handleClose = () => {
@@ -57,6 +61,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
+
+    setGlobalContext((prev) => ({ ...prev, isModalActive: false }));
   };
 
   useEffect(() => {

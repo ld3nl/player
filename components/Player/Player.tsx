@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import css from "./Player.module.scss";
+import { GlobalContext } from "../../pages/_app";
 
 type Props = {
   src: string;
@@ -25,18 +26,16 @@ const AudioPlayer: React.FC<Props> = ({
     currentTime: 0,
     duration: 0,
   });
-  // const audioRef = useRef<HTMLAudioElement>(null);
+
+  const { globalContext } = useContext(GlobalContext);
 
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
     if (storedProgress) {
       const { currentTime } = JSON.parse(storedProgress);
       setProgress(JSON.parse(storedProgress));
-      // if (audioRef.current) {
-      //   audioRef.current.currentTime = currentTime;
-      // }
     }
-  }, [src, id]);
+  }, [src, id, globalContext]);
 
   const remainingTime = progress.duration - progress.currentTime;
   const remainingMinutes = Math.floor(remainingTime / 60);
@@ -45,16 +44,6 @@ const AudioPlayer: React.FC<Props> = ({
   const transferParam = (value: any) =>
     selectAudio !== undefined && selectAudio(value);
 
-  // const handleTimeUpdate = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-  //   const currentTime = e.currentTarget.currentTime;
-  //   const duration = e.currentTarget.duration;
-  //   setProgress({ currentTime, duration });
-  //   localStorage.setItem(
-  //     `${id}-progress`,
-  //     JSON.stringify({ currentTime, duration })
-  //   );
-  // };
-
   return (
     <div
       className={css["audio-player"]}
@@ -62,13 +51,7 @@ const AudioPlayer: React.FC<Props> = ({
     >
       <h2>{title}</h2>
       <p>{date}</p>
-      {/* <audio
-        className={css["audio-element"]}
-        src={src}
-        onTimeUpdate={handleTimeUpdate}
-        ref={audioRef}
-        controls
-      /> */}
+
       {progress.currentTime != 0 && (
         <div className={css["progress-bar"]}>
           <progress
