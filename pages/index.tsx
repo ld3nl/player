@@ -1,5 +1,6 @@
 import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
+import { GlobalContext } from "./_app";
 import { GetServerSideProps, GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 
@@ -36,6 +37,8 @@ export default function Home({ posts, totalPosts }: HomeProps) {
   const [selectedAudio, setSelectedAudio] = useState<any>(null);
 
   const [filteredPost, setFilteredPost] = useState<Post[]>();
+
+  const { globalContext } = useContext(GlobalContext);
 
   useEffect(() => setFilteredPost(posts), [posts]);
 
@@ -102,9 +105,9 @@ export default function Home({ posts, totalPosts }: HomeProps) {
         })}
 
       <MainPlayer
-        title={selectedAudio?.title}
-        src={selectedAudio?.src}
-        id={selectedAudio?.id}
+        title={globalContext?.selectedItem?.title}
+        src={globalContext?.selectedItem?.src}
+        id={globalContext?.selectedItem?.id}
       />
     </>
   );

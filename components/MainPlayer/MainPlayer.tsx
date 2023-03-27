@@ -63,7 +63,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
       audioRef.current.pause();
     }
 
-    setGlobalContext((prev) => ({ ...prev, isModalActive: false }));
+    setGlobalContext((prev) => ({
+      ...prev,
+      isModalActive: false,
+      selectedItem: { title: "", date: "", src: "", id: "" },
+    }));
   };
 
   useEffect(() => {
@@ -85,6 +89,18 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     );
   };
 
+  const handleSkipForward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime += 15;
+    }
+  };
+
+  const handleSkipBackward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime -= 15;
+    }
+  };
+
   return (
     <>
       <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
@@ -95,14 +111,17 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
-
-        <audio
-          className={css["audio-element"]}
-          src={src}
-          onTimeUpdate={handleTimeUpdate}
-          ref={audioRef}
-          controls
-        />
+        <div className={css.audio}>
+          <button onClick={handleSkipBackward}>skip Backward</button>
+          <audio
+            className={css["audio-element"]}
+            src={src}
+            onTimeUpdate={handleTimeUpdate}
+            ref={audioRef}
+            controls
+          />
+          <button onClick={handleSkipForward}>skip forward</button>
+        </div>
       </div>
     </>
   );

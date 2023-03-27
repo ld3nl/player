@@ -33,7 +33,7 @@ const AudioPlayer: React.FC<Props> = ({
     new Date().toLocaleDateString("en-AU")
   );
 
-  const { globalContext } = useContext(GlobalContext);
+  const { globalContext, setGlobalContext } = useContext(GlobalContext);
 
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
@@ -54,7 +54,13 @@ const AudioPlayer: React.FC<Props> = ({
   return (
     <div
       className={css["audio-player"]}
-      onClick={() => transferParam({ title, date, src, id })}
+      onClick={() => {
+        // transferParam({ title, date, src, id });
+        setGlobalContext((prev) => ({
+          ...prev,
+          selectedItem: { title, date, src, id },
+        }));
+      }}
     >
       <h2>{he.decode(title)}</h2>
 
@@ -62,11 +68,13 @@ const AudioPlayer: React.FC<Props> = ({
 
       {progress.currentTime != 0 && (
         <div className={css["progress-bar"]}>
-          <progress
-            className={css["progress"]}
-            value={progress.currentTime}
-            max={progress.duration}
-          />
+          <div>
+            <progress
+              className={css["progress"]}
+              value={progress.currentTime}
+              max={progress.duration}
+            />
+          </div>
           <span className={css["duration"]}>
             {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
             left
