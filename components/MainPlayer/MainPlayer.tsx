@@ -1,7 +1,8 @@
 import { FC, useEffect, useState, useRef, useContext } from "react";
+import he from "he";
+import { GlobalContext } from "../../pages/_app";
 import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
-import { GlobalContext } from "../../pages/_app";
 
 interface Props {
   title?: string;
@@ -93,7 +94,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div className={css.artWork}>
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
-        <h1>{title}</h1>
+        <h2>{he.decode(title)}</h2>
         <audio
           className={css["audio-element"]}
           src={src}

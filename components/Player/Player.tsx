@@ -1,6 +1,8 @@
 import React, { useContext, useState, useEffect } from "react";
-import css from "./Player.module.scss";
+import he from "he";
 import { GlobalContext } from "../../pages/_app";
+
+import css from "./Player.module.scss";
 
 type Props = {
   src: string;
@@ -49,7 +51,8 @@ const AudioPlayer: React.FC<Props> = ({
       className={css["audio-player"]}
       onClick={() => transferParam({ title, date, src, id })}
     >
-      <h2>{title}</h2>
+      <h2>{he.decode(title)}</h2>
+
       <p>{date}</p>
 
       {progress.currentTime != 0 && (
