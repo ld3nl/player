@@ -29,6 +29,10 @@ const AudioPlayer: React.FC<Props> = ({
     duration: 0,
   });
 
+  const [publishDate, setPublishDate] = useState(
+    new Date().toLocaleDateString("en-AU")
+  );
+
   const { globalContext } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -37,7 +41,8 @@ const AudioPlayer: React.FC<Props> = ({
       const { currentTime } = JSON.parse(storedProgress);
       setProgress(JSON.parse(storedProgress));
     }
-  }, [src, id, globalContext]);
+    setPublishDate(new Date(date).toLocaleDateString("en-AU"));
+  }, [src, id, globalContext, date]);
 
   const remainingTime = progress.duration - progress.currentTime;
   const remainingMinutes = Math.floor(remainingTime / 60);
@@ -53,7 +58,7 @@ const AudioPlayer: React.FC<Props> = ({
     >
       <h2>{he.decode(title)}</h2>
 
-      <p>{date}</p>
+      <p>{publishDate}</p>
 
       {progress.currentTime != 0 && (
         <div className={css["progress-bar"]}>
