@@ -37,7 +37,7 @@ export default function Home({ posts, totalPosts }: HomeProps) {
 
   const [filteredPost, setFilteredPost] = useState<Post[]>();
 
-  useEffect(() => setFilteredPost(posts), []);
+  useEffect(() => setFilteredPost(posts), [posts]);
 
   const filterPosts = (posts: Post[], words: string[]): Post[] => {
     return posts.filter((post) => {

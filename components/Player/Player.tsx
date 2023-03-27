@@ -36,7 +36,7 @@ const AudioPlayer: React.FC<Props> = ({
       //   audioRef.current.currentTime = currentTime;
       // }
     }
-  }, [src]);
+  }, [src, id]);
 
   const remainingTime = progress.duration - progress.currentTime;
   const remainingMinutes = Math.floor(remainingTime / 60);
