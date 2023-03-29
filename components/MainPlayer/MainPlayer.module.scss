@@ -51,15 +51,52 @@
 
 .progressBar {
   margin: 0 1rem 1rem;
-  .progress {
-    height: 5px;
-    appearance: none;
+
+  :global {
+    // .single-thumb .range-slider__thumb[data-lower] {
+    //   width: 0;
+    // }
+    // .single-thumb .range-slider__range {
+    //   border-radius: 6px;
+    // }
+
+    // .range-slider {
+    //   height: 4px;
+    //   background: blue;
+    //   border-radius: 4px;
+    //   margin-bottom: 1rem;
+    // }
+
+    // .range-slider .range-slider__range {
+    //   left: 0 !important;
+    //   background: #ff7300;
+    // }
+  }
+
+  .horizontal-slider {
     width: 100%;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: #3b7677;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
+    height: 8px;
+
+    .example-thumb {
+      top: -3px;
+      width: 10px;
+      height: 10px;
+      line-height: 38px;
+
+      background-color: red;
+      border-radius: 50rem;
+      z-index: 40;
+    }
+
+    .example-track {
+      top: 0;
+      height: 4px;
+      background-color: peru;
+
+      &[class$="-1"] {
+        background-color: forestgreen;
+      }
+    }
   }
 }
 

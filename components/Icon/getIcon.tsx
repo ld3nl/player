@@ -74,7 +74,7 @@ export function getSVG({ name }: SVGProps) {
             fill="none"
             stroke="#231f20"
             strokeMiterlimit="10"
-            stroke-width="2"
+            strokeWidth="2"
           />
           <path
             d="M60 27.32A32.68 32.68 0 1 1 27.32 60"

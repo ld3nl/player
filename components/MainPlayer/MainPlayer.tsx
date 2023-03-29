@@ -1,9 +1,11 @@
 import { FC, useEffect, useState, useRef, useContext } from "react";
 import he from "he";
+import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
 import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
+import "react-range-slider-input/dist/style.css";
 
 interface Props {
   title?: string;
@@ -185,8 +187,42 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
+
         <div className={css.progressBar}>
-          <input
+          {/* <RangeSlider
+            className="single-thumb"
+            defaultValue={[0, progress.currentTime]}
+            maxValue={isNaN(progress.duration) ? 0 : progress.duration}
+            minValue={0}
+            thumbsDisabled={[true, false]}
+            rangeSlideDisabled={true}
+            step={"any"}
+            onInput={(e) => onScrub((progress.duration / 100) * e[1])}
+          /> */}
+
+          {/* <RangeSlider
+            className="single-thumb"
+            defaultValue={[0, progress.currentTime / (progress.duration / 100)]}
+            thumbsDisabled={[true, false]}
+            rangeSlideDisabled={true}
+          /> */}
+
+          <ReactSlider
+            value={progress.currentTime / (progress.duration / 100)}
+            step={0.1}
+            className={css["horizontal-slider"]}
+            thumbClassName={css["example-thumb"]}
+            trackClassName={css["example-track"]}
+            // onChange={(e) => console.log(e)}
+            onChange={(e) => onScrub(Number(e) * (progress.duration / 100))}
+            onAfterChange={onScrubEnd}
+            // (6677 / (8888 / 100)) * (8888 / 100)
+            // renderThumb={(props, state) => (
+            //   <div {...props}>{state.valueNow}</div>
+            // )}
+          />
+
+          {/* <input
             type="range"
             value={progress.currentTime}
             step="1"
@@ -196,9 +232,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             onChange={(e) => onScrub(Number(e.target.value))}
             onMouseUp={onScrubEnd}
             onKeyUp={onScrubEnd}
+            onTouchStart={(e) => console.log("touchstart", e)}
+            onTouchMove={(e) => console.log("touchmove", e)}
             onTouchEnd={onScrubEnd} // add touchend event listener
             style={{ background: trackStyling }}
-          />
+          /> */}
 
           <span className={css["duration"]}>
             {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
