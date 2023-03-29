@@ -196,8 +196,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             onChange={(e) => onScrub(Number(e.target.value))}
             onMouseUp={onScrubEnd}
             onKeyUp={onScrubEnd}
+            onTouchEnd={onScrubEnd} // add touchend event listener
             style={{ background: trackStyling }}
           />
+
           <span className={css["duration"]}>
             {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
             left
