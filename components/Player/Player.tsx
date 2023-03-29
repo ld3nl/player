@@ -48,9 +48,6 @@ const AudioPlayer: React.FC<Props> = ({
   const remainingMinutes = Math.floor(remainingTime / 60);
   const remainingSeconds = Math.floor(remainingTime % 60);
 
-  const transferParam = (value: any) =>
-    selectAudio !== undefined && selectAudio(value);
-
   return (
     <div
       className={css["audio-player"]}

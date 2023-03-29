@@ -129,6 +129,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setProgress({ ...progress, duration });
   };
 
+  const remainingTime = progress.duration - progress.currentTime;
+  const remainingMinutes = Math.floor(remainingTime / 60);
+  const remainingSeconds = Math.floor(remainingTime % 60);
+
   return (
     <>
       <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
@@ -147,6 +151,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             11
           </progress>
           <input
+            step=".01"
             className={css.customRange}
             type="range"
             min={0}
@@ -154,6 +159,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             value={progress.currentTime}
             onInput={handleInput}
           />
+          <span className={css["duration"]}>
+            {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
+            left
+          </span>
         </div>
         <div className={css.audio}>
           <audio
