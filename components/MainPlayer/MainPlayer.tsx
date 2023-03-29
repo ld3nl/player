@@ -189,7 +189,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           <input
             type="range"
             value={progress.currentTime}
-            step=".01"
+            step="1"
             min="0"
             max={isNaN(progress.duration) ? 0 : progress.duration}
             className={css["progress"]}
