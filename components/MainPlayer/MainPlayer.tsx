@@ -3,6 +3,7 @@ import he from "he";
 import { GlobalContext } from "../../pages/_app";
 import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
+import Icon from "../Icon/Icon";
 
 interface Props {
   title?: string;
@@ -30,6 +31,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
 
@@ -75,6 +77,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
       handleOpen();
       if (audioRef.current) {
         audioRef.current.play();
+        setIsPlaying(true);
       }
     }
   }, [title, src]);
@@ -101,6 +104,31 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   };
 
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (audioRef.current.paused) {
+        audioRef.current.play();
+        setIsPlaying(true);
+      } else {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const currentTime = Number(e.currentTarget.value);
+    setProgress({ ...progress, currentTime });
+    if (audioRef.current) {
+      audioRef.current.currentTime = currentTime;
+    }
+  };
+
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    const duration = e.currentTarget.duration;
+    setProgress({ ...progress, duration });
+  };
+
   return (
     <>
       <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
@@ -111,16 +139,44 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
+        <div className={css.progressBar}>
+          <progress
+            value={progress.currentTime}
+            max={isNaN(progress.duration) ? 0 : progress.duration}
+          >
+            11
+          </progress>
+          <input
+            className={css.customRange}
+            type="range"
+            min={0}
+            max={isNaN(progress.duration) ? 0 : progress.duration}
+            value={progress.currentTime}
+            onInput={handleInput}
+          />
+        </div>
         <div className={css.audio}>
-          <button onClick={handleSkipBackward}>skip Backward</button>
           <audio
             className={css["audio-element"]}
             src={src}
             onTimeUpdate={handleTimeUpdate}
             ref={audioRef}
-            controls
+            onLoadedMetadata={handleLoadedMetadata}
+            // controls
           />
-          <button onClick={handleSkipForward}>skip forward</button>
+
+          <div className={css.actionButtons}>
+            <button className={css.sm} onClick={handleSkipBackward}>
+              <Icon name={"BackwardRewind"} size={"sm"} />
+            </button>
+
+            <button onClick={handlePlayPause}>
+              <Icon name={isPlaying ? "Pause" : "Play"} />
+            </button>
+            <button className={css.sm} onClick={handleSkipForward}>
+              <Icon name={"ForwardRewind"} size={"sm"} />
+            </button>
+          </div>
         </div>
       </div>
     </>

@@ -36,24 +36,32 @@ export default function Home({ posts, totalPosts }: HomeProps) {
 
   const [selectedAudio, setSelectedAudio] = useState<any>(null);
 
-  const [filteredPost, setFilteredPost] = useState<Post[]>();
-
   const { globalContext } = useContext(GlobalContext);
 
-  useEffect(() => setFilteredPost(posts), [posts]);
+  // useEffect(() => setFilteredPost(posts), [posts]);
 
-  const filterPosts = (posts: Post[], words: string[]): Post[] => {
-    return posts.filter((post) => {
-      const title = post.title.rendered.toLowerCase();
-      return (
-        words.length > 0 &&
-        words.every(
-          (word) =>
-            typeof word === "string" && title.includes(word.toLowerCase())
-        )
+  const useFilteredPosts = (posts: Post[]) => {
+    const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
+
+    const filterPosts = (words: string[]): void => {
+      setFilteredPosts(
+        posts.filter((post) => {
+          const title = post.title.rendered.toLowerCase();
+          return (
+            words.length > 0 &&
+            words.every(
+              (word) =>
+                typeof word === "string" && title.includes(word.toLowerCase())
+            )
+          );
+        })
       );
-    });
+    };
+
+    return { filteredPosts, filterPosts };
   };
+
+  const { filteredPosts, filterPosts } = useFilteredPosts(posts);
 
   return (
     <>
@@ -82,13 +90,13 @@ export default function Home({ posts, totalPosts }: HomeProps) {
           onChange={(e) => {
             const string = e.target.value;
             const array = string.split(" ");
-            setFilteredPost(filterPosts(posts, array));
+            filterPosts(array);
           }}
         />
       </div>
 
-      {filteredPost &&
-        filteredPost.slice(0, numberOfPost).map((post, i) => {
+      {filteredPosts &&
+        filteredPosts.slice(0, numberOfPost).map((post, i) => {
           const { audioUrl, title, date, id } = post;
 
           return (
@@ -104,11 +112,7 @@ export default function Home({ posts, totalPosts }: HomeProps) {
           );
         })}
 
-      <MainPlayer
-        title={globalContext?.selectedItem?.title}
-        src={globalContext?.selectedItem?.src}
-        id={globalContext?.selectedItem?.id}
-      />
+      <MainPlayer {...globalContext.selectedItem} />
     </>
   );
 }

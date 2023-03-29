@@ -3,17 +3,14 @@ import type { AppProps } from "next/app";
 
 import { createContext, useState } from "react";
 
+type GlobalContextValue = {
+  isModalActive: boolean;
+  selectedItem: { title: string; date: string; src: string; id: string };
+};
+
 export const GlobalContext = createContext<{
-  globalContext: {
-    isModalActive: boolean;
-    selectedItem: { title: string; date: string; src: string; id: string };
-  };
-  setGlobalContext: React.Dispatch<
-    React.SetStateAction<{
-      isModalActive: boolean;
-      selectedItem: { title: string; date: string; src: string; id: string };
-    }>
-  >;
+  globalContext: GlobalContextValue;
+  setGlobalContext: React.Dispatch<React.SetStateAction<GlobalContextValue>>;
 }>({
   globalContext: {
     isModalActive: false,
