@@ -23,12 +23,13 @@ const imgArray = [
 ];
 
 const MainPlayer: FC<Props> = ({ title, src, id }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const [progress, setProgress] = useState<Progress>({
     currentTime: 0,
     duration: 0,
   });
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const intervalRef = useRef();
 
   const [trackProgress, setTrackProgress] = useState(0);
 
@@ -153,7 +154,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const onScrub = (value: number) => {
-    if (audioRef.current) {
+    if (audioRef.current && intervalRef.current) {
       clearInterval(intervalRef.current);
       audioRef.current.currentTime = value;
       setTrackProgress(audioRef.current.currentTime);
