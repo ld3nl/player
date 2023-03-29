@@ -28,10 +28,15 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     duration: 0,
   });
   const audioRef = useRef<HTMLAudioElement>(null);
+  const intervalRef = useRef();
+
+  const [trackProgress, setTrackProgress] = useState(0);
 
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const [trackStyling, setTrackStyling] = useState("");
 
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
 
@@ -53,6 +58,16 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   }, [src, id]);
 
+  useEffect(() => {
+    if (title && src) {
+      handleOpen();
+      if (audioRef.current) {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  }, [title, src]);
+
   const handleOpen = () => {
     setIsOpen(true);
     setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
@@ -72,24 +87,26 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }));
   };
 
-  useEffect(() => {
-    if (title && src) {
-      handleOpen();
-      if (audioRef.current) {
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
-    }
-  }, [title, src]);
-
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const currentTime = e.currentTarget.currentTime;
     const duration = e.currentTarget.duration;
-    setProgress({ currentTime, duration });
+
     localStorage.setItem(
       `${id}-progress`,
       JSON.stringify({ currentTime, duration })
     );
+
+    const currentPercentage = duration
+      ? `${(currentTime / progress.duration) * 100}%`
+      : "0%";
+
+    const trackStylingVar = `
+    -webkit-gradient(linear, 0% 0%, 100% 0%, color-stop(${currentPercentage}, rgb(255 113 0)), color-stop(${currentPercentage}, rgb(255 255 255)))
+    `;
+
+    setTrackStyling(trackStylingVar);
+
+    setProgress({ currentTime, duration });
   };
 
   const handleSkipForward = () => {
@@ -116,17 +133,41 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   };
 
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const currentTime = Number(e.currentTarget.value);
-    setProgress({ ...progress, currentTime });
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    const duration = e.currentTarget.duration;
+    setProgress((prev) => ({ ...prev, duration }));
+  };
+
+  const startTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (audioRef.current?.ended) {
+        // toNextTrack();
+      } else if (audioRef.current) {
+        setTrackProgress(audioRef.current.currentTime);
+      }
+    }, 1000);
+  };
+
+  const onScrub = (value: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = currentTime;
+      clearInterval(intervalRef.current);
+      audioRef.current.currentTime = value;
+      setTrackProgress(audioRef.current.currentTime);
     }
   };
 
-  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    const duration = e.currentTarget.duration;
-    setProgress({ ...progress, duration });
+  const onScrubEnd = () => {
+    if (audioRef.current) {
+      if (!isPlaying) {
+        setIsPlaying(true);
+      }
+
+      startTimer();
+    }
   };
 
   const remainingTime = progress.duration - progress.currentTime;
@@ -144,20 +185,17 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
         <div className={css.progressBar}>
-          <progress
-            value={progress.currentTime}
-            max={isNaN(progress.duration) ? 0 : progress.duration}
-          >
-            11
-          </progress>
           <input
-            step=".01"
-            className={css.customRange}
             type="range"
-            min={0}
-            max={isNaN(progress.duration) ? 0 : progress.duration}
             value={progress.currentTime}
-            onInput={handleInput}
+            step=".01"
+            min="0"
+            max={isNaN(progress.duration) ? 0 : progress.duration}
+            className={css["progress"]}
+            onChange={(e) => onScrub(Number(e.target.value))}
+            onMouseUp={onScrubEnd}
+            onKeyUp={onScrubEnd}
+            style={{ background: trackStyling }}
           />
           <span className={css["duration"]}>
             {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
