@@ -189,7 +189,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
         <div className={css.progressBar}>
           <ReactSlider
-            value={progress.currentTime / (progress.duration / 100)}
+            value={
+              progress.currentTime
+                ? progress.currentTime / (progress.duration / 100)
+                : 0
+            }
             step={0.1}
             className={css["horizontal-slider"]}
             thumbClassName={css["example-thumb"]}
