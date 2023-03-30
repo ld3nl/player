@@ -157,8 +157,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const onScrub = (value: number) => {
     if (audioRef.current && intervalRef.current) {
       clearInterval(intervalRef.current);
+      setTrackProgress(value);
       audioRef.current.currentTime = value;
-      setTrackProgress(audioRef.current.currentTime);
     }
   };
 
@@ -190,9 +190,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div className={css.progressBar}>
           <ReactSlider
             value={
-              progress.currentTime
-                ? progress.currentTime / (progress.duration / 100)
-                : 0
+              trackProgress ? trackProgress / (progress.duration / 100) : 0
             }
             step={0.1}
             className={css["horizontal-slider"]}
