@@ -37,6 +37,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioIsLoading, setAudioIsLoading] = useState(false);
 
   const [trackStyling, setTrackStyling] = useState("");
 
@@ -80,6 +81,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
     if (audioRef.current) {
       audioRef.current.pause();
+      setAudioIsLoading(false);
     }
 
     setGlobalContext((prev) => ({
@@ -136,6 +138,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    setAudioIsLoading(true);
     const duration = e.currentTarget.duration;
     setProgress((prev) => ({ ...prev, duration }));
   };
@@ -155,6 +158,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const onScrub = (value: number) => {
+    console.log(value);
+
     if (audioRef.current && intervalRef.current) {
       clearInterval(intervalRef.current);
       setTrackProgress(value);
@@ -187,48 +192,60 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
 
-        <div className={css.progressBar}>
-          <ReactSlider
-            value={
-              trackProgress ? trackProgress / (progress.duration / 100) : 0
-            }
-            step={0.1}
-            className={css["horizontal-slider"]}
-            thumbClassName={css["example-thumb"]}
-            trackClassName={css["example-track"]}
-            // onChange={(e) => console.log(e)}
-            onChange={(e) => onScrub(Number(e) * (progress.duration / 100))}
-            onAfterChange={onScrubEnd}
-          />
+        {audioIsLoading && (
+          <div className={css.progressBar}>
+            <ReactSlider
+              value={
+                trackProgress ? trackProgress / (progress.duration / 100) : 0
+              }
+              step={0.1}
+              className={css["horizontal-slider"]}
+              thumbClassName={css["example-thumb"]}
+              trackClassName={css["example-track"]}
+              // onChange={(e) => console.log(e)}
+              onChange={(e) => onScrub(Number(e) * (progress.duration / 100))}
+              onAfterChange={onScrubEnd}
+            />
 
-          <span className={css["duration"]}>
-            {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s
-            left
-          </span>
-        </div>
-        <div className={css.audio}>
-          <audio
-            className={css["audio-element"]}
-            src={src}
-            onTimeUpdate={handleTimeUpdate}
-            ref={audioRef}
-            onLoadedMetadata={handleLoadedMetadata}
-            // controls
-          />
-
-          <div className={css.actionButtons}>
-            <button className={css.sm} onClick={handleSkipBackward}>
-              <Icon name={"BackwardRewind"} size={"sm"} />
-            </button>
-
-            <button onClick={handlePlayPause}>
-              <Icon name={isPlaying ? "Pause" : "Play"} />
-            </button>
-            <button className={css.sm} onClick={handleSkipForward}>
-              <Icon name={"ForwardRewind"} size={"sm"} />
-            </button>
+            <span className={css["duration"]}>
+              {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}
+              s left
+            </span>
           </div>
-        </div>
+        )}
+
+        <audio
+          className={css["audio-element"]}
+          src={src}
+          onTimeUpdate={handleTimeUpdate}
+          ref={audioRef}
+          onLoadedMetadata={handleLoadedMetadata}
+          // controls
+        />
+        {audioIsLoading && (
+          <div className={css.audio}>
+            <div className={css.actionButtons}>
+              <button className={css.sm} onClick={handleSkipBackward}>
+                <Icon name={"BackwardRewind"} size={"sm"} />
+              </button>
+
+              <button onClick={handlePlayPause}>
+                <Icon name={isPlaying ? "Pause" : "Play"} />
+              </button>
+              <button className={css.sm} onClick={handleSkipForward}>
+                <Icon name={"ForwardRewind"} size={"sm"} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!audioIsLoading && (
+          <div className={css["loader"]}>
+            <div className={css["dot"]}></div>
+            <div className={css["dot"]}></div>
+            <div className={css["dot"]}></div>
+          </div>
+        )}
       </div>
     </>
   );
