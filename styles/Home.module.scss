@@ -34,3 +34,9 @@ $input-border-radius: 5px;
     }
   }
 }
+
+.iconActive-true {
+  path[fill="none"] {
+    fill: black;
+  }
+}

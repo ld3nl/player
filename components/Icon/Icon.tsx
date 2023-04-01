@@ -2,7 +2,12 @@ import * as React from "react";
 import { getSVG, SVGProps } from "./getIcon";
 import css from "./Icon.module.scss";
 
-type SVGIconName = "Play" | "ForwardRewind" | "BackwardRewind" | "Pause";
+type SVGIconName =
+  | "Play"
+  | "ForwardRewind"
+  | "BackwardRewind"
+  | "Pause"
+  | "Favorite";
 
 interface IconProps {
   className?: string;

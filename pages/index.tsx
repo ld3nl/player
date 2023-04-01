@@ -7,6 +7,7 @@ import LRUCache from "lru-cache";
 import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
 import AudioPlayer from "@/components/Player/Player";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
+import Icon from "@/components/Icon/Icon";
 
 import css from "../styles/Home.module.scss";
 
@@ -29,39 +30,59 @@ const cache = new LRUCache({
 
 const DEFAULT_NUMBER_OF_POSTS = 12;
 
+const useFilteredPosts = (posts: Post[], favoriteItems: number[]) => {
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
+
+  const filterPosts = (words: string[]): void => {
+    setFilteredPosts(
+      posts.filter((post) => {
+        const title = post.title.rendered.toLowerCase();
+        return (
+          words.length > 0 &&
+          words.every(
+            (word) =>
+              typeof word === "string" && title.includes(word.toLowerCase())
+          )
+        );
+      })
+    );
+  };
+
+  const filterFavorites = () => {
+    if (favoriteItems.length > 0) {
+      setFilteredPosts(posts.filter((post) => favoriteItems.includes(post.id)));
+    } else {
+      setFilteredPosts(posts);
+    }
+  };
+
+  useEffect(() => {
+    filterFavorites();
+  }, [favoriteItems]);
+
+  return { filteredPosts, filterPosts };
+};
+
 export default function Home({ posts, totalPosts }: HomeProps) {
   const [numberOfPost, setNumberOfPost] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS
   );
 
+  console.log(posts);
+
   const [selectedAudio, setSelectedAudio] = useState<any>(null);
 
   const { globalContext } = useContext(GlobalContext);
 
-  // useEffect(() => setFilteredPost(posts), [posts]);
+  const [favoriteItems, setFavoriteItems] = useState<number[]>(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("favoriteItems") || "[]")
+      : []
+  );
 
-  const useFilteredPosts = (posts: Post[]) => {
-    const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
+  const { filteredPosts, filterPosts } = useFilteredPosts(posts, favoriteItems);
 
-    const filterPosts = (words: string[]): void => {
-      setFilteredPosts(
-        posts.filter((post) => {
-          const title = post.title.rendered.toLowerCase();
-          return (
-            words.length > 0 &&
-            words.every(
-              (word) =>
-                typeof word === "string" && title.includes(word.toLowerCase())
-            )
-          );
-        })
-      );
-    };
-
-    return { filteredPosts, filterPosts };
-  };
-
-  const { filteredPosts, filterPosts } = useFilteredPosts(posts);
+  const [showFavorite, setShowFavorite] = useState(false);
 
   return (
     <>
@@ -79,6 +100,25 @@ export default function Home({ posts, totalPosts }: HomeProps) {
           defaultValue={numberOfPost}
           onChange={(e) => setNumberOfPost(Number(e.target.value))}
         />
+        <button
+          className={css.button}
+          onClick={() => {
+            setShowFavorite(!showFavorite);
+            if (showFavorite) setFavoriteItems([]);
+            else
+              setFavoriteItems(
+                typeof window !== "undefined"
+                  ? JSON.parse(localStorage.getItem("favoriteItems") || "[]")
+                  : []
+              );
+          }}
+        >
+          <Icon
+            className={css[`iconActive-${showFavorite}`]}
+            name={"Favorite"}
+            size={"sm"}
+          />
+        </button>
       </div>
 
       <div className={css["input-container"]}>
@@ -117,7 +157,7 @@ export default function Home({ posts, totalPosts }: HomeProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (context) => {
   const key = "posts";
   const cachedData = cache.get(key);
 
@@ -165,5 +205,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   cache.set(key, { ...data }); // store the data in cache
   console.log(`Cache miss for key: ${key}`);
 
-  return { props: data };
+  return { props: data, revalidate: 7000 };
 };

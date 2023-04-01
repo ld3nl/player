@@ -38,8 +38,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [imageSrc, setSrc] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioIsLoading, setAudioIsLoading] = useState(false);
-
-  const [trackStyling, setTrackStyling] = useState("");
+  const [favorite, setFavorite] = useState(false);
 
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
 
@@ -52,6 +51,12 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
+    const favoriteItems = JSON.parse(
+      localStorage.getItem("favoriteItems") || "[]"
+    );
+
+    setFavorite(favoriteItems.includes(id));
+
     if (storedProgress) {
       const { currentTime } = JSON.parse(storedProgress);
       setProgress(JSON.parse(storedProgress));
@@ -91,24 +96,36 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }));
   };
 
+  const toggleFavorite = (id: any) => {
+    const favoriteItems = JSON.parse(
+      localStorage.getItem("favoriteItems") || "[]"
+    );
+
+    const isFavorite = favoriteItems.includes(id);
+
+    if (isFavorite) {
+      const updatedItems = favoriteItems.filter((item: any) => item !== id);
+      localStorage.setItem("favoriteItems", JSON.stringify(updatedItems));
+    } else {
+      favoriteItems.push(id);
+      localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
+    }
+
+    setFavorite(!isFavorite);
+  };
+
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const currentTime = e.currentTarget.currentTime;
     const duration = e.currentTarget.duration;
 
     localStorage.setItem(
       `${id}-progress`,
-      JSON.stringify({ currentTime, duration })
+      JSON.stringify({ currentTime, duration, favorite })
     );
 
     const currentPercentage = duration
       ? `${(currentTime / progress.duration) * 100}%`
       : "0%";
-
-    const trackStylingVar = `
-    -webkit-gradient(linear, 0% 0%, 100% 0%, color-stop(${currentPercentage}, rgb(255 113 0)), color-stop(${currentPercentage}, rgb(255 255 255)))
-    `;
-
-    setTrackStyling(trackStylingVar);
 
     setProgress({ currentTime, duration });
   };
@@ -137,8 +154,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   };
 
-  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+  const handleLoad = () => {
     setAudioIsLoading(true);
+  };
+
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const duration = e.currentTarget.duration;
     setProgress((prev) => ({ ...prev, duration }));
   };
@@ -192,6 +212,15 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         </div>
         <h2>{title ? he.decode(title) : ""}</h2>
 
+        <div>
+          <button className={css.button} onClick={() => toggleFavorite(id)}>
+            <Icon
+              className={css[`iconActive-${favorite}`]}
+              name={"Favorite"}
+              size={"sm"}
+            />
+          </button>
+        </div>
         {audioIsLoading && (
           <div className={css.progressBar}>
             <ReactSlider
@@ -202,7 +231,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               className={css["horizontal-slider"]}
               thumbClassName={css["example-thumb"]}
               trackClassName={css["example-track"]}
-              // onChange={(e) => console.log(e)}
               onChange={(e) => onScrub(Number(e) * (progress.duration / 100))}
               onAfterChange={onScrubEnd}
             />
@@ -220,6 +248,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           onTimeUpdate={handleTimeUpdate}
           ref={audioRef}
           onLoadedMetadata={handleLoadedMetadata}
+          onCanPlayThrough={handleLoad}
           // controls
         />
         {audioIsLoading && (

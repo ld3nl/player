@@ -1,6 +1,8 @@
 import "@/styles/globals.scss";
 import type { AppProps } from "next/app";
 
+
+
 import { createContext, useState } from "react";
 
 type GlobalContextValue = {

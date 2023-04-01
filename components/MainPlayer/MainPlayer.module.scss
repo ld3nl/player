@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   text-align: center;
+
   position: fixed;
   bottom: -100vh;
   left: 0;
@@ -111,31 +112,42 @@
   }
 }
 
+.button {
+  background: #ffffff62;
+  flex: 1 0;
+  border: 0;
+  padding: 0.7rem;
+  border-radius: 50rem;
+  transition: background-color 0.4s linear;
+  align-self: center;
+  cursor: pointer;
+
+  &.sm {
+    padding: 0.5rem;
+  }
+
+  &:hover {
+    background: #ffffffd8;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+
+  .iconActive-true {
+    path[fill="none"] {
+      fill: black;
+    }
+  }
+}
+
 .actionButtons {
   display: flex;
   gap: 1rem;
   align-items: center;
 
   button {
-    background: #ffffff62;
-    flex: 1 0;
-    border: 0;
-    padding: 0.7rem;
-    border-radius: 50rem;
-    transition: background-color 0.4s linear;
-    cursor: pointer;
-
-    &.sm {
-      padding: 0.5rem;
-    }
-
-    &:hover {
-      background: #ffffffd8;
-    }
-
-    &:focus {
-      outline: 0;
-    }
+    @extend .button;
   }
 }
 
