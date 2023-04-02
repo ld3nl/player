@@ -130,6 +130,7 @@ export default function Home({ posts, totalPosts }: HomeProps) {
           type="text"
           placeholder="Search"
           onChange={(e) => {
+            if (showFavorite) setFavoriteItems([]);
             const string = e.target.value;
             const array = string.split(" ");
             filterPosts(array);
