@@ -86,7 +86,9 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
       </div>
 
       <div
+        className={css.listing}
         onClick={() => {
+          console.log({ selectedItem: { title, date, src, id } });
           setGlobalContext((prev) => ({
             ...prev,
             selectedItem: { title, date, src, id },

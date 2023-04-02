@@ -19,16 +19,9 @@ $main-color: #4caf50;
   // align-items: start;
   // max-width: 500px;
   gap: 1rem;
-  cursor: pointer;
-  background-color: #ffffff0e;
-  transition: background-color 0.5s linear;
+
   padding: 1rem;
-
   border-bottom: 1px solid #cccc;
-
-  &:hover {
-    background-color: #fed064;
-  }
 
   h2 {
     font-size: 18px;
@@ -83,6 +76,18 @@ $main-color: #4caf50;
     &::-webkit-progress-value,
     &::-moz-progress-bar {
       background-color: $main-color;
+    }
+  }
+
+  .listing {
+    cursor: pointer;
+    // background-color: #ffffff0e;
+    transition: background-color 0.5s linear;
+    &:hover {
+      h2 {
+        text-decoration: underline;
+      }
+      // background-color: #fed064;
     }
   }
 }
