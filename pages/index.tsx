@@ -148,7 +148,6 @@ export default function Home({ posts, totalPosts }: HomeProps) {
                 src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                 date={date}
                 id={id}
-                selectAudio={(val: any) => setSelectedAudio(val)}
               />
             </div>
           );
