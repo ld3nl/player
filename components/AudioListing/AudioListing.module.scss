@@ -4,7 +4,7 @@
 $main-color: #4caf50;
 
 /* Define styles for the audio player */
-.audio-player {
+.audio-listing {
   //   :global {
   //     @import "~/normalize.css/normalize.css";
   //   }
@@ -15,9 +15,10 @@ $main-color: #4caf50;
   --audio-element-progress-height: 0.5rem;
 
   display: flex;
-  flex-direction: column;
-  align-items: start;
+  // flex-direction: column;
+  // align-items: start;
   // max-width: 500px;
+  gap: 1rem;
   cursor: pointer;
   background-color: #ffffff0e;
   transition: background-color 0.5s linear;

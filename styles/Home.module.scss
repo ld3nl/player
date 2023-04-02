@@ -10,6 +10,10 @@ $input-border-radius: 5px;
   flex-direction: column;
   margin-bottom: 20px;
 
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
   label {
     font-weight: bold;
     margin-bottom: 5px;
@@ -33,10 +37,10 @@ $input-border-radius: 5px;
       width: 300px;
     }
   }
-}
 
-.iconActive-true {
-  path[fill="none"] {
-    fill: black;
+  .button {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
   }
 }

@@ -215,9 +215,9 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div>
           <button className={css.button} onClick={() => toggleFavorite(id)}>
             <Icon
-              className={css[`iconActive-${favorite}`]}
               name={"Favorite"}
               size={"sm"}
+              variation={favorite ? "active" : "default"}
             />
           </button>
         </div>

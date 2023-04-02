@@ -13,16 +13,20 @@ interface IconProps {
   className?: string;
   name: SVGIconName;
   size?: "sm" | "md";
+  variation?: "active" | "default";
 }
 
 const Icon: React.FunctionComponent<IconProps> = ({
   className = "",
   name,
   size = "md",
+  variation = "default",
 }) => {
   const svgProps: SVGProps = { name };
   return (
-    <span className={[css.Icon, css[size]].join(" ")}>
+    <span
+      className={[css.Icon, css[size], css[name], css[variation]].join(" ")}
+    >
       <svg
         className={`${className}`}
         xmlns="http://www.w3.org/2000/svg"
