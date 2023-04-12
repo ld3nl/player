@@ -4,9 +4,6 @@ import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
-// import dynamic from "next/dynamic";
-
-// const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
 
 import ReactPlayer from "react-player";
 
@@ -19,11 +16,6 @@ interface Props {
   id?: string;
 }
 
-type Progress = {
-  currentTime: number;
-  duration: number;
-};
-
 const imgArray = [
   "https://www.paullowe.org/wp-content/uploads/2017/06/P1080841.jpg",
   "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg",
@@ -33,22 +25,6 @@ const imgArray = [
 const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const audioRef = useRef<any>(null);
 
-  // const [state, setState] = useState({
-  //   url: null,
-  //   pip: false,
-  //   playing: true,
-  //   controls: false,
-  //   light: false,
-  //   volume: 0.8,
-  //   muted: false,
-  //   played: 0,
-  //   loaded: 0,
-  //   duration: 0,
-  //   playbackRate: 1.0,
-  //   loop: false,
-  //   seeking: false,
-  // });
-
   const [url, setUrl] = useState(null);
   const [pip, setPip] = useState(false);
   const [playing, setPlaying] = useState(true);
@@ -57,7 +33,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [volume, setVolume] = useState(0.8);
   const [muted, setMuted] = useState(false);
   const [played, setPlayed] = useState(0);
-  const [playedSec, setPlayedSeconds] = useState(0);
 
   const [loaded, setLoaded] = useState<number | boolean>(0);
   const [duration, setDuration] = useState(0);
@@ -93,22 +68,12 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
     setFavorite(favoriteItems.includes(id));
 
-    if (storedProgress) {
-      const { playedSeconds } = JSON.parse(storedProgress);
-      if (audioRef.current) {
-        setPlayedSeconds(playedSeconds);
-      }
-    }
-
     handlePlay();
   }, [src, id]);
 
   useEffect(() => {
     if (title && src) {
       handleOpen();
-      // if (audioRef.current) {
-      //   setIsPlaying(true);
-      // }
     }
   }, [title, src]);
 
@@ -138,7 +103,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setVolume(0.8);
     setMuted(false);
     setPlayed(0);
-    setPlayedSeconds(0);
     setLoaded(0);
     setDuration(0);
     setPlaybackRate(1.0);
@@ -205,7 +169,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handleSeekChange = (e: any) => {
-    setPlayed(parseFloat(e.target.value));
+    const newValue = e.target?.value || e;
+    console.log(newValue);
+    if (newValue) {
+      setPlayed(parseFloat(newValue));
+    }
   };
 
   const handleSeekTouchStart = (e: any) => {
@@ -218,8 +186,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handleSeekMouseUp = (e: any) => {
+    const newValue = e.target?.value || e;
     setSeeking(false);
-    audioRef.current?.seekTo(parseFloat(e.target.value));
+    if (newValue) {
+      audioRef.current?.seekTo(parseFloat(newValue));
+    }
   };
 
   const handleProgress = (updatedState: {
@@ -231,7 +202,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     // We only want to update time slider if we are not currently seeking
     if (!seeking) {
       const { loaded, played, playedSeconds } = updatedState;
-      console.log("onProgress", updatedState);
 
       setLoaded(loaded);
       setPlayed(played);
@@ -245,7 +215,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const handleDuration = (duration: any) => {
     setDuration(duration);
-    // audioRef.current.seekTo(playedSec, "seconds");
 
     const storedProgress = localStorage.getItem(`${id}-progress`);
 
@@ -300,7 +269,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
         {duration !== 0 && (
           <div className={css.Progress}>
-            <input
+            {/* <input
               type="range"
               min={0}
               max={0.999999}
@@ -311,7 +280,20 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               onChange={handleSeekChange}
               onMouseUp={handleSeekMouseUp}
               // onTouchEnd={handleSeekTouchEnd}
-            />
+            /> */}
+            <div className={css.progressBar}>
+              <ReactSlider
+                value={played * 100}
+                step={0.000001}
+                className={css["horizontal-slider"]}
+                thumbClassName={css["example-thumb"]}
+                trackClassName={css["example-track"]}
+                // onMouseDown={handleSeekMouseDown}
+                onChange={(e) => handleSeekChange(e / 100)}
+                onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+              />
+            </div>
+
             <div className={css.Duration}>
               <Duration seconds={duration * played} />
               <Duration seconds={duration * (1 - played)} />
