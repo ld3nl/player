@@ -21,6 +21,7 @@
     "normalize.css": "^8.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-player": "^2.12.0",
     "react-slider": "^2.0.4",
     "typescript": "5.0.2"
   },

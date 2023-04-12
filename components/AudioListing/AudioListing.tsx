@@ -14,13 +14,13 @@ type Props = {
 };
 
 type Progress = {
-  currentTime: number;
+  playedSeconds: number;
   duration: number;
 };
 
 const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
   const [progress, setProgress] = useState<Progress>({
-    currentTime: 0,
+    playedSeconds: 0,
     duration: 0,
   });
   const [favorite, setFavorite] = useState(false);
@@ -30,12 +30,6 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
   );
 
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
-
-  const [favoriteItems, setFavoriteItems] = useState<number[]>(
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("favoriteItems") || "[]")
-      : []
-  );
 
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
@@ -51,7 +45,7 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
     setPublishDate(new Date(date).toLocaleDateString("en-AU"));
   }, [src, id, globalContext, date]);
 
-  const remainingTime = progress.duration - progress.currentTime;
+  const remainingTime = progress.duration - progress.playedSeconds;
   const remainingMinutes = Math.floor(remainingTime / 60);
   const remainingSeconds = Math.floor(remainingTime % 60);
 
@@ -95,16 +89,16 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
           }));
         }}
       >
-        <h2>{he.decode(title)}</h2>
+        {title && <h2>{he.decode(title)}</h2>}
 
         <p>{publishDate}</p>
 
-        {progress.currentTime != 0 && (
+        {progress.playedSeconds != 0 && (
           <div className={css["progress-bar"]}>
             <div>
               <progress
                 className={css["progress"]}
-                value={progress.currentTime}
+                value={progress.playedSeconds}
                 max={progress.duration}
               />
             </div>

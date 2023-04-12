@@ -1,21 +1,24 @@
-import Head from "next/head";
-import { useEffect, useState, useContext } from "react";
-import { GlobalContext } from "./_app";
+import { useEffect, useState, useContext, useCallback } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
+import Head from "next/head";
 
-import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
 import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 import Icon from "@/components/Icon/Icon";
 import Button from "@/components/Button/Button";
 
+import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
+import { useFilteredPosts } from "../lib/hooks";
+
+import { GlobalContext } from "./_app";
+
 import css from "../styles/Home.module.scss";
 
 type Post = {
-  id: any;
-  audioUrl: any;
-  title: any;
+  id: number;
+  audioUrl: string;
+  title: string;
   date: string;
 };
 
@@ -24,47 +27,14 @@ type HomeProps = {
   totalPosts: number;
 };
 
-const cache = new LRUCache({
+const cache = new LRUCache<string, HomeProps>({
   max: 500, // maximum number of entries
 });
 
 const DEFAULT_NUMBER_OF_POSTS = 12;
 
-const useFilteredPosts = (posts: Post[], favoriteItems: number[]) => {
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
-
-  const filterPosts = (words: string[]): void => {
-    setFilteredPosts(
-      posts.filter((post) => {
-        const title = post.title.rendered.toLowerCase();
-        return (
-          words.length > 0 &&
-          words.every(
-            (word) =>
-              typeof word === "string" && title.includes(word.toLowerCase())
-          )
-        );
-      })
-    );
-  };
-
-  const filterFavorites = () => {
-    if (favoriteItems.length > 0) {
-      setFilteredPosts(posts.filter((post) => favoriteItems.includes(post.id)));
-    } else {
-      setFilteredPosts(posts);
-    }
-  };
-
-  useEffect(() => {
-    filterFavorites();
-  }, [favoriteItems]);
-
-  return { filteredPosts, filterPosts };
-};
-
-export default function Home({ posts, totalPosts }: HomeProps) {
-  const [numberOfPost, setNumberOfPost] = useState<number>(
+export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
+  const [numberOfPosts, setNumberOfPosts] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS
   );
 
@@ -78,9 +48,16 @@ export default function Home({ posts, totalPosts }: HomeProps) {
 
   const { filteredPosts, filterPosts } = useFilteredPosts(posts, favoriteItems);
 
-  const [showFavorite, setShowFavorite] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
-  useEffect(() => setShowFavorite(favoriteItems.length >= 1));
+  useEffect(() => {
+    setShowFavorites(favoriteItems.length > 0);
+  }, [favoriteItems]);
+
+  const handleShowFavoritesToggle = useCallback(() => {
+    setShowFavorites((showFavorites) => !showFavorites);
+    setFavoriteItems((favoriteItems) => (showFavorites ? [] : favoriteItems));
+  }, [setShowFavorites, setFavoriteItems, showFavorites]);
 
   return (
     <>
@@ -91,34 +68,22 @@ export default function Home({ posts, totalPosts }: HomeProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={css["input-container"]}>
-        <label htmlFor="numberOfPost">Number of posts:</label>
+        <label htmlFor="numberOfPosts">Number of posts:</label>
         <input
-          id="numberOfPost"
+          id="numberOfPosts"
           type="number"
-          defaultValue={numberOfPost}
-          onChange={(e) => setNumberOfPost(Number(e.target.value))}
+          defaultValue={numberOfPosts}
+          onChange={(e) => setNumberOfPosts(Number(e.target.value))}
         />
-        <Button
-          className={css.button}
-          onClick={() => {
-            setShowFavorite(!showFavorite);
-            if (showFavorite) setFavoriteItems([]);
-            else
-              setFavoriteItems(
-                typeof window !== "undefined"
-                  ? JSON.parse(localStorage.getItem("favoriteItems") || "[]")
-                  : []
-              );
-          }}
-        >
+        <Button className={css.button} onClick={handleShowFavoritesToggle}>
           <Icon
-            name={"Favorite"}
-            size={"sm"}
-            variation={showFavorite ? "active" : "default"}
+            name="Favorite"
+            size="sm"
+            variation={showFavorites ? "active" : "default"}
           />
           <span>-</span>
           <span>
-            {!showFavorite ? "Shows favorites items" : "Show all items"}
+            {!showFavorites ? "Show favorite items" : "Show all items"}
           </span>
         </Button>
       </div>
@@ -130,22 +95,22 @@ export default function Home({ posts, totalPosts }: HomeProps) {
           type="text"
           placeholder="Search"
           onChange={(e) => {
-            if (showFavorite) setFavoriteItems([]);
-            const string = e.target.value;
-            const array = string.split(" ");
-            filterPosts(array);
+            if (showFavorites) setFavoriteItems([]);
+            const searchString = e.target.value;
+            const searchTerms = searchString.split(" ");
+            filterPosts(searchTerms);
           }}
         />
       </div>
 
       {filteredPosts &&
-        filteredPosts.slice(0, numberOfPost).map((post, i) => {
+        filteredPosts.slice(0, numberOfPosts).map((post, i) => {
           const { audioUrl, title, date, id } = post;
 
           return (
             <div key={`item-${i}`}>
               <AudioListing
-                title={title.rendered}
+                title={title}
                 src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                 date={date}
                 id={id}
@@ -191,10 +156,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
         : "";
 
       return {
-        audioUrl: audioUrl,
-        title,
-        date,
         id,
+        audioUrl: audioUrl,
+        title: title.rendered,
+        date,
       };
     })
   );

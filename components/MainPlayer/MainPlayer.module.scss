@@ -1,4 +1,6 @@
 .MainPlayer {
+  --img: "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg";
+
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -8,9 +10,34 @@
   left: 0;
   right: 0;
   height: 100%;
-  background-color: purple;
+  background-color: rgba(255, 255, 255, 0.1);
   transition: bottom 0.5s ease-in-out, opacity 0.2s ease-in-out 0.2s;
   opacity: 0;
+
+  &::before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg);
+    background-size: 150% auto;
+    filter: blur(10px);
+    z-index: -1;
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+  }
 
   &.open {
     bottom: 0;
@@ -18,10 +45,12 @@
     transition-delay: 0.2s;
   }
 }
+
 .audio {
   display: flex;
   justify-content: center;
 }
+
 .open-button {
   position: fixed;
   bottom: 0;
@@ -29,10 +58,49 @@
   transform: translateX(-50%);
 }
 
+.Progress {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 32px;
+}
+
+.Duration {
+  display: flex;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.29px;
+
+  color: #ffffff;
+  text-align: left;
+  padding-left: 32px;
+}
+
+.top {
+  padding: 58px 24px 21.5px;
+  display: flex;
+}
+
+.specialIcon {
+  width: 14.82px;
+  height: 14.82px;
+}
+
 .close-button {
-  position: absolute;
-  top: 0;
-  right: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
 }
 
 .artWork {
@@ -40,8 +108,8 @@
   justify-content: center;
   width: calc(100vw - 32px);
 
-  height: 50vh;
-  margin: 1rem auto 0;
+  // height: 50vh;
+  margin: 0 auto 15px;
 
   img {
     max-width: 100%;
@@ -116,14 +184,20 @@
   background: #ffffff62;
   flex: 1 0;
   border: 0;
-  padding: 0.7rem;
+  padding: 0;
+  min-width: 64px;
+  height: 64px;
+  display: inline-flex;
   border-radius: 50rem;
   transition: background-color 0.4s linear;
-  align-self: center;
+  justify-content: center;
+  align-items: center;
+
   cursor: pointer;
 
   &.sm {
-    padding: 0.5rem;
+    min-width: 48px;
+    height: 48px;
   }
 
   &:hover {
@@ -137,7 +211,7 @@
 
 .actionButtons {
   display: flex;
-  gap: 1rem;
+  gap: 40px;
   align-items: center;
 
   button {

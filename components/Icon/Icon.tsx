@@ -7,6 +7,7 @@ type SVGIconName =
   | "ForwardRewind"
   | "BackwardRewind"
   | "Pause"
+  | "Close"
   | "Favorite";
 
 interface IconProps {
@@ -23,15 +24,25 @@ const Icon: React.FunctionComponent<IconProps> = ({
   variation = "default",
 }) => {
   const svgProps: SVGProps = { name };
+  let viewBox = "0 0 120 120";
+
+  if (name === "Close") viewBox = "0 0 16 16";
+
   return (
     <span
-      className={[css.Icon, css[size], css[name], css[variation]].join(" ")}
+      className={[
+        css.Icon,
+        css[size],
+        css[name],
+        css[variation],
+        className,
+      ].join(" ")}
     >
       <svg
         className={`${className}`}
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        viewBox="0 0 120 120"
+        viewBox={viewBox}
         preserveAspectRatio="xMidYMid meet"
       >
         {getSVG(svgProps)}

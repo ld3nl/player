@@ -5,6 +5,13 @@ import { GlobalContext } from "../../pages/_app";
 import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
+// import dynamic from "next/dynamic";
+
+// const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
+
+import ReactPlayer from "react-player";
+
+import { Duration } from "./Duration";
 
 interface Props {
   title?: string;
@@ -24,23 +31,52 @@ const imgArray = [
 ];
 
 const MainPlayer: FC<Props> = ({ title, src, id }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<any>(null);
 
-  const [progress, setProgress] = useState<Progress>({
-    currentTime: 0,
-    duration: 0,
-  });
+  // const [state, setState] = useState({
+  //   url: null,
+  //   pip: false,
+  //   playing: true,
+  //   controls: false,
+  //   light: false,
+  //   volume: 0.8,
+  //   muted: false,
+  //   played: 0,
+  //   loaded: 0,
+  //   duration: 0,
+  //   playbackRate: 1.0,
+  //   loop: false,
+  //   seeking: false,
+  // });
 
-  const [trackProgress, setTrackProgress] = useState(0);
+  const [url, setUrl] = useState(null);
+  const [pip, setPip] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [controls, setControls] = useState(false);
+  const [light, setLight] = useState(false);
+  const [volume, setVolume] = useState(0.8);
+  const [muted, setMuted] = useState(false);
+  const [played, setPlayed] = useState(0);
+  const [playedSec, setPlayedSeconds] = useState(0);
+
+  const [loaded, setLoaded] = useState<number | boolean>(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [loop, setLoop] = useState(false);
+  const [seeking, setSeeking] = useState(false);
+
+  const [isSSR, setIsSSR] = useState(true);
+
+  useEffect(() => {
+    setIsSSR(false);
+  }, []);
 
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setSrc] = useState<string>("");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audioIsLoading, setAudioIsLoading] = useState(false);
+  const [audioIsLoading, setAudioIsLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
 
-  const { globalContext, setGlobalContext } = useContext(GlobalContext);
+  const { setGlobalContext } = useContext(GlobalContext);
 
   useLockScroll(isOpen);
 
@@ -58,21 +94,21 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setFavorite(favoriteItems.includes(id));
 
     if (storedProgress) {
-      const { currentTime } = JSON.parse(storedProgress);
-      setProgress(JSON.parse(storedProgress));
+      const { playedSeconds } = JSON.parse(storedProgress);
       if (audioRef.current) {
-        audioRef.current.currentTime = currentTime;
+        setPlayedSeconds(playedSeconds);
       }
     }
+
+    handlePlay();
   }, [src, id]);
 
   useEffect(() => {
     if (title && src) {
       handleOpen();
-      if (audioRef.current) {
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
+      // if (audioRef.current) {
+      //   setIsPlaying(true);
+      // }
     }
   }, [title, src]);
 
@@ -85,8 +121,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setIsOpen(false);
 
     if (audioRef.current) {
-      audioRef.current.pause();
-      setAudioIsLoading(false);
+      handleStop();
     }
 
     setGlobalContext((prev) => ({
@@ -94,6 +129,21 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
       isModalActive: false,
       selectedItem: { title: "", date: "", src: "", id: "" },
     }));
+
+    setUrl(null);
+    setPip(false);
+    setPlaying(true);
+    setControls(false);
+    setLight(false);
+    setVolume(0.8);
+    setMuted(false);
+    setPlayed(0);
+    setPlayedSeconds(0);
+    setLoaded(0);
+    setDuration(0);
+    setPlaybackRate(1.0);
+    setLoop(false);
+    setSeeking(false);
   };
 
   const toggleFavorite = (id: any) => {
@@ -114,103 +164,100 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setFavorite(!isFavorite);
   };
 
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    const currentTime = e.currentTarget.currentTime;
-    const duration = e.currentTarget.duration;
+  const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
+    setSeeking(true);
 
-    localStorage.setItem(
-      `${id}-progress`,
-      JSON.stringify({ currentTime, duration, favorite })
-    );
+    const sec = (seconds * 1) / duration;
 
-    const currentPercentage = duration
-      ? `${(currentTime / progress.duration) * 100}%`
-      : "0%";
+    let seekTo = 0;
 
-    setProgress({ currentTime, duration });
+    if (action === "backward") {
+      seekTo = played - sec;
+    }
+
+    if (action === "forward") {
+      seekTo = played + sec;
+    }
+
+    setPlayed(seekTo);
+    audioRef.current.seekTo(seekTo);
+
+    setSeeking(false);
   };
 
-  const handleSkipForward = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime += 15;
-    }
+  const handleStop = () => {
+    setUrl(null);
+    setPlaying(false);
   };
 
-  const handleSkipBackward = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime -= 15;
-    }
+  const handlePlay = () => {
+    console.log("onPlay");
+
+    setPlaying(true);
   };
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (audioRef.current.paused) {
-        audioRef.current.play();
-        setIsPlaying(true);
-      } else {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      }
+    setPlaying(!playing);
+  };
+
+  const handleSeekMouseDown = (e: any) => {
+    setSeeking(true);
+  };
+
+  const handleSeekChange = (e: any) => {
+    setPlayed(parseFloat(e.target.value));
+  };
+
+  const handleSeekMouseUp = (e: any) => {
+    setSeeking(false);
+    audioRef.current?.seekTo(parseFloat(e.target.value));
+  };
+
+  const handleProgress = (updatedState: {
+    loaded: number | boolean;
+    loadedSeconds: number;
+    played: number;
+    playedSeconds: number;
+  }) => {
+    // We only want to update time slider if we are not currently seeking
+    if (!seeking) {
+      const { loaded, played, playedSeconds } = updatedState;
+      console.log("onProgress", updatedState);
+
+      setLoaded(loaded);
+      setPlayed(played);
+
+      localStorage.setItem(
+        `${id}-progress`,
+        JSON.stringify({ playedSeconds, duration, favorite })
+      );
     }
   };
 
-  const handleLoad = () => {
-    setAudioIsLoading(true);
-  };
+  const handleDuration = (duration: any) => {
+    setDuration(duration);
+    // audioRef.current.seekTo(playedSec, "seconds");
 
-  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    const duration = e.currentTarget.duration;
-    setProgress((prev) => ({ ...prev, duration }));
-  };
+    const storedProgress = localStorage.getItem(`${id}-progress`);
 
-  const startTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    intervalRef.current = setInterval(() => {
-      if (audioRef.current?.ended) {
-        // toNextTrack();
-      } else if (audioRef.current) {
-        setTrackProgress(audioRef.current.currentTime);
-      }
-    }, 1000);
-  };
-
-  const onScrub = (value: number) => {
-    console.log(value);
-
-    if (audioRef.current && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      setTrackProgress(value);
-      audioRef.current.currentTime = value;
+    if (storedProgress) {
+      const { playedSeconds } = JSON.parse(storedProgress);
+      audioRef.current.seekTo(playedSeconds, "seconds");
     }
   };
-
-  const onScrubEnd = () => {
-    if (audioRef.current) {
-      if (!isPlaying) {
-        setIsPlaying(true);
-      }
-
-      startTimer();
-    }
-  };
-
-  const remainingTime = progress.duration - progress.currentTime;
-  const remainingMinutes = Math.floor(remainingTime / 60);
-  const remainingSeconds = Math.floor(remainingTime % 60);
 
   return (
     <>
       <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
-        <button className={css["close-button"]} onClick={handleClose}>
-          Close
-        </button>
+        <div className={css.top}>
+          <button className={css["close-button"]} onClick={handleClose}>
+            <Icon className={css.specialIcon} name={"Close"} />
+          </button>
+        </div>
         <div className={css.artWork}>
           <img className={css.image} src={imageSrc} alt={"sone"} />
         </div>
-        <h2>{title ? he.decode(title) : ""}</h2>
+        <span className={css.title}>{title ? he.decode(title) : ""}</span>
 
         <div>
           <button className={css.button} onClick={() => toggleFavorite(id)}>
@@ -221,54 +268,80 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             />
           </button>
         </div>
-        {audioIsLoading && (
-          <div className={css.progressBar}>
-            <ReactSlider
-              value={
-                trackProgress ? trackProgress / (progress.duration / 100) : 0
-              }
-              step={0.1}
-              className={css["horizontal-slider"]}
-              thumbClassName={css["example-thumb"]}
-              trackClassName={css["example-track"]}
-              onChange={(e) => onScrub(Number(e) * (progress.duration / 100))}
-              onAfterChange={onScrubEnd}
-            />
 
-            <span className={css["duration"]}>
-              {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}
-              s left
-            </span>
+        {isSSR ? null : (
+          <ReactPlayer
+            ref={audioRef}
+            style={{ display: "none" }}
+            url={src}
+            onReady={() => setAudioIsLoading(true)}
+            pip={pip}
+            playing={playing}
+            controls={controls}
+            light={light}
+            loop={loop}
+            playbackRate={playbackRate}
+            volume={volume}
+            muted={muted}
+            // onReady={() => console.log('onReady')}
+            // onStart={() => console.log("onStart")}
+            onPlay={handlePlay}
+            // onEnablePIP={this.handleEnablePIP}
+            // onDisablePIP={this.handleDisablePIP}
+            // onPause={this.handlePause}
+            // onBuffer={() => console.log('onBuffer')}
+            // onPlaybackRateChange={this.handleOnPlaybackRateChange}
+            // onSeek={e => console.log('onSeek', e)}
+            // onEnded={this.handleEnded}
+            // onError={e => console.log('onError', e)}
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+          />
+        )}
+
+        {duration !== 0 && (
+          <div className={css.Progress}>
+            <input
+              type="range"
+              min={0}
+              max={0.999999}
+              step="any"
+              value={played}
+              onMouseDown={handleSeekMouseDown}
+              onChange={handleSeekChange}
+              onMouseUp={handleSeekMouseUp}
+            />
+            <div className={css.Duration}>
+              <Duration seconds={duration * played} />
+              <Duration seconds={duration * (1 - played)} />
+            </div>
           </div>
         )}
 
-        <audio
-          className={css["audio-element"]}
-          src={src}
-          onTimeUpdate={handleTimeUpdate}
-          ref={audioRef}
-          onLoadedMetadata={handleLoadedMetadata}
-          onCanPlayThrough={handleLoad}
-          // controls
-        />
-        {audioIsLoading && (
+        {duration !== 0 && (
           <div className={css.audio}>
             <div className={css.actionButtons}>
-              <button className={css.sm} onClick={handleSkipBackward}>
+              <button
+                className={css.sm}
+                onClick={() => handleSeekTo("backward", 15)}
+              >
                 <Icon name={"BackwardRewind"} size={"sm"} />
               </button>
 
               <button onClick={handlePlayPause}>
-                <Icon name={isPlaying ? "Pause" : "Play"} />
+                <Icon name={playing ? "Pause" : "Play"} />
               </button>
-              <button className={css.sm} onClick={handleSkipForward}>
+              <button
+                className={css.sm}
+                onClick={() => handleSeekTo("forward", 15)}
+              >
                 <Icon name={"ForwardRewind"} size={"sm"} />
               </button>
             </div>
           </div>
         )}
 
-        {!audioIsLoading && (
+        {duration === 0 && (
           <div className={css["loader"]}>
             <div className={css["dot"]}></div>
             <div className={css["dot"]}></div>
