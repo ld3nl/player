@@ -208,6 +208,15 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setPlayed(parseFloat(e.target.value));
   };
 
+  const handleSeekTouchStart = (e: any) => {
+    setSeeking(true);
+  };
+
+  const handleSeekTouchEnd = (e: any) => {
+    setSeeking(false);
+    audioRef.current?.seekTo(parseFloat(e.target.value));
+  };
+
   const handleSeekMouseUp = (e: any) => {
     setSeeking(false);
     audioRef.current?.seekTo(parseFloat(e.target.value));
@@ -308,8 +317,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               step="any"
               value={played}
               onMouseDown={handleSeekMouseDown}
+              onTouchStart={handleSeekTouchStart}
               onChange={handleSeekChange}
               onMouseUp={handleSeekMouseUp}
+              onTouchEnd={handleSeekTouchEnd}
             />
             <div className={css.Duration}>
               <Duration seconds={duration * played} />
