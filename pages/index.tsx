@@ -51,6 +51,22 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const [showFavorites, setShowFavorites] = useState(false);
 
   useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop === 0) {
+        window.scrollTo(0, 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
     setShowFavorites(favoriteItems.length > 0);
   }, [favoriteItems]);
 
@@ -64,62 +80,67 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
       <Head>
         <title>Paul Lowe Talks source paullowe.org</title>
         <meta name="description" content="Paul Lowe Talks" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={css["input-container"]}>
-        <label htmlFor="numberOfPosts">Number of posts:</label>
-        <input
-          id="numberOfPosts"
-          type="number"
-          defaultValue={numberOfPosts}
-          onChange={(e) => setNumberOfPosts(Number(e.target.value))}
-        />
-        <Button className={css.button} onClick={handleShowFavoritesToggle}>
-          <Icon
-            name="Favorite"
-            size="sm"
-            variation={showFavorites ? "active" : "default"}
+      <div className={css.main}>
+        <div className={css["input-container"]}>
+          <label htmlFor="numberOfPosts">Number of posts:</label>
+          <input
+            id="numberOfPosts"
+            type="number"
+            defaultValue={numberOfPosts}
+            onChange={(e) => setNumberOfPosts(Number(e.target.value))}
           />
-          <span>-</span>
-          <span>
-            {!showFavorites ? "Show favorite items" : "Show all items"}
-          </span>
-        </Button>
+          <Button className={css.button} onClick={handleShowFavoritesToggle}>
+            <Icon
+              name="Favorite"
+              size="sm"
+              variation={showFavorites ? "active" : "default"}
+            />
+            <span>-</span>
+            <span>
+              {!showFavorites ? "Show favorite items" : "Show all items"}
+            </span>
+          </Button>
+        </div>
+
+        <div className={css["input-container"]}>
+          <label htmlFor="search">Search:</label>
+          <input
+            id="search"
+            type="text"
+            placeholder="Search"
+            onChange={(e) => {
+              if (showFavorites) setFavoriteItems([]);
+              const searchString = e.target.value;
+              const searchTerms = searchString.split(" ");
+              filterPosts(searchTerms);
+            }}
+          />
+        </div>
+
+        {filteredPosts &&
+          filteredPosts.slice(0, numberOfPosts).map((post, i) => {
+            const { audioUrl, title, date, id } = post;
+
+            return (
+              <div key={`item-${i}`}>
+                <AudioListing
+                  title={title}
+                  src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
+                  date={date}
+                  id={id}
+                />
+              </div>
+            );
+          })}
+
+        <MainPlayer {...globalContext.selectedItem} />
       </div>
-
-      <div className={css["input-container"]}>
-        <label htmlFor="search">Search:</label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search"
-          onChange={(e) => {
-            if (showFavorites) setFavoriteItems([]);
-            const searchString = e.target.value;
-            const searchTerms = searchString.split(" ");
-            filterPosts(searchTerms);
-          }}
-        />
-      </div>
-
-      {filteredPosts &&
-        filteredPosts.slice(0, numberOfPosts).map((post, i) => {
-          const { audioUrl, title, date, id } = post;
-
-          return (
-            <div key={`item-${i}`}>
-              <AudioListing
-                title={title}
-                src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
-                date={date}
-                id={id}
-              />
-            </div>
-          );
-        })}
-
-      <MainPlayer {...globalContext.selectedItem} />
     </>
   );
 }

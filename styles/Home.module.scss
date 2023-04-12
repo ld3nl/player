@@ -44,3 +44,8 @@ $input-border-radius: 5px;
     align-items: center;
   }
 }
+
+.main {
+  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: auto;
+}
