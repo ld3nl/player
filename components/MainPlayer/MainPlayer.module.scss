@@ -1,3 +1,5 @@
+@import "./range.scss";
+
 .MainPlayer {
   --img: "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg";
 
@@ -43,6 +45,10 @@
     bottom: 0;
     opacity: 1;
     transition-delay: 0.2s;
+  }
+
+  [type="range"] {
+    @extend %range;
   }
 }
 
@@ -223,6 +229,17 @@
   display: flex;
   justify-content: center;
   margin: 1rem 0;
+}
+
+.foot {
+  // display: flex;
+  margin-top: auto;
+  padding-left: 16px;
+  padding-bottom: 39px;
+
+  & > * {
+    display: flex;
+  }
 }
 
 .dot {

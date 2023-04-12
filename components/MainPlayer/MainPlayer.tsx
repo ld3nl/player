@@ -2,7 +2,6 @@ import { FC, useEffect, useState, useRef, useContext } from "react";
 import he from "he";
 import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
-import css from "./MainPlayer.module.scss";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
 // import dynamic from "next/dynamic";
@@ -13,6 +12,7 @@ import ReactPlayer from "react-player";
 
 import { Duration } from "./Duration";
 
+import css from "./MainPlayer.module.scss";
 interface Props {
   title?: string;
   src?: string;
@@ -268,16 +268,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         </div>
         <span className={css.title}>{title ? he.decode(title) : ""}</span>
 
-        <div>
-          <button className={css.button} onClick={() => toggleFavorite(id)}>
-            <Icon
-              name={"Favorite"}
-              size={"sm"}
-              variation={favorite ? "active" : "default"}
-            />
-          </button>
-        </div>
-
         {isSSR ? null : (
           <ReactPlayer
             ref={audioRef}
@@ -317,10 +307,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               step="any"
               value={played}
               onMouseDown={handleSeekMouseDown}
-              onTouchStart={handleSeekTouchStart}
+              // onTouchStart={handleSeekTouchStart}
               onChange={handleSeekChange}
               onMouseUp={handleSeekMouseUp}
-              onTouchEnd={handleSeekTouchEnd}
+              // onTouchEnd={handleSeekTouchEnd}
             />
             <div className={css.Duration}>
               <Duration seconds={duration * played} />
@@ -351,6 +341,19 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
             </div>
           </div>
         )}
+
+        <div className={css.foot}>
+          <button
+            className={[css.sm, css.button].join(" ")}
+            onClick={() => toggleFavorite(id)}
+          >
+            <Icon
+              name={"Favorite"}
+              size={"sm"}
+              variation={favorite ? "active" : "default"}
+            />
+          </button>
+        </div>
 
         {duration === 0 && (
           <div className={css["loader"]}>
