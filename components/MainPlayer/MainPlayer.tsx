@@ -233,7 +233,9 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div className={css.artWork}>
           <Image className={css.image} src={img} alt={"sone"} />
         </div>
-        <span className={css.title}>{title ? he.decode(title) : ""}</span>
+        {duration !== 0 && (
+          <span className={css.title}>{title ? he.decode(title) : ""}</span>
+        )}
 
         {isSSR ? null : (
           <ReactPlayer
@@ -322,18 +324,20 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           </div>
         )}
 
-        <div className={css.foot}>
-          <button
-            className={[css.sm, css.button].join(" ")}
-            onClick={() => toggleFavorite(id)}
-          >
-            <Icon
-              name={"Favorite"}
-              size={"sm"}
-              variation={favorite ? "active" : "default"}
-            />
-          </button>
-        </div>
+        {duration !== 0 && (
+          <div className={css.foot}>
+            <button
+              className={[css.sm, css.button].join(" ")}
+              onClick={() => toggleFavorite(id)}
+            >
+              <Icon
+                name={"Favorite"}
+                size={"sm"}
+                variation={favorite ? "active" : "default"}
+              />
+            </button>
+          </div>
+        )}
 
         {duration === 0 && (
           <div className={css["loader"]}>

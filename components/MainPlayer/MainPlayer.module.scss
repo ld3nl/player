@@ -233,7 +233,7 @@ $random-index: floor(($random-number * $num-images) + 1);
 .loader {
   display: flex;
   justify-content: center;
-  margin: 1rem 0;
+  margin: auto 0;
 }
 
 .foot {
