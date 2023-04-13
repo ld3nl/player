@@ -133,10 +133,11 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     let seekTo = 0;
 
     if (action === "backward") {
-      seekTo = played - sec;
+      seekTo = Math.max(played - sec, 0);
     }
 
     if (action === "forward") {
+      // seekTo = Math.min(played + sec, 1);
       seekTo = played + sec;
     }
 

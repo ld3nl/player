@@ -117,7 +117,7 @@ $random-index: floor(($random-number * $num-images) + 1);
 .artWork {
   display: flex;
   justify-content: center;
-  width: calc(100vw - 32px);
+  width: calc(100vw - 64px);
 
   // height: 50vh;
   margin: 0 auto 15px;
