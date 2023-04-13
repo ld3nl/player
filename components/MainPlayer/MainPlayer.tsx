@@ -1,4 +1,5 @@
 import { FC, useEffect, useState, useRef, useContext } from "react";
+import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
@@ -10,17 +11,19 @@ import ReactPlayer from "react-player";
 import { Duration } from "./Duration";
 
 import css from "./MainPlayer.module.scss";
+import img from "@/public/P1080841.jpg";
+
 interface Props {
   title?: string;
   src?: string;
   id?: string;
 }
 
-const imgArray = [
-  "https://www.paullowe.org/wp-content/uploads/2017/06/P1080841.jpg",
-  "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg",
-  "https://www.paullowe.org/wp-content/uploads/2016/09/IMG_0987_low_website.jpg",
-];
+// const imgArray = [
+//   "https://www.paullowe.org/wp-content/uploads/2017/06/P1080841.jpg",
+//   "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg",
+//   "https://www.paullowe.org/wp-content/uploads/2016/09/IMG_0987_low_website.jpg",
+// ];
 
 const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const audioRef = useRef<any>(null);
@@ -47,18 +50,12 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [imageSrc, setSrc] = useState<string>("");
   const [audioIsLoading, setAudioIsLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
 
   const { setGlobalContext } = useContext(GlobalContext);
 
   useLockScroll(isOpen);
-
-  useEffect(() => {
-    const imgSrc = imgArray[Math.floor(Math.random() * imgArray.length)];
-    setSrc(imgSrc);
-  }, []);
 
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
@@ -233,7 +230,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           </button>
         </div>
         <div className={css.artWork}>
-          <img className={css.image} src={imageSrc} alt={"sone"} />
+          <Image className={css.image} src={img} alt={"sone"} />
         </div>
         <span className={css.title}>{title ? he.decode(title) : ""}</span>
 
