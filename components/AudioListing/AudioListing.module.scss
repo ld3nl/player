@@ -8,42 +8,51 @@ $main-color: #4caf50;
   //   :global {
   //     @import "~/normalize.css/normalize.css";
   //   }
-
   --audio-element-background-color: #f0f0f0;
   --audio-element-progress-color: #333;
   --audio-element-progress-hover-color: #666;
   --audio-element-progress-height: 0.5rem;
 
+  min-height: 84px;
+  height: 100%;
   display: flex;
   // flex-direction: column;
   // align-items: start;
   // max-width: 500px;
-  gap: 1rem;
+  // gap: 1rem;
 
-  padding: 1rem;
+  padding: 18px 15px;
   border-bottom: 1px solid #cccc;
 
   h2 {
-    font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 17.5px;
-    font-weight: 600;
+    display: flex;
+    margin: 0;
+    flex: 1 1 auto;
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.2;
+    /* identical to box height, or 150% */
   }
 
   p {
     font-size: 15px;
-    margin-bottom: 19px;
-    margin-top: 0;
-    color: #888;
+    margin: 0;
+    color: #1f1f1f;
     font-weight: 400;
+    flex: 0 0 auto;
+    font-style: italic;
   }
 
   .progress-bar {
     display: flex;
-    align-items: center;
     width: 100%;
     margin-top: 0;
     font-size: 12px;
+    flex: 1 1 auto;
+    margin-top: auto;
+    align-items: end;
 
     & > div {
       border-radius: 3px;
@@ -58,6 +67,7 @@ $main-color: #4caf50;
     .current-time,
     .duration {
       font-weight: bold;
+      line-height: 0.5;
     }
 
     .progress {
@@ -80,6 +90,12 @@ $main-color: #4caf50;
   }
 
   .listing {
+    flex-direction: column;
+    display: flex;
+
+    flex: 1 1 100%;
+    min-height: 0;
+
     cursor: pointer;
     // background-color: #ffffff0e;
     transition: background-color 0.5s linear;

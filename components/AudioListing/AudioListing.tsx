@@ -70,7 +70,10 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
   return (
     <div className={css["audio-listing"]}>
       <div>
-        <Button onClick={() => toggleFavorite(id)}>
+        <Button
+          onClick={() => toggleFavorite(id)}
+          style={{ marginTop: "-5px" }}
+        >
           <Icon
             name={"Favorite"}
             size={"sm"}
