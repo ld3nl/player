@@ -47,7 +47,8 @@ export const useFilteredPosts = (posts: Post[], favoriteItems: number[]) => {
   const filterPosts = (words: string[]): void => {
     setFilteredPosts(
       posts.filter((post) => {
-        const title = post.title.rendered.toLowerCase();
+        const title =
+          post.title.toLowerCase() || post.title?.rendered?.toLowerCase();
         return (
           words.length > 0 &&
           words.every(
