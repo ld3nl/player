@@ -8,9 +8,10 @@ import css from "./AudioListing.module.scss";
 
 type Props = {
   src: string;
-  id: string;
+  id: any;
   title: string;
   date: string;
+  favoriteCallback?: (id: string) => void;
 };
 
 type Progress = {
@@ -18,7 +19,13 @@ type Progress = {
   duration: number;
 };
 
-const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
+const AudioPlayer: React.FC<Props> = ({
+  src,
+  title,
+  date,
+  id,
+  favoriteCallback,
+}) => {
   const [progress, setProgress] = useState<Progress>({
     playedSeconds: 0,
     duration: 0,
@@ -63,6 +70,8 @@ const AudioPlayer: React.FC<Props> = ({ src, title, date, id }) => {
       favoriteItems.push(id);
       localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
     }
+
+    if (typeof favoriteCallback === "function") favoriteCallback(id);
 
     setFavorite(!isFavorite);
   };

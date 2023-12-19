@@ -38,17 +38,44 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
     DEFAULT_NUMBER_OF_POSTS
   );
 
+  const [showFav, setShowFav] = useState<boolean>(false);
+  const [favCTATriggered, setFavCTATriggered] = useState<boolean>(false);
+
   const { globalContext } = useContext(GlobalContext);
 
-  const [favoriteItems, setFavoriteItems] = useState<number[]>(
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("favoriteItems") || "[]")
-      : []
+  const [favoriteItems, setFavoriteItems] = useState<number[]>([]);
+
+  const { filteredPosts, filterPosts } = useFilteredPosts(
+    posts,
+    showFav ? favoriteItems : []
   );
 
-  const { filteredPosts, filterPosts } = useFilteredPosts(posts, favoriteItems);
+  useEffect(() => {
+    // Function to update favoriteItems from localStorage
+    const updateFavorites = () => {
+      const storedFavorites = localStorage.getItem("favoriteItems");
+      if (storedFavorites) {
+        setFavoriteItems(JSON.parse(storedFavorites));
+      } else {
+        setFavoriteItems([]); // Reset to empty if nothing is found in localStorage
+      }
+    };
 
-  const [showFavorites, setShowFavorites] = useState(false);
+    // Call once to set initial state
+    updateFavorites();
+
+    // Optional: Set up a listener for changes in localStorage
+    window.addEventListener("storage", (event) => {
+      if (event.key === "favoriteItems") {
+        updateFavorites();
+      }
+    });
+
+    // Cleanup listener
+    return () => {
+      window.removeEventListener("storage", updateFavorites);
+    };
+  }, [showFav, favCTATriggered]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,15 +92,6 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  useEffect(() => {
-    setShowFavorites(favoriteItems.length > 0);
-  }, [favoriteItems]);
-
-  const handleShowFavoritesToggle = useCallback(() => {
-    setShowFavorites((showFavorites) => !showFavorites);
-    setFavoriteItems((favoriteItems) => (showFavorites ? [] : favoriteItems));
-  }, [setShowFavorites, setFavoriteItems, showFavorites]);
 
   return (
     <>
@@ -95,16 +113,14 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             defaultValue={numberOfPosts}
             onChange={(e) => setNumberOfPosts(Number(e.target.value))}
           />
-          <Button className={css.button} onClick={handleShowFavoritesToggle}>
+          <Button className={css.button} onClick={() => setShowFav(!showFav)}>
             <Icon
               name="Favorite"
               size="sm"
-              variation={showFavorites ? "active" : "default"}
+              variation={showFav ? "active" : "default"}
             />
             <span>-</span>
-            <span>
-              {!showFavorites ? "Show favorite items" : "Show all items"}
-            </span>
+            <span>{!showFav ? "Show favorite items" : "Show all items"}</span>
           </Button>
         </div>
 
@@ -115,7 +131,6 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             type="text"
             placeholder="Search"
             onChange={(e) => {
-              if (showFavorites) setFavoriteItems([]);
               const searchString = e.target.value;
               const searchTerms = searchString.split(" ");
               filterPosts(searchTerms);
@@ -134,6 +149,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
                   id={id}
+                  favoriteCallback={(id) => {
+                    setFavCTATriggered(!favCTATriggered);
+                  }}
                 />
               </div>
             );

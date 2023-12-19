@@ -2,20 +2,17 @@ import { useEffect, useState, useCallback } from "react";
 
 export const useLockScroll = (isOpen: boolean): void => {
   useEffect(() => {
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isOpen) {
-        e.preventDefault();
-      }
-    };
+    if (typeof document === "undefined") return;
 
+    const originalStyle = document.body.style.overflow;
+    const handleTouchMove = (e: TouchEvent) => isOpen && e.preventDefault();
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isOpen && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
         e.preventDefault();
       }
     };
 
-    // Add listeners to lock scroll
-    if (isOpen && typeof document !== "undefined") {
+    if (isOpen) {
       document.body.style.overflow = "hidden";
       document.addEventListener("touchmove", handleTouchMove, {
         passive: false,
@@ -23,9 +20,8 @@ export const useLockScroll = (isOpen: boolean): void => {
       document.addEventListener("keydown", handleKeyDown);
     }
 
-    // Remove listeners to unlock scroll
     return () => {
-      document.body.style.overflow = "visible";
+      document.body.style.overflow = originalStyle;
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("keydown", handleKeyDown);
     };
@@ -34,9 +30,10 @@ export const useLockScroll = (isOpen: boolean): void => {
 
 export default useLockScroll;
 
+// Improved Post type (example)
 type Post = {
-  id: any;
-  audioUrl: any;
+  id: number;
+  audioUrl: string;
   title: any;
   date: string;
 };
