@@ -41,13 +41,16 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const [showFav, setShowFav] = useState<boolean>(false);
   const [favCTATriggered, setFavCTATriggered] = useState<boolean>(false);
 
+  const [searchTerms, setSearchTerms] = useState<string[]>([]);
+
   const { globalContext } = useContext(GlobalContext);
 
   const [favoriteItems, setFavoriteItems] = useState<number[]>([]);
 
   const { filteredPosts, filterPosts } = useFilteredPosts(
     posts,
-    showFav ? favoriteItems : []
+    showFav ? favoriteItems : [],
+    searchTerms
   );
 
   useEffect(() => {
@@ -93,6 +96,17 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
     };
   }, []);
 
+  // Input Handler
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target) return;
+
+    const searchString = e.target.value.trim();
+    const searchTerms = searchString.split(" ").filter((term) => term);
+    console.log(searchTerms);
+    setSearchTerms(searchTerms);
+    filterPosts(searchTerms);
+  };
+
   return (
     <>
       <Head>
@@ -130,11 +144,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             id="search"
             type="text"
             placeholder="Search"
-            onChange={(e) => {
-              const searchString = e.target.value;
-              const searchTerms = searchString.split(" ");
-              filterPosts(searchTerms);
-            }}
+            onChange={handleSearchChange}
           />
         </div>
 
