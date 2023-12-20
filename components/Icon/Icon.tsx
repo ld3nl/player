@@ -1,6 +1,5 @@
 import * as React from "react";
 import { getSVG, SVGProps } from "./getIcon";
-import css from "./Icon.module.scss";
 
 type SVGIconName =
   | "Play"
@@ -29,25 +28,19 @@ const Icon: React.FunctionComponent<IconProps> = ({
   if (name === "Close") viewBox = "0 0 16 16";
 
   return (
-    <span
+    <svg
       className={[
-        css.Icon,
-        css[size],
-        css[name],
-        css[variation],
         className,
+        size === "sm" ? "w-8 h-8" : "w-10 h-10",
+        variation === "active" ? "fill-purple-600" : "fill-blue-100 ",
       ].join(" ")}
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      viewBox={viewBox}
+      preserveAspectRatio="xMidYMid meet"
     >
-      <svg
-        className={`${className}`}
-        xmlns="http://www.w3.org/2000/svg"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-        viewBox={viewBox}
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {getSVG(svgProps)}
-      </svg>
-    </span>
+      {getSVG(svgProps)}
+    </svg>
   );
 };
 

@@ -13,8 +13,6 @@ import { useFilteredPosts } from "../lib/hooks";
 
 import { GlobalContext } from "./_app";
 
-import css from "../styles/Home.module.scss";
-
 type Post = {
   id: number;
   audioUrl: string;
@@ -118,16 +116,19 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={css.main}>
-        <div className={css["input-container"]}>
-          <label htmlFor="numberOfPosts">Number of posts:</label>
-          <input
-            id="numberOfPosts"
-            type="number"
-            defaultValue={numberOfPosts}
-            onChange={(e) => setNumberOfPosts(Number(e.target.value))}
-          />
-          <Button className={css.button} onClick={() => setShowFav(!showFav)}>
+      <div className="flex flex-col h-full">
+        <div className="dark:bg-gray-700 p-3 flex">
+          <label htmlFor="numberOfPosts">
+            <span className="text-white">Number of posts:</span>
+            <input
+              className="form-input mt-1 block w-20"
+              id="numberOfPosts"
+              type="number"
+              defaultValue={numberOfPosts}
+              onChange={(e) => setNumberOfPosts(Number(e.target.value))}
+            />
+          </label>
+          <Button onClick={() => setShowFav(!showFav)}>
             <Icon
               name="Favorite"
               size="sm"
@@ -138,23 +139,26 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
           </Button>
         </div>
 
-        <div className={css["input-container"]}>
-          <label htmlFor="search">Search:</label>
-          <input
-            id="search"
-            type="text"
-            placeholder="Search"
-            onChange={handleSearchChange}
-          />
+        <div className="sticky top-0 z-50 dark:bg-gray-200 p-3">
+          <label className="block">
+            <span className="text-gray-700">Search:</span>
+            <input
+              className="form-input mt-1 block w-full"
+              id="search"
+              type="text"
+              placeholder="Search"
+              onChange={handleSearchChange}
+            />
+          </label>
         </div>
+        <div className="mt-auto w-100 text-gray-900 bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          {filteredPosts &&
+            filteredPosts.slice(0, numberOfPosts).map((post, i) => {
+              const { audioUrl, title, date, id } = post;
 
-        {filteredPosts &&
-          filteredPosts.slice(0, numberOfPosts).map((post, i) => {
-            const { audioUrl, title, date, id } = post;
-
-            return (
-              <div key={`item-${i}`}>
+              return (
                 <AudioListing
+                  key={`item-${i}`}
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
@@ -163,9 +167,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                     setFavCTATriggered(!favCTATriggered);
                   }}
                 />
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
 
         <MainPlayer {...globalContext.selectedItem} />
       </div>

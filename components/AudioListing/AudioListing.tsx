@@ -4,7 +4,6 @@ import { GlobalContext } from "../../pages/_app";
 
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
-import css from "./AudioListing.module.scss";
 
 type Props = {
   src: string;
@@ -77,22 +76,18 @@ const AudioPlayer: React.FC<Props> = ({
   };
 
   return (
-    <div className={css["audio-listing"]}>
-      <div>
-        <Button
-          onClick={() => toggleFavorite(id)}
-          style={{ marginTop: "-5px" }}
-        >
-          <Icon
-            name={"Favorite"}
-            size={"sm"}
-            variation={favorite ? "active" : "default"}
-          />
-        </Button>
-      </div>
+    <div className="relative inline-flex items-center w-full px-4 py-2 text-sm font-medium border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white w-100">
+      <Button onClick={() => toggleFavorite(id)}>
+        <Icon
+          className="w-3 h-3 me-2.5"
+          name={"Favorite"}
+          size={"sm"}
+          variation={favorite ? "active" : "default"}
+        />
+      </Button>
 
       <div
-        className={css.listing}
+        className="w-full"
         onClick={() => {
           console.log({ selectedItem: { title, date, src, id } });
           setGlobalContext((prev) => ({
@@ -103,18 +98,27 @@ const AudioPlayer: React.FC<Props> = ({
       >
         {title && <h2>{he.decode(title)}</h2>}
 
-        <p>{publishDate}</p>
+        <p className="text-xs font-small text-slate-300 mb-2">{publishDate}</p>
 
         {progress.playedSeconds != 0 && (
-          <div className={css["progress-bar"]}>
+          <div>
             <div>
-              <progress
-                className={css["progress"]}
+              {/* <progress
                 value={progress.playedSeconds}
                 max={progress.duration}
-              />
+              /> */}
+              <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-200">
+                <div
+                  className="bg-purple-600 h-1.5 rounded-full dark:bg-purple-500"
+                  style={{
+                    width: `${
+                      progress.playedSeconds / (progress.duration / 100)
+                    }%`,
+                  }}
+                ></div>
+              </div>
             </div>
-            <span className={css["duration"]}>
+            <span className="text-xs font-small text-slate-300 mb-2">
               {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}
               s left
             </span>

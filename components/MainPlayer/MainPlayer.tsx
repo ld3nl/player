@@ -10,7 +10,6 @@ import ReactPlayer from "react-player";
 
 import { Duration } from "./Duration";
 
-import css from "./MainPlayer.module.scss";
 import img from "@/public/P1080841.jpg";
 
 interface Props {
@@ -224,18 +223,28 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   return (
     <>
-      <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
-        <div className={css.top}>
-          <button className={css["close-button"]} onClick={handleClose}>
-            <Icon className={css.specialIcon} name={"Close"} />
+      <div
+        className={[
+          "fixed top-0 left-0 w-full h-full bg-black z-50",
+          isOpen ? "block" : "hidden",
+        ].join(" ")}
+      >
+        <div className="absolute top-0 left-0 w-full h-25 bg-black bg-opacity-50 z-50">
+          <button
+            className="absolute top-0 right-0 p-3 text-white"
+            onClick={handleClose}
+          >
+            <Icon name={"Close"} />
           </button>
         </div>
-        <div className={css.artWork}>
-          <Image className={css.image} src={img} alt={"sone"} />
+        <div>
+          <Image
+            src={img}
+            alt={"Nature Beach"}
+            className="top-1/2 left-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+          />
         </div>
-        {duration !== 0 && (
-          <span className={css.title}>{title ? he.decode(title) : ""}</span>
-        )}
+        {duration !== 0 && <span>{title ? he.decode(title) : ""}</span>}
 
         {isSSR ? null : (
           <ReactPlayer
@@ -268,7 +277,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         )}
 
         {duration !== 0 && (
-          <div className={css.Progress}>
+          <div>
             {/* <input
               type="range"
               min={0}
@@ -281,20 +290,17 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               onMouseUp={handleSeekMouseUp}
               // onTouchEnd={handleSeekTouchEnd}
             /> */}
-            <div className={css.progressBar}>
+            <div>
               <ReactSlider
                 value={played * 100}
                 step={0.000001}
-                className={css["horizontal-slider"]}
-                thumbClassName={css["example-thumb"]}
-                trackClassName={css["example-track"]}
                 // onMouseDown={handleSeekMouseDown}
                 onChange={(e) => handleSeekChange(e / 100)}
                 onAfterChange={(e) => handleSeekMouseUp(e / 100)}
               />
             </div>
 
-            <div className={css.Duration}>
+            <div>
               <Duration seconds={duration * played} />
               <Duration seconds={duration * (1 - played)} />
             </div>
@@ -302,22 +308,16 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         )}
 
         {duration !== 0 && (
-          <div className={css.audio}>
-            <div className={css.actionButtons}>
-              <button
-                className={css.sm}
-                onClick={() => handleSeekTo("backward", 15)}
-              >
+          <div>
+            <div>
+              <button onClick={() => handleSeekTo("backward", 15)}>
                 <Icon name={"BackwardRewind"} size={"sm"} />
               </button>
 
               <button onClick={handlePlayPause}>
                 <Icon name={playing ? "Pause" : "Play"} />
               </button>
-              <button
-                className={css.sm}
-                onClick={() => handleSeekTo("forward", 15)}
-              >
+              <button onClick={() => handleSeekTo("forward", 15)}>
                 <Icon name={"ForwardRewind"} size={"sm"} />
               </button>
             </div>
@@ -325,11 +325,8 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         )}
 
         {duration !== 0 && (
-          <div className={css.foot}>
-            <button
-              className={[css.sm, css.button].join(" ")}
-              onClick={() => toggleFavorite(id)}
-            >
+          <div>
+            <button onClick={() => toggleFavorite(id)}>
               <Icon
                 name={"Favorite"}
                 size={"sm"}
@@ -340,10 +337,19 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         )}
 
         {duration === 0 && (
-          <div className={css["loader"]}>
-            <div className={css["dot"]}></div>
-            <div className={css["dot"]}></div>
-            <div className={css["dot"]}></div>
+          <div className="flex">
+            <span className="relative flex h-10 w-10">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 "></span>
+              <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+            </span>
+            <span className="relative flex h-10 w-10">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 delay-100"></span>
+              <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+            </span>
+            <span className="relative flex h-10 w-10">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 delay-200"></span>
+              <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+            </span>
           </div>
         )}
       </div>
