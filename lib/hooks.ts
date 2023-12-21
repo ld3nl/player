@@ -49,7 +49,7 @@ type Post = {
 export const useFilteredPosts = (
   posts: Post[],
   favoriteItems: number[],
-  searchArray: string[]
+  searchArray: string[],
 ) => {
   // State to store the filtered list of posts.
   const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
@@ -74,7 +74,7 @@ export const useFilteredPosts = (
         const title = (post.title || post.title?.rendered || "").toLowerCase();
 
         const isIncluded = words.some((word) =>
-          title.includes(word.toLowerCase())
+          title.includes(word.toLowerCase()),
         );
 
         // Debug: Log each post's title and if it matches the filter
@@ -89,7 +89,7 @@ export const useFilteredPosts = (
       // all of the search words.
       setFilteredPosts(newFilteredPosts);
     },
-    [posts]
+    [posts],
   );
 
   /**

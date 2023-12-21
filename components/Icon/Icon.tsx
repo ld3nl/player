@@ -33,7 +33,7 @@ const Icon: React.FunctionComponent<IconProps> = ({
     <svg
       className={[
         className,
-        size === "sm" ? "w-8 h-8" : "w-10 h-10",
+        size === "sm" ? "h-8 w-8" : "h-10 w-10",
         variation === "active"
           ? customVariation.active
           : customVariation.default,

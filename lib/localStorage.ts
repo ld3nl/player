@@ -5,7 +5,7 @@ type ValueSetter<T> = T | ((value: T) => T);
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-  useLocalStorage = true
+  useLocalStorage = true,
 ): [T, (value: ValueSetter<T>) => void] {
   if (typeof key !== "string") {
     throw new Error("The 'key' parameter must be a string.");

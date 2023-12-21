@@ -61,7 +61,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     setFavorite(favoriteItems.includes(id));
@@ -126,7 +126,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const toggleFavorite = (id: any) => {
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     const isFavorite = favoriteItems.includes(id);
@@ -223,7 +223,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
       localStorage.setItem(
         `${id}-progress`,
-        JSON.stringify({ playedSeconds, duration, favorite })
+        JSON.stringify({ playedSeconds, duration, favorite }),
       );
     }
   };
@@ -245,31 +245,31 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div
           className={[
             "flex flex-col items-center justify-center",
-            "backdrop-filter backdrop-blur-lg bg-black bg-opacity-50 z-50",
-            "fixed top-0 left-0 w-full h-full",
+            "z-50 bg-black bg-opacity-50 backdrop-blur-lg backdrop-filter",
+            "fixed left-0 top-0 h-full w-full",
             "transition-all duration-500 ease-in-out",
             isOpen && !isAnimatingOut
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0",
           ].join(" ")}
         >
-          <div className="absolute top-0 left-0 w-full h-25 bg-black bg-opacity-50 z-50">
+          <div className="h-25 absolute left-0 top-0 z-50 w-full bg-black bg-opacity-50">
             <button
-              className="absolute top-0 right-0 p-3 text-white"
+              className="absolute right-0 top-0 p-3 text-white"
               onClick={handleClose}
             >
               <Icon name={"Close"} />
             </button>
           </div>
-          <div className="flex w-96 mx-auto">
+          <div className="mx-auto flex w-96">
             <Image
               src={img}
               alt={"Nature Beach"}
-              className="w-full h-auto object-cover"
+              className="h-auto w-full object-cover"
             />
           </div>
           {duration !== 0 && (
-            <span className="block text-sm text-gray-200 my-3 text-center">
+            <span className="my-3 block text-center text-sm text-gray-200">
               {title ? he.decode(title) : ""}
             </span>
           )}
@@ -305,20 +305,20 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           )}
 
           {duration !== 0 && (
-            <div className="space-y-2 w-full">
+            <div className="w-full space-y-2">
               <div className="w-full">
                 <ReactSlider
                   value={played * 100}
                   step={0.000001}
                   onChange={(e) => handleSeekChange(e / 100)}
                   onAfterChange={(e) => handleSeekMouseUp(e / 100)}
-                  className="h-1 bg-gray-300 rounded-full cursor-pointer mx-10"
+                  className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
                   thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
                   trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
                 />
               </div>
 
-              <div className="flex justify-between text-xs text-gray-400 mx-10">
+              <div className="mx-10 flex justify-between text-xs text-gray-400">
                 <Duration seconds={duration * played} />
                 <Duration seconds={duration * (1 - played)} />
               </div>
@@ -326,25 +326,25 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           )}
 
           {duration !== 0 && (
-            <div className="flex justify-center items-center p-4">
+            <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => handleSeekTo("backward", 15)}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"BackwardRewind"} size={"sm"} />
                 </button>
 
                 <button
                   onClick={handlePlayPause}
-                  className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600 hover:bg-purple-700 text-white mx-2"
+                  className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={playing ? "Pause" : "Play"} />
                 </button>
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"ForwardRewind"} size={"sm"} />
                 </button>
@@ -353,10 +353,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           )}
 
           {duration !== 0 && (
-            <div className="flex items-center justify-center mt-2">
+            <div className="mt-2 flex items-center justify-center">
               <button
                 onClick={() => toggleFavorite(id)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
                   name={"Favorite"}
@@ -374,16 +374,16 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           {duration === 0 && (
             <div className="flex">
               <span className="relative flex h-10 w-10">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 "></span>
-                <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 "></span>
+                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
               </span>
               <span className="relative flex h-10 w-10">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 delay-100"></span>
-                <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 delay-100"></span>
+                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
               </span>
               <span className="relative flex h-10 w-10">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 delay-200"></span>
-                <span className="relative inline-flex rounded-full h-10 w-10 bg-sky-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 delay-200"></span>
+                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
               </span>
             </div>
           )}

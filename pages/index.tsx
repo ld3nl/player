@@ -33,7 +33,7 @@ const DEFAULT_NUMBER_OF_POSTS = 12;
 
 export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
-    DEFAULT_NUMBER_OF_POSTS
+    DEFAULT_NUMBER_OF_POSTS,
   );
 
   const [showFav, setShowFav] = useState<boolean>(false);
@@ -48,7 +48,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const { filteredPosts, filterPosts } = useFilteredPosts(
     posts,
     showFav ? favoriteItems : [],
-    searchTerms
+    searchTerms,
   );
 
   useEffect(() => {
@@ -116,9 +116,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex flex-col h-full">
-        <div className="flex sticky top-0 z-50 dark:bg-gray-200 p-3">
-          <label className="block mx-3">
+      <div className="flex h-full flex-col">
+        <div className="sticky top-0 z-50 flex p-3 dark:bg-gray-200">
+          <label className="mx-3 block">
             <span className="text-gray-700">Number of posts:</span>
             <input
               className="form-input mt-1 block w-20"
@@ -128,7 +128,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
               onChange={(e) => setNumberOfPosts(Number(e.target.value))}
             />
           </label>
-          <label className="block mx-3">
+          <label className="mx-3 block">
             <span className="text-gray-700">Search:</span>
             <input
               className="form-input mt-1 block w-full"
@@ -139,9 +139,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             />
           </label>
 
-          <div className="flex justify-center mx-3">
+          <div className="mx-3 flex justify-center">
             <Button
-              className="form-input relative w-full flex items-center justify-center mt-auto pl-9"
+              className="form-input relative mt-auto flex w-full items-center justify-center pl-9"
               onClick={() => setShowFav(!showFav)}
             >
               <Icon
@@ -160,7 +160,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             </Button>
           </div>
         </div>
-        <div className="w-100 text-gray-900 bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <div className="w-100 border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {
               const { audioUrl, title, date, id } = post;
@@ -213,7 +213,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       const audioUrl = match
         ? match[1].replace(
             /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-            ""
+            "",
           )
         : "";
 
@@ -223,7 +223,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
         title: title.rendered,
         date,
       };
-    })
+    }),
   );
 
   const data = {
