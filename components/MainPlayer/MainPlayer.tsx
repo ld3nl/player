@@ -225,8 +225,10 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     <>
       <div
         className={[
-          "fixed top-0 left-0 w-full h-full bg-black z-50",
-          isOpen ? "block" : "hidden",
+          "backdrop-filter backdrop-blur-lg bg-black bg-opacity-50 z-50",
+          "fixed top-0 left-0 w-full h-full",
+          "transition-all duration-500 ease-in-out",
+          isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0",
         ].join(" ")}
       >
         <div className="absolute top-0 left-0 w-full h-25 bg-black bg-opacity-50 z-50">

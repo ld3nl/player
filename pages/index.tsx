@@ -117,9 +117,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex flex-col h-full">
-        <div className="dark:bg-gray-700 p-3 flex">
-          <label htmlFor="numberOfPosts">
-            <span className="text-white">Number of posts:</span>
+        <div className="flex sticky top-0 z-50 dark:bg-gray-200 p-3">
+          <label className="block mx-3">
+            <span className="text-gray-700">Number of posts:</span>
             <input
               className="form-input mt-1 block w-20"
               id="numberOfPosts"
@@ -128,19 +128,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
               onChange={(e) => setNumberOfPosts(Number(e.target.value))}
             />
           </label>
-          <Button onClick={() => setShowFav(!showFav)}>
-            <Icon
-              name="Favorite"
-              size="sm"
-              variation={showFav ? "active" : "default"}
-            />
-            <span>-</span>
-            <span>{!showFav ? "Show favorite items" : "Show all items"}</span>
-          </Button>
-        </div>
-
-        <div className="sticky top-0 z-50 dark:bg-gray-200 p-3">
-          <label className="block">
+          <label className="block mx-3">
             <span className="text-gray-700">Search:</span>
             <input
               className="form-input mt-1 block w-full"
@@ -150,8 +138,29 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
               onChange={handleSearchChange}
             />
           </label>
+
+          <div className="flex justify-center mx-3">
+            <Button
+              className="form-input relative w-full flex items-center justify-center mt-auto pl-9"
+              onClick={() => setShowFav(!showFav)}
+            >
+              <Icon
+                className="absolute left-1"
+                name="Favorite"
+                size="sm"
+                variation={showFav ? "active" : "default"}
+                customVariation={{
+                  active: "fill-purple-600",
+                  default: "fill-white stroke-purple-600 stroke-2",
+                }}
+              />
+              <span className="font-small">
+                {!showFav ? "Show Favorite Items" : "Show All Items"}
+              </span>
+            </Button>
+          </div>
         </div>
-        <div className="mt-auto w-100 text-gray-900 bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <div className="w-100 text-gray-900 bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {
               const { audioUrl, title, date, id } = post;

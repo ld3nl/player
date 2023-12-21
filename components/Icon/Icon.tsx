@@ -14,6 +14,7 @@ interface IconProps {
   name: SVGIconName;
   size?: "sm" | "md";
   variation?: "active" | "default";
+  customVariation?: { active: string; default: string };
 }
 
 const Icon: React.FunctionComponent<IconProps> = ({
@@ -21,6 +22,7 @@ const Icon: React.FunctionComponent<IconProps> = ({
   name,
   size = "md",
   variation = "default",
+  customVariation = { active: "fill-purple-600", default: "fill-blue-100" },
 }) => {
   const svgProps: SVGProps = { name };
   let viewBox = "0 0 120 120";
@@ -32,7 +34,9 @@ const Icon: React.FunctionComponent<IconProps> = ({
       className={[
         className,
         size === "sm" ? "w-8 h-8" : "w-10 h-10",
-        variation === "active" ? "fill-purple-600" : "fill-blue-100 ",
+        variation === "active"
+          ? customVariation.active
+          : customVariation.default,
       ].join(" ")}
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
