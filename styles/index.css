@@ -7,3 +7,7 @@
     clip-path: inset(0.6px);
   }
 }
+
+.bg-track-custom-1 {
+    background-color: white;
+}
