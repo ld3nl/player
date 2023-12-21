@@ -29,7 +29,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
-  const [url, setUrl] = useState(null);
+  // const [url, setUrl] = useState(null);
   const [pip, setPip] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [controls, setControls] = useState(false);
@@ -38,7 +38,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const [muted, setMuted] = useState(false);
   const [played, setPlayed] = useState(0);
 
-  const [loaded, setLoaded] = useState<number | boolean>(0);
+  // const [loaded, setLoaded] = useState<number | boolean>(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [loop, setLoop] = useState(false);
@@ -51,7 +51,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [audioIsLoading, setAudioIsLoading] = useState(true);
+  // const [audioIsLoading, setAudioIsLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
 
   const { setGlobalContext } = useContext(GlobalContext);
@@ -59,7 +59,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   useLockScroll(isOpen);
 
   useEffect(() => {
-    const storedProgress = localStorage.getItem(`${id}-progress`);
+    // const storedProgress = localStorage.getItem(`${id}-progress`);
     const favoriteItems = JSON.parse(
       localStorage.getItem("favoriteItems") || "[]",
     );
@@ -89,7 +89,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
       }));
 
       // Reset other states
-      setUrl(null);
+      // setUrl(null);
       setPip(false);
       setPlaying(true);
       setControls(false);
@@ -97,7 +97,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
       setVolume(0.8);
       setMuted(false);
       setPlayed(0);
-      setLoaded(0);
+      // setLoaded(0);
       setDuration(0);
       setPlaybackRate(1.0);
       setLoop(false);
@@ -165,7 +165,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handleStop = () => {
-    setUrl(null);
+    // setUrl(null);
     setPlaying(false);
   };
 
@@ -179,9 +179,9 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setPlaying(!playing);
   };
 
-  const handleSeekMouseDown = (e: any) => {
-    setSeeking(true);
-  };
+  // const handleSeekMouseDown = (e: any) => {
+  //   setSeeking(true);
+  // };
 
   const handleSeekChange = (e: any) => {
     const newValue = e.target?.value || e;
@@ -191,14 +191,14 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   };
 
-  const handleSeekTouchStart = (e: any) => {
-    setSeeking(true);
-  };
+  // const handleSeekTouchStart = (e: any) => {
+  //   setSeeking(true);
+  // };
 
-  const handleSeekTouchEnd = (e: any) => {
-    setSeeking(false);
-    audioRef.current?.seekTo(parseFloat(e.target.value));
-  };
+  // const handleSeekTouchEnd = (e: any) => {
+  //   setSeeking(false);
+  //   audioRef.current?.seekTo(parseFloat(e.target.value));
+  // };
 
   const handleSeekMouseUp = (e: any) => {
     const newValue = e.target?.value || e;
@@ -216,9 +216,9 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   }) => {
     // We only want to update time slider if we are not currently seeking
     if (!seeking) {
-      const { loaded, played, playedSeconds } = updatedState;
+      const { played, playedSeconds } = updatedState;
 
-      setLoaded(loaded);
+      // setLoaded(loaded);
       setPlayed(played);
 
       localStorage.setItem(
@@ -245,7 +245,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         <div
           className={[
             "flex flex-col items-center justify-center",
-            "z-50 bg-black bg-opacity-50 backdrop-blur-lg backdrop-filter",
+            "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
             "fixed left-0 top-0 h-full w-full",
             "transition-all duration-500 ease-in-out",
             isOpen && !isAnimatingOut
@@ -253,7 +253,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               : "translate-y-full opacity-0",
           ].join(" ")}
         >
-          <div className="h-25 absolute left-0 top-0 z-50 w-full bg-black bg-opacity-50">
+          <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
             <button
               className="absolute right-0 top-0 p-3 text-white"
               onClick={handleClose}
@@ -279,7 +279,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               ref={audioRef}
               style={{ display: "none" }}
               url={src}
-              onReady={() => setAudioIsLoading(true)}
+              // onReady={() => setAudioIsLoading(true)}
               pip={pip}
               playing={playing}
               controls={controls}

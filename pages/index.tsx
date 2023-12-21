@@ -140,7 +140,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             "sticky top-0 z-50 flex flex-col p-3 md:flex-row",
             "transition duration-300 ease-in-out",
             isScrolled
-              ? "bg-white bg-opacity-50 shadow-lg backdrop-blur-sm backdrop-filter"
+              ? "bg-white/50 shadow-lg backdrop-blur-sm backdrop-filter"
               : "dark:bg-gray-200",
           ].join(" ")}
         >
