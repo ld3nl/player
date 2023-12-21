@@ -1,5 +1,4 @@
 import React, { ButtonHTMLAttributes } from "react";
-import css from "./Button.module.scss";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   className?: string;
@@ -7,7 +6,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const Button: React.FC<ButtonProps> = ({ className, children, ...props }) => {
   return (
-    <button className={[css.button, className].join(" ")} {...props}>
+    <button className={[className].join(" ")} {...props}>
       {children}
     </button>
   );

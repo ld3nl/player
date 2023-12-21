@@ -27,7 +27,7 @@ interface Post {
 export const getAllPostsFromServer = async (
   term: number | null = null,
   per_page: number | null = null,
-  offset: number | null = null
+  offset: number | null = null,
 ): Promise<Post[]> => {
   try {
     const response: AxiosResponse<Post[]> = await axios.get<Post[]>(
@@ -38,7 +38,7 @@ export const getAllPostsFromServer = async (
           per_page: per_page,
           offset: offset,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {

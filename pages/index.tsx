@@ -13,8 +13,6 @@ import { useFilteredPosts } from "../lib/hooks";
 
 import { GlobalContext } from "./_app";
 
-import css from "../styles/Home.module.scss";
-
 type Post = {
   id: number;
   audioUrl: string;
@@ -35,7 +33,7 @@ const DEFAULT_NUMBER_OF_POSTS = 12;
 
 export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
-    DEFAULT_NUMBER_OF_POSTS
+    DEFAULT_NUMBER_OF_POSTS,
   );
 
   const [showFav, setShowFav] = useState<boolean>(false);
@@ -50,7 +48,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const { filteredPosts, filterPosts } = useFilteredPosts(
     posts,
     showFav ? favoriteItems : [],
-    searchTerms
+    searchTerms,
   );
 
   useEffect(() => {
@@ -118,43 +116,70 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={css.main}>
-        <div className={css["input-container"]}>
-          <label htmlFor="numberOfPosts">Number of posts:</label>
-          <input
-            id="numberOfPosts"
-            type="number"
-            defaultValue={numberOfPosts}
-            onChange={(e) => setNumberOfPosts(Number(e.target.value))}
-          />
-          <Button className={css.button} onClick={() => setShowFav(!showFav)}>
-            <Icon
-              name="Favorite"
-              size="sm"
-              variation={showFav ? "active" : "default"}
+      <div className="flex h-full flex-col">
+        <div className="sticky top-0 z-50 flex flex-col p-3 md:flex-row dark:bg-gray-200">
+          <div className="mx-3 flex flex-col">
+            <label htmlFor="numberOfPosts" className="text-gray-700">
+              <span className="hidden md:inline">Number of posts:</span>
+              <span className="md:hidden">Posts:</span>
+            </label>
+            <input
+              className="form-input mt-1 block w-full md:w-20"
+              id="numberOfPosts"
+              type="number"
+              defaultValue={numberOfPosts}
+              onChange={(e) => setNumberOfPosts(Number(e.target.value))}
             />
-            <span>-</span>
-            <span>{!showFav ? "Show favorite items" : "Show all items"}</span>
-          </Button>
+          </div>
+          <div className="mx-3 mt-3 flex flex-col md:mt-0">
+            <label htmlFor="search" className="text-gray-700">
+              <span className="hidden md:inline">Search:</span>
+              <span className="md:hidden">Search:</span>
+            </label>
+            <input
+              className="form-input mt-1 block w-full"
+              id="search"
+              type="text"
+              placeholder="Search"
+              onChange={handleSearchChange}
+            />
+          </div>
+
+          <div className="mx-3 mt-3 flex justify-center md:mt-0">
+            <Button
+              className="form-input relative mt-auto flex w-full items-center justify-center pl-9"
+              onClick={() => setShowFav(!showFav)}
+            >
+              <Icon
+                className="absolute left-1"
+                name="Favorite"
+                size="sm"
+                variation={showFav ? "active" : "default"}
+                customVariation={{
+                  active: "fill-purple-600",
+                  default: "fill-white stroke-purple-600 stroke-2",
+                }}
+              />
+              <span className="font-small">
+                <span className="hidden md:inline">
+                  {!showFav ? "Show Favorite Items" : "Show All Items"}
+                </span>
+                <span className="md:hidden">
+                  {!showFav ? "Favorites" : "All Items"}
+                </span>
+              </span>
+            </Button>
+          </div>
         </div>
 
-        <div className={css["input-container"]}>
-          <label htmlFor="search">Search:</label>
-          <input
-            id="search"
-            type="text"
-            placeholder="Search"
-            onChange={handleSearchChange}
-          />
-        </div>
+        <div className="w-100 border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          {filteredPosts &&
+            filteredPosts.slice(0, numberOfPosts).map((post, i) => {
+              const { audioUrl, title, date, id } = post;
 
-        {filteredPosts &&
-          filteredPosts.slice(0, numberOfPosts).map((post, i) => {
-            const { audioUrl, title, date, id } = post;
-
-            return (
-              <div key={`item-${i}`}>
+              return (
                 <AudioListing
+                  key={`item-${i}`}
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
@@ -163,9 +188,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                     setFavCTATriggered(!favCTATriggered);
                   }}
                 />
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
 
         <MainPlayer {...globalContext.selectedItem} />
       </div>
@@ -200,7 +225,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       const audioUrl = match
         ? match[1].replace(
             /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-            ""
+            "",
           )
         : "";
 
@@ -210,7 +235,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
         title: title.rendered,
         date,
       };
-    })
+    }),
   );
 
   const data = {

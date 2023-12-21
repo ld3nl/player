@@ -4,7 +4,6 @@ import { GlobalContext } from "../../pages/_app";
 
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
-import css from "./AudioListing.module.scss";
 
 type Props = {
   src: string;
@@ -33,7 +32,7 @@ const AudioPlayer: React.FC<Props> = ({
   const [favorite, setFavorite] = useState(false);
 
   const [publishDate, setPublishDate] = useState(
-    new Date().toLocaleDateString("en-AU")
+    new Date().toLocaleDateString("en-AU"),
   );
 
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
@@ -41,7 +40,7 @@ const AudioPlayer: React.FC<Props> = ({
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     setFavorite(favoriteItems.includes(id));
@@ -58,7 +57,7 @@ const AudioPlayer: React.FC<Props> = ({
 
   const toggleFavorite = (id: any) => {
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     const isFavorite = favoriteItems.includes(id);
@@ -77,22 +76,18 @@ const AudioPlayer: React.FC<Props> = ({
   };
 
   return (
-    <div className={css["audio-listing"]}>
-      <div>
-        <Button
-          onClick={() => toggleFavorite(id)}
-          style={{ marginTop: "-5px" }}
-        >
-          <Icon
-            name={"Favorite"}
-            size={"sm"}
-            variation={favorite ? "active" : "default"}
-          />
-        </Button>
-      </div>
+    <div className="w-100 relative inline-flex w-full items-center border-b border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:text-white dark:focus:ring-gray-500">
+      <Button onClick={() => toggleFavorite(id)}>
+        <Icon
+          className="me-2.5 h-3 w-3"
+          name={"Favorite"}
+          size={"sm"}
+          variation={favorite ? "active" : "default"}
+        />
+      </Button>
 
       <div
-        className={css.listing}
+        className="w-full"
         onClick={() => {
           console.log({ selectedItem: { title, date, src, id } });
           setGlobalContext((prev) => ({
@@ -103,18 +98,27 @@ const AudioPlayer: React.FC<Props> = ({
       >
         {title && <h2>{he.decode(title)}</h2>}
 
-        <p>{publishDate}</p>
+        <p className="font-small mb-2 text-xs text-slate-300">{publishDate}</p>
 
         {progress.playedSeconds != 0 && (
-          <div className={css["progress-bar"]}>
+          <div>
             <div>
-              <progress
-                className={css["progress"]}
+              {/* <progress
                 value={progress.playedSeconds}
                 max={progress.duration}
-              />
+              /> */}
+              <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-200">
+                <div
+                  className="h-1.5 rounded-full bg-purple-600 dark:bg-purple-500"
+                  style={{
+                    width: `${
+                      progress.playedSeconds / (progress.duration / 100)
+                    }%`,
+                  }}
+                ></div>
+              </div>
             </div>
-            <span className={css["duration"]}>
+            <span className="font-small mb-2 text-xs text-slate-300">
               {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}
               s left
             </span>

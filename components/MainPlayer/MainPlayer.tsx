@@ -10,7 +10,6 @@ import ReactPlayer from "react-player";
 
 import { Duration } from "./Duration";
 
-import css from "./MainPlayer.module.scss";
 import img from "@/public/P1080841.jpg";
 
 interface Props {
@@ -27,6 +26,8 @@ interface Props {
 
 const MainPlayer: FC<Props> = ({ title, src, id }) => {
   const audioRef = useRef<any>(null);
+
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   const [url, setUrl] = useState(null);
   const [pip, setPip] = useState(false);
@@ -60,7 +61,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   useEffect(() => {
     const storedProgress = localStorage.getItem(`${id}-progress`);
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     setFavorite(favoriteItems.includes(id));
@@ -74,42 +75,58 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
   }, [title, src]);
 
+  // useEffect for handling other state updates when the modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (audioRef.current) {
+        handleStop();
+      }
+
+      setGlobalContext((prev) => ({
+        ...prev,
+        isModalActive: false,
+        selectedItem: { title: "", date: "", src: "", id: "" },
+      }));
+
+      // Reset other states
+      setUrl(null);
+      setPip(false);
+      setPlaying(true);
+      setControls(false);
+      setLight(false);
+      setVolume(0.8);
+      setMuted(false);
+      setPlayed(0);
+      setLoaded(0);
+      setDuration(0);
+      setPlaybackRate(1.0);
+      setLoop(false);
+      setSeeking(false);
+    }
+  }, [isOpen]); // Dependency array ensures this runs only when isOpen changes
+
+  const [isDelayingOpen, setIsDelayingOpen] = useState(false);
+
   const handleOpen = () => {
-    setIsOpen(true);
-    setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
+    setIsDelayingOpen(true); // Start delaying
+    setTimeout(() => {
+      setIsOpen(true);
+      setIsDelayingOpen(false); // End delaying
+      setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
+    }, 10); // Short delay, just enough for the browser to render the initial state
   };
 
   const handleClose = () => {
-    setIsOpen(false);
-
-    if (audioRef.current) {
-      handleStop();
-    }
-
-    setGlobalContext((prev) => ({
-      ...prev,
-      isModalActive: false,
-      selectedItem: { title: "", date: "", src: "", id: "" },
-    }));
-
-    setUrl(null);
-    setPip(false);
-    setPlaying(true);
-    setControls(false);
-    setLight(false);
-    setVolume(0.8);
-    setMuted(false);
-    setPlayed(0);
-    setLoaded(0);
-    setDuration(0);
-    setPlaybackRate(1.0);
-    setLoop(false);
-    setSeeking(false);
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsAnimatingOut(false);
+    }, 500); // Duration of the closing animation
   };
 
   const toggleFavorite = (id: any) => {
     const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]"
+      localStorage.getItem("favoriteItems") || "[]",
     );
 
     const isFavorite = favoriteItems.includes(id);
@@ -206,7 +223,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
       localStorage.setItem(
         `${id}-progress`,
-        JSON.stringify({ playedSeconds, duration, favorite })
+        JSON.stringify({ playedSeconds, duration, favorite }),
       );
     }
   };
@@ -224,129 +241,154 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   return (
     <>
-      <div className={[css.MainPlayer, isOpen ? css.open : ""].join(" ")}>
-        <div className={css.top}>
-          <button className={css["close-button"]} onClick={handleClose}>
-            <Icon className={css.specialIcon} name={"Close"} />
-          </button>
-        </div>
-        <div className={css.artWork}>
-          <Image className={css.image} src={img} alt={"sone"} />
-        </div>
-        {duration !== 0 && (
-          <span className={css.title}>{title ? he.decode(title) : ""}</span>
-        )}
-
-        {isSSR ? null : (
-          <ReactPlayer
-            ref={audioRef}
-            style={{ display: "none" }}
-            url={src}
-            onReady={() => setAudioIsLoading(true)}
-            pip={pip}
-            playing={playing}
-            controls={controls}
-            light={light}
-            loop={loop}
-            playbackRate={playbackRate}
-            volume={volume}
-            muted={muted}
-            // onReady={() => console.log('onReady')}
-            // onStart={() => console.log("onStart")}
-            onPlay={handlePlay}
-            // onEnablePIP={this.handleEnablePIP}
-            // onDisablePIP={this.handleDisablePIP}
-            // onPause={this.handlePause}
-            // onBuffer={() => console.log('onBuffer')}
-            // onPlaybackRateChange={this.handleOnPlaybackRateChange}
-            // onSeek={e => console.log('onSeek', e)}
-            // onEnded={this.handleEnded}
-            // onError={e => console.log('onError', e)}
-            onProgress={handleProgress}
-            onDuration={handleDuration}
-          />
-        )}
-
-        {duration !== 0 && (
-          <div className={css.Progress}>
-            {/* <input
-              type="range"
-              min={0}
-              max={0.999999}
-              step="any"
-              value={played}
-              onMouseDown={handleSeekMouseDown}
-              // onTouchStart={handleSeekTouchStart}
-              onChange={handleSeekChange}
-              onMouseUp={handleSeekMouseUp}
-              // onTouchEnd={handleSeekTouchEnd}
-            /> */}
-            <div className={css.progressBar}>
-              <ReactSlider
-                value={played * 100}
-                step={0.000001}
-                className={css["horizontal-slider"]}
-                thumbClassName={css["example-thumb"]}
-                trackClassName={css["example-track"]}
-                // onMouseDown={handleSeekMouseDown}
-                onChange={(e) => handleSeekChange(e / 100)}
-                onAfterChange={(e) => handleSeekMouseUp(e / 100)}
-              />
-            </div>
-
-            <div className={css.Duration}>
-              <Duration seconds={duration * played} />
-              <Duration seconds={duration * (1 - played)} />
-            </div>
-          </div>
-        )}
-
-        {duration !== 0 && (
-          <div className={css.audio}>
-            <div className={css.actionButtons}>
-              <button
-                className={css.sm}
-                onClick={() => handleSeekTo("backward", 15)}
-              >
-                <Icon name={"BackwardRewind"} size={"sm"} />
-              </button>
-
-              <button onClick={handlePlayPause}>
-                <Icon name={playing ? "Pause" : "Play"} />
-              </button>
-              <button
-                className={css.sm}
-                onClick={() => handleSeekTo("forward", 15)}
-              >
-                <Icon name={"ForwardRewind"} size={"sm"} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {duration !== 0 && (
-          <div className={css.foot}>
+      {(isOpen || isAnimatingOut || isDelayingOpen) && (
+        <div
+          className={[
+            "flex flex-col items-center justify-center",
+            "z-50 bg-black bg-opacity-50 backdrop-blur-lg backdrop-filter",
+            "fixed left-0 top-0 h-full w-full",
+            "transition-all duration-500 ease-in-out",
+            isOpen && !isAnimatingOut
+              ? "translate-y-0 opacity-100"
+              : "translate-y-full opacity-0",
+          ].join(" ")}
+        >
+          <div className="h-25 absolute left-0 top-0 z-50 w-full bg-black bg-opacity-50">
             <button
-              className={[css.sm, css.button].join(" ")}
-              onClick={() => toggleFavorite(id)}
+              className="absolute right-0 top-0 p-3 text-white"
+              onClick={handleClose}
             >
-              <Icon
-                name={"Favorite"}
-                size={"sm"}
-                variation={favorite ? "active" : "default"}
-              />
+              <Icon name={"Close"} />
             </button>
           </div>
-        )}
-
-        {duration === 0 && (
-          <div className={css["loader"]}>
-            <div className={css["dot"]}></div>
-            <div className={css["dot"]}></div>
-            <div className={css["dot"]}></div>
+          <div className="mx-auto flex w-96">
+            <Image
+              src={img}
+              alt={"Nature Beach"}
+              className="h-auto w-full object-cover"
+            />
           </div>
-        )}
-      </div>
+          {duration !== 0 && (
+            <span className="my-3 block text-center text-sm text-gray-200">
+              {title ? he.decode(title) : ""}
+            </span>
+          )}
+
+          {isSSR ? null : (
+            <ReactPlayer
+              ref={audioRef}
+              style={{ display: "none" }}
+              url={src}
+              onReady={() => setAudioIsLoading(true)}
+              pip={pip}
+              playing={playing}
+              controls={controls}
+              light={light}
+              loop={loop}
+              playbackRate={playbackRate}
+              volume={volume}
+              muted={muted}
+              // onReady={() => console.log('onReady')}
+              // onStart={() => console.log("onStart")}
+              onPlay={handlePlay}
+              // onEnablePIP={this.handleEnablePIP}
+              // onDisablePIP={this.handleDisablePIP}
+              // onPause={this.handlePause}
+              // onBuffer={() => console.log('onBuffer')}
+              // onPlaybackRateChange={this.handleOnPlaybackRateChange}
+              // onSeek={e => console.log('onSeek', e)}
+              // onEnded={this.handleEnded}
+              // onError={e => console.log('onError', e)}
+              onProgress={handleProgress}
+              onDuration={handleDuration}
+            />
+          )}
+
+          {duration !== 0 && (
+            <div className="w-full space-y-2">
+              <div className="w-full">
+                <ReactSlider
+                  value={played * 100}
+                  step={0.000001}
+                  onChange={(e) => handleSeekChange(e / 100)}
+                  onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+                  className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
+                  thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
+                  trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
+                />
+              </div>
+
+              <div className="mx-10 flex justify-between text-xs text-gray-400">
+                <Duration seconds={duration * played} />
+                <Duration seconds={duration * (1 - played)} />
+              </div>
+            </div>
+          )}
+
+          {duration !== 0 && (
+            <div className="flex items-center justify-center p-4">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => handleSeekTo("backward", 15)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                >
+                  <Icon name={"BackwardRewind"} customSize={"5"} />
+                </button>
+
+                <button
+                  onClick={handlePlayPause}
+                  className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                >
+                  <Icon name={playing ? "Pause" : "Play"} size={"md"} />
+                </button>
+
+                <button
+                  onClick={() => handleSeekTo("forward", 15)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                >
+                  <Icon name={"ForwardRewind"} customSize={"5"} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {duration !== 0 && (
+            <div className="mt-2 flex items-center justify-center">
+              <button
+                onClick={() => toggleFavorite(id)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+              >
+                <Icon
+                  name={"Favorite"}
+                  size={"sm"}
+                  variation={favorite ? "active" : "default"}
+                  customVariation={{
+                    active: "fill-purple-600",
+                    default: "fill-white stroke-purple-600 stroke-2",
+                  }}
+                />
+              </button>
+            </div>
+          )}
+
+          {duration === 0 && (
+            <div className="flex p-10">
+              <span className="relative flex h-5 w-5 ">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
+              </span>
+              <span className="relative mx-3 flex h-5 w-5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-100"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
+              </span>
+              <span className="relative flex h-5 w-5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-200"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 };
