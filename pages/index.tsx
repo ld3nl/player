@@ -51,6 +51,24 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
     searchTerms,
   );
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Event handler for scroll event
+  const handleScroll = () => {
+    const top = window.scrollY < 10;
+    setIsScrolled(!top);
+  };
+
+  // Set up the event listener for scrolling
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   useEffect(() => {
     // Function to update favoriteItems from localStorage
     const updateFavorites = () => {
@@ -117,7 +135,15 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-full flex-col">
-        <div className="sticky top-0 z-50 flex flex-col p-3 md:flex-row dark:bg-gray-200">
+        <div
+          className={[
+            "sticky top-0 z-50 flex flex-col p-3 md:flex-row",
+            "transition duration-300 ease-in-out",
+            isScrolled
+              ? "bg-white bg-opacity-50 shadow-lg backdrop-blur-sm backdrop-filter"
+              : "dark:bg-gray-200",
+          ].join(" ")}
+        >
           <div className="mx-3 flex flex-col">
             <label htmlFor="numberOfPosts" className="text-gray-700">
               <span className="hidden md:inline">Number of posts:</span>
