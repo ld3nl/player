@@ -332,21 +332,21 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"BackwardRewind"} size={"sm"} />
+                  <Icon name={"BackwardRewind"} customSize={"5"} />
                 </button>
 
                 <button
                   onClick={handlePlayPause}
                   className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={playing ? "Pause" : "Play"} />
+                  <Icon name={playing ? "Pause" : "Play"} size={"md"} />
                 </button>
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"ForwardRewind"} size={"sm"} />
+                  <Icon name={"ForwardRewind"} customSize={"5"} />
                 </button>
               </div>
             </div>
