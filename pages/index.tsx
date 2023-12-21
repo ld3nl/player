@@ -117,19 +117,25 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-full flex-col">
-        <div className="sticky top-0 z-50 flex p-3 dark:bg-gray-200">
-          <label className="mx-3 block">
-            <span className="text-gray-700">Number of posts:</span>
+        <div className="sticky top-0 z-50 flex flex-col p-3 md:flex-row dark:bg-gray-200">
+          <div className="mx-3 flex flex-col">
+            <label htmlFor="numberOfPosts" className="text-gray-700">
+              <span className="hidden md:inline">Number of posts:</span>
+              <span className="md:hidden">Posts:</span>
+            </label>
             <input
-              className="form-input mt-1 block w-20"
+              className="form-input mt-1 block w-full md:w-20"
               id="numberOfPosts"
               type="number"
               defaultValue={numberOfPosts}
               onChange={(e) => setNumberOfPosts(Number(e.target.value))}
             />
-          </label>
-          <label className="mx-3 block">
-            <span className="text-gray-700">Search:</span>
+          </div>
+          <div className="mx-3 mt-3 flex flex-col md:mt-0">
+            <label htmlFor="search" className="text-gray-700">
+              <span className="hidden md:inline">Search:</span>
+              <span className="md:hidden">Search:</span>
+            </label>
             <input
               className="form-input mt-1 block w-full"
               id="search"
@@ -137,9 +143,9 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
               placeholder="Search"
               onChange={handleSearchChange}
             />
-          </label>
+          </div>
 
-          <div className="mx-3 flex justify-center">
+          <div className="mx-3 mt-3 flex justify-center md:mt-0">
             <Button
               className="form-input relative mt-auto flex w-full items-center justify-center pl-9"
               onClick={() => setShowFav(!showFav)}
@@ -155,11 +161,17 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                 }}
               />
               <span className="font-small">
-                {!showFav ? "Show Favorite Items" : "Show All Items"}
+                <span className="hidden md:inline">
+                  {!showFav ? "Show Favorite Items" : "Show All Items"}
+                </span>
+                <span className="md:hidden">
+                  {!showFav ? "Favorites" : "All Items"}
+                </span>
               </span>
             </Button>
           </div>
         </div>
+
         <div className="w-100 border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {

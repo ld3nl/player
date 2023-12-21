@@ -372,18 +372,18 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
           )}
 
           {duration === 0 && (
-            <div className="flex">
-              <span className="relative flex h-10 w-10">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 "></span>
-                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
+            <div className="flex p-10">
+              <span className="relative flex h-5 w-5 ">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
               </span>
-              <span className="relative flex h-10 w-10">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 delay-100"></span>
-                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
+              <span className="relative mx-3 flex h-5 w-5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-100"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
               </span>
-              <span className="relative flex h-10 w-10">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75 delay-200"></span>
-                <span className="relative inline-flex h-10 w-10 rounded-full bg-sky-500"></span>
+              <span className="relative flex h-5 w-5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-200"></span>
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
               </span>
             </div>
           )}
