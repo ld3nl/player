@@ -10,7 +10,8 @@ type Props = {
   id: any;
   title: string;
   date: string;
-  favoriteCallback?: (id: string) => void;
+  // eslint-disable-next-line no-unused-vars
+  favoriteCallback?: (id?: string) => void;
 };
 
 type Progress = {
@@ -76,7 +77,7 @@ const AudioPlayer: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-100 relative inline-flex w-full items-center border-b border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:text-white dark:focus:ring-gray-500">
+    <div className="relative inline-flex w-full items-center border-b border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:text-white dark:focus:ring-gray-500">
       <Button onClick={() => toggleFavorite(id)}>
         <Icon
           className="me-2.5 h-3 w-3"
@@ -98,7 +99,7 @@ const AudioPlayer: React.FC<Props> = ({
       >
         {title && <h2>{he.decode(title)}</h2>}
 
-        <p className="font-small mb-2 text-xs text-slate-300">{publishDate}</p>
+        <p className="mb-2 text-xs text-slate-300">{publishDate}</p>
 
         {progress.playedSeconds != 0 && (
           <div>
@@ -118,7 +119,7 @@ const AudioPlayer: React.FC<Props> = ({
                 ></div>
               </div>
             </div>
-            <span className="font-small mb-2 text-xs text-slate-300">
+            <span className="mb-2 text-xs text-slate-300">
               {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}
               s left
             </span>

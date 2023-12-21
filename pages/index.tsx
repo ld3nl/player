@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
@@ -31,7 +31,7 @@ const cache = new LRUCache<string, HomeProps>({
 
 const DEFAULT_NUMBER_OF_POSTS = 12;
 
-export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
+export default function Home({ posts }: HomeProps): JSX.Element {
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS,
   );
@@ -186,7 +186,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                   default: "fill-white stroke-purple-600 stroke-2",
                 }}
               />
-              <span className="font-small">
+              <span>
                 <span className="hidden md:inline">
                   {!showFav ? "Show Favorite Items" : "Show All Items"}
                 </span>
@@ -198,7 +198,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
           </div>
         </div>
 
-        <div className="w-100 border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+        <div className="border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {
               const { audioUrl, title, date, id } = post;
@@ -210,7 +210,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
                   id={id}
-                  favoriteCallback={(id) => {
+                  favoriteCallback={() => {
                     setFavCTATriggered(!favCTATriggered);
                   }}
                 />
@@ -224,7 +224,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   );
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async () => {
   const key = "posts";
   const cachedData = cache.get(key);
 

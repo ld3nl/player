@@ -28,7 +28,6 @@ export function getSVG({ name }: SVGProps) {
           <rect height="44.92" rx="4.2" width="8.68" x="44.66" y="37.54" />
           <rect
             strokeWidth="2px"
-            className="cls-2"
             height="44.92"
             rx="4.2"
             width="8.68"

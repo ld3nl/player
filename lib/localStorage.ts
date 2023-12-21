@@ -1,11 +1,13 @@
 import { useState } from "react";
 
+// eslint-disable-next-line no-unused-vars
 type ValueSetter<T> = T | ((value: T) => T);
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
   useLocalStorage = true,
+  // eslint-disable-next-line no-unused-vars
 ): [T, (value: ValueSetter<T>) => void] {
   if (typeof key !== "string") {
     throw new Error("The 'key' parameter must be a string.");
