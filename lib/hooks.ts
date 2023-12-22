@@ -54,13 +54,6 @@ export const useFilteredPosts = (
   // State to store the filtered list of posts.
   const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
 
-  // Debug: Initial state of posts and favoriteItems
-  console.log("Initial posts:", posts);
-  console.log("Initial favoriteItems:", favoriteItems);
-
-  // Logs the current search terms for debugging purposes.
-  console.log("searchArray", searchArray);
-
   /**
    * Filters posts based on an array of search words.
    * Uses useCallback to memoize the function for performance optimization.
@@ -69,7 +62,6 @@ export const useFilteredPosts = (
    */
   const filterPosts = useCallback(
     (words: string[]): void => {
-      console.log("Filtering posts with words:", words);
       const newFilteredPosts = posts.filter((post) => {
         const title = (post.title || post.title?.rendered || "").toLowerCase();
 
@@ -77,13 +69,8 @@ export const useFilteredPosts = (
           title.includes(word.toLowerCase()),
         );
 
-        // Debug: Log each post's title and if it matches the filter
-        console.log(`Post title: ${title}, Included in filter: ${isIncluded}`);
-
         return isIncluded;
       });
-
-      console.log("Filtered posts:", newFilteredPosts);
 
       // Sets the filteredPosts state to only those posts whose titles contain
       // all of the search words.
@@ -99,15 +86,11 @@ export const useFilteredPosts = (
   const filterFavorites = useCallback(() => {
     // If there are favorite items, filters posts to those with IDs
     // in the favoriteItems array. Otherwise, resets to the original posts.
-    console.log("Filtering favorites");
 
     const newFilteredPosts =
       favoriteItems.length > 0
         ? posts.filter((post) => favoriteItems.includes(post.id))
         : posts;
-
-    // Debug: Log the filtered posts after applying favorites filter
-    console.log("Filtered posts after applying favorites:", newFilteredPosts);
 
     if (searchArray.length === 0) setFilteredPosts(newFilteredPosts);
   }, [searchArray, favoriteItems, posts]);
@@ -120,14 +103,6 @@ export const useFilteredPosts = (
 
   // Effect hook to apply the search filter whenever the searchArray or posts change.
   useEffect(() => {
-    // If the search array is empty, resets the filteredPosts to the original posts.
-    // if (searchArray.length === 0) {
-    //   console.log("Resetting posts due to empty search array");
-
-    //   setFilteredPosts(posts);
-    //   return;
-    // }
-
     // Calls filterPosts to filter based on the searchArray.
     filterPosts(searchArray);
   }, [posts, searchArray, filterPosts]);

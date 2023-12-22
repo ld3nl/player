@@ -170,8 +170,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handlePlay = () => {
-    console.log("onPlay");
-
     setPlaying(true);
   };
 
@@ -185,7 +183,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
   const handleSeekChange = (e: any) => {
     const newValue = e.target?.value || e;
-    console.log(newValue);
     if (newValue) {
       setPlayed(parseFloat(newValue));
     }
@@ -279,7 +276,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               ref={audioRef}
               style={{ display: "none" }}
               url={src}
-              // onReady={() => setAudioIsLoading(true)}
               pip={pip}
               playing={playing}
               controls={controls}
@@ -288,17 +284,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
               playbackRate={playbackRate}
               volume={volume}
               muted={muted}
-              // onReady={() => console.log('onReady')}
-              // onStart={() => console.log("onStart")}
               onPlay={handlePlay}
-              // onEnablePIP={this.handleEnablePIP}
-              // onDisablePIP={this.handleDisablePIP}
-              // onPause={this.handlePause}
-              // onBuffer={() => console.log('onBuffer')}
-              // onPlaybackRateChange={this.handleOnPlaybackRateChange}
-              // onSeek={e => console.log('onSeek', e)}
-              // onEnded={this.handleEnded}
-              // onError={e => console.log('onError', e)}
               onProgress={handleProgress}
               onDuration={handleDuration}
             />

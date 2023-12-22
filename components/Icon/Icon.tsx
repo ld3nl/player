@@ -1,6 +1,7 @@
 import * as React from "react";
 import { getSVG, SVGProps } from "./getIcon";
 
+// Define the types of icons available in your application
 type SVGIconName =
   | "Play"
   | "ForwardRewind"
@@ -9,15 +10,17 @@ type SVGIconName =
   | "Close"
   | "Favorite";
 
+// Props interface for the Icon component
 interface IconProps {
-  className?: string;
-  name: SVGIconName;
-  size?: "sm" | "md";
-  variation?: "active" | "default";
-  customVariation?: { active: string; default: string };
-  customSize?: string;
+  className?: string; // Optional className for styling
+  name: SVGIconName; // Name of the icon to be rendered
+  size?: "sm" | "md"; // Optional size of the icon, with default sizes available
+  variation?: "active" | "default"; // Optional variation for different icon styles
+  customVariation?: { active: string; default: string }; // Optional custom variation for more control
+  customSize?: string; // Optional custom size for exact sizing
 }
 
+// Icon component definition
 const Icon: React.FunctionComponent<IconProps> = ({
   className = "",
   name,
@@ -26,13 +29,15 @@ const Icon: React.FunctionComponent<IconProps> = ({
   customVariation = { active: "fill-purple-600", default: "fill-blue-100" },
   customSize,
 }) => {
-  const svgProps: SVGProps = { name };
-  let viewBox = "0 0 120 120";
+  const svgProps: SVGProps = { name }; // Properties passed to the getSVG function
+  let viewBox = "0 0 120 120"; // Default viewBox size
 
+  // Adjusting viewBox based on the icon name
   if (name === "Close") viewBox = "0 0 16 16";
   if (name === "ForwardRewind" || name === "BackwardRewind")
     viewBox = "0 0 256 256";
 
+  // Rendering the SVG element
   return (
     <svg
       className={[

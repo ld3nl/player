@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
@@ -29,9 +29,9 @@ const cache = new LRUCache<string, HomeProps>({
   max: 500, // maximum number of entries
 });
 
-const DEFAULT_NUMBER_OF_POSTS = 12;
+const DEFAULT_NUMBER_OF_POSTS = 30;
 
-export default function Home({ posts }: HomeProps): JSX.Element {
+export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS,
   );
@@ -118,7 +118,6 @@ export default function Home({ posts }: HomeProps): JSX.Element {
 
     const searchString = e.target.value.trim();
     const searchTerms = searchString.split(" ").filter((term) => term);
-    console.log(searchTerms);
     setSearchTerms(searchTerms);
     filterPosts(searchTerms);
   };
@@ -153,6 +152,9 @@ export default function Home({ posts }: HomeProps): JSX.Element {
               className="form-input mt-1 block w-full md:w-20"
               id="numberOfPosts"
               type="number"
+              step="30"
+              max={totalPosts}
+              min={DEFAULT_NUMBER_OF_POSTS}
               defaultValue={numberOfPosts}
               onChange={(e) => setNumberOfPosts(Number(e.target.value))}
             />
@@ -209,6 +211,7 @@ export default function Home({ posts }: HomeProps): JSX.Element {
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
+                  // @ts-ignore
                   id={id}
                   favoriteCallback={() => {
                     setFavCTATriggered(!favCTATriggered);
@@ -224,28 +227,90 @@ export default function Home({ posts }: HomeProps): JSX.Element {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  const key = "posts";
-  const cachedData = cache.get(key);
+/**
+ * Calculates the dynamic Time To Live (TTL) for cache entries.
+ * This is just an example and should be tailored to your application's needs.
+ *
+ * @return {number} The TTL value in seconds.
+ */
+function calculateDynamicTTL() {
+  // Example logic: Set a default TTL and modify based on specific conditions
+  let ttl = 3600; // default 1 hour in seconds
 
+  // Example condition: Change TTL based on time of day, content type, etc.
+  // if (someSpecificCondition) {
+  //   ttl = 7200; // e.g., 2 hours in seconds
+  // }
+
+  return ttl;
+}
+
+/**
+ * Dynamically calculates the revalidate time based on content update frequency or other criteria.
+ * @return {number} The revalidate time in seconds.
+ */
+function calculateRevalidateTime() {
+  // Example logic: Set a default revalidate time and adjust based on certain criteria
+  const defaultRevalidateTime = 7000; // Default to 7000 seconds
+
+  // Add logic here to determine the appropriate revalidate time.
+  // This could be based on the time of day, the frequency of content updates, etc.
+
+  return defaultRevalidateTime;
+}
+
+// Importing necessary types or functions from external libraries or frameworks.
+export const getStaticProps: GetStaticProps = async () => {
+  console.log("[getStaticProps] Function called"); // Log when function is called
+
+  // Define a cache key to store or retrieve data.
+  const key = "posts";
+  console.log(`[getStaticProps] Cache key: ${key}`);
+
+  // Attempt to retrieve cached data using the specified key.
+  const cachedData = cache.get(key);
+  console.log(
+    `[getStaticProps] Cache get for key: ${key}, found: ${!!cachedData}`,
+  );
+
+  // Check if the data is already in the cache.
   if (cachedData) {
-    console.log(`Cache hit for key: ${key}`);
+    console.log(`[getStaticProps] Cache hit for key: ${key}`);
     return { props: cachedData };
   }
 
-  const categoriesCount = await getCategoryCount(80);
-  const totalPosts = categoriesCount; // assuming total number of posts is the same as the total number of categories
+  // Add a timestamp to see when data fetching starts.
+  console.log(
+    `[getStaticProps] Starting data fetch at: ${new Date().toISOString()}`,
+  );
 
+  // Get the count of categories, which is used as an approximation for total posts.
+  const categoriesCount = await getCategoryCount(80);
+  console.log(`[getStaticProps] Categories count: ${categoriesCount}`);
+
+  // Assuming that the total number of posts is equal to the number of categories.
+  const totalPosts = categoriesCount;
+
+  // Calculate the number of requests needed to fetch all posts, given a max of 99 per request.
   const numberOfRequests = Math.ceil(totalPosts / 99);
+  console.log(
+    `[getStaticProps] Number of requests to make: ${numberOfRequests}`,
+  );
+
   const promises = [];
 
+  // Creating a series of promises to fetch posts in batches.
   for (let i = 0; i < numberOfRequests; i++) {
     const offset = i * 99;
     promises.push(getAllPostsFromServer(80, 99, offset));
+    console.log(`[getStaticProps] Request added for batch: ${i + 1}`);
   }
 
-  const postsFromServer = await Promise.all(promises).then((results) =>
-    results.flat().map(({ excerpt, title, date, id }) => {
+  // Wait for all promises to resolve, then process the results.
+  const postsFromServer = await Promise.all(promises).then((results) => {
+    console.log(`[getStaticProps] Received data from all batches`);
+    return results.flat().map(({ excerpt, title, date, id }) => {
+      // Extracting the audio URL from the excerpt using a regular expression.
       const pattern = /src="([^"]*)/;
       const match = excerpt.rendered.match(pattern);
       const audioUrl = match
@@ -261,16 +326,26 @@ export const getStaticProps: GetStaticProps = async () => {
         title: title.rendered,
         date,
       };
-    }),
-  );
+    });
+  });
 
+  // Preparing the data to be returned and cached.
   const data = {
     posts: postsFromServer,
     totalPosts,
   };
 
-  cache.set(key, { ...data }); // store the data in cache
-  console.log(`Cache miss for key: ${key}`);
+  // Storing the fetched data in cache to improve performance for subsequent requests.
+  cache.set(key, { ...data }, { ttl: calculateDynamicTTL() });
+  console.log(
+    `[getStaticProps] Cache miss for key: ${key}, storing data in cache with TTL: ${calculateDynamicTTL()} seconds`,
+  );
 
-  return { props: data, revalidate: 7000 };
+  // Returning the data as props to the page component and setting a revalidate time.
+  const revalidateTime = calculateRevalidateTime();
+  console.log(
+    `[getStaticProps] Returning data with revalidate time: ${revalidateTime} seconds`,
+  );
+
+  return { props: data, revalidate: revalidateTime };
 };

@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import "../styles/index.css";
 
-import React, { createContext, useState } from "react";
+import { createContext, useState } from "react";
 
 type GlobalContextValue = {
   isModalActive: boolean;
