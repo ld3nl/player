@@ -102,7 +102,7 @@ const AudioPlayer: React.FC<Props> = ({
       </Button>
 
       <div
-        className="w-full"
+        className="w-full cursor-pointer"
         onClick={() => {
           setGlobalContext((prev) => ({
             ...prev,
