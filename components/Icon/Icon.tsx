@@ -8,7 +8,8 @@ type SVGIconName =
   | "BackwardRewind"
   | "Pause"
   | "Close"
-  | "Favorite";
+  | "Favorite"
+  | "Spinner";
 
 // Props interface for the Icon component
 interface IconProps {
@@ -36,6 +37,11 @@ const Icon: React.FunctionComponent<IconProps> = ({
   if (name === "Close") viewBox = "0 0 16 16";
   if (name === "ForwardRewind" || name === "BackwardRewind")
     viewBox = "0 0 256 256";
+
+  if (name === "Spinner") {
+    className = `${className} animate-spin`;
+    viewBox = "0 0 24 24";
+  }
 
   // Rendering the SVG element
   return (

@@ -154,7 +154,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     }
 
     if (action === "forward") {
-      // seekTo = Math.min(played + sec, 1);
       seekTo = played + sec;
     }
 
@@ -165,7 +164,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
   };
 
   const handleStop = () => {
-    // setUrl(null);
     setPlaying(false);
   };
 
@@ -177,25 +175,12 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     setPlaying(!playing);
   };
 
-  // const handleSeekMouseDown = (e: any) => {
-  //   setSeeking(true);
-  // };
-
   const handleSeekChange = (e: any) => {
     const newValue = e.target?.value || e;
     if (newValue) {
       setPlayed(parseFloat(newValue));
     }
   };
-
-  // const handleSeekTouchStart = (e: any) => {
-  //   setSeeking(true);
-  // };
-
-  // const handleSeekTouchEnd = (e: any) => {
-  //   setSeeking(false);
-  //   audioRef.current?.seekTo(parseFloat(e.target.value));
-  // };
 
   const handleSeekMouseUp = (e: any) => {
     const newValue = e.target?.value || e;
@@ -215,7 +200,6 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     if (!seeking) {
       const { played, playedSeconds } = updatedState;
 
-      // setLoaded(loaded);
       setPlayed(played);
 
       localStorage.setItem(
@@ -359,18 +343,13 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
 
           {duration === 0 && (
             <div className="flex p-10">
-              <span className="relative flex h-5 w-5 ">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75"></span>
-                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
-              </span>
-              <span className="relative mx-3 flex h-5 w-5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-100"></span>
-                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
-              </span>
-              <span className="relative flex h-5 w-5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75 delay-200"></span>
-                <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-800"></span>
-              </span>
+              <Icon
+                name={"Spinner"}
+                customVariation={{
+                  active: "fill-purple-600",
+                  default: "fill-purple-600",
+                }}
+              />
             </div>
           )}
         </div>
