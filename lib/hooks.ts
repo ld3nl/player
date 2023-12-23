@@ -36,6 +36,7 @@ type Post = {
   audioUrl: string;
   title: any;
   date: string;
+  categories: any;
 };
 
 /**

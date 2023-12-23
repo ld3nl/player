@@ -14,6 +14,7 @@ type Props = {
   date: string;
   // eslint-disable-next-line no-unused-vars
   favoriteCallback?: (id?: string) => void; // Optional callback for favorite action
+  categories?: any;
 };
 
 // Type definition for tracking audio progress
@@ -28,6 +29,7 @@ const AudioPlayer: React.FC<Props> = ({
   date,
   id,
   favoriteCallback,
+  categories,
 }) => {
   // State for tracking progress of the audio
   const [progress, setProgress] = useState<Progress>({
@@ -110,7 +112,31 @@ const AudioPlayer: React.FC<Props> = ({
           }));
         }}
       >
-        {title && <h2>{he.decode(title)}</h2>}
+        {title && (
+          <div>
+            <h2 className="mb-2">{he.decode(title)}</h2>
+            <span className="text-xs font-bold text-slate-300">
+              Categories:
+            </span>{" "}
+            {categories.map((category: any, index: number) => {
+              let name = category.name;
+              // name.replace(" /", ", ");
+              // console.log(name);
+              return (
+                <span
+                  key={`category-${index}`}
+                  className={[
+                    "text-xs font-light italic text-slate-300",
+                    // index === 0 ? "" : "ms-2",
+                    // "inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10",
+                  ].join(" ")}
+                >
+                  {index !== 0 && " / "} {he.decode(name)}
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         <p className="mb-2 text-xs text-slate-300">{publishDate}</p>
 

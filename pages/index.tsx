@@ -8,7 +8,11 @@ import MainPlayer from "@/components/MainPlayer/MainPlayer";
 import Icon from "@/components/Icon/Icon";
 import Button from "@/components/Button/Button";
 
-import { getAllPostsFromServer, getCategoryCount } from "../lib/utils";
+import {
+  getAllPostsFromServer,
+  getCategoryCount,
+  StaticCategoryData,
+} from "../lib/utils";
 import { useFilteredPosts } from "../lib/hooks";
 
 import { GlobalContext } from "./_app";
@@ -18,6 +22,7 @@ type Post = {
   audioUrl: string;
   title: string;
   date: string;
+  categories: number[];
 };
 
 type HomeProps = {
@@ -203,7 +208,19 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
         <div className="border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {
-              const { audioUrl, title, date, id } = post;
+              const { audioUrl, title, date, id, categories } = post;
+
+              const categoryDetails = categories
+                ?.map((categoryId: number) => {
+                  // Assuming you want to exclude category with id 80 and find the matching category
+                  if (categoryId === 80) {
+                    return null; // or however you want to handle this specific case
+                  }
+                  return StaticCategoryData.find(
+                    (category: any) => category.id === categoryId,
+                  );
+                })
+                .filter(Boolean); // This will remove any null values from the array
 
               return (
                 <AudioListing
@@ -216,6 +233,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                   favoriteCallback={() => {
                     setFavCTATriggered(!favCTATriggered);
                   }}
+                  categories={categoryDetails}
                 />
               );
             })}
@@ -309,7 +327,7 @@ export const getStaticProps: GetStaticProps = async () => {
   // Wait for all promises to resolve, then process the results.
   const postsFromServer = await Promise.all(promises).then((results) => {
     console.log(`[getStaticProps] Received data from all batches`);
-    return results.flat().map(({ excerpt, title, date, id }) => {
+    return results.flat().map(({ excerpt, title, date, id, categories }) => {
       // Extracting the audio URL from the excerpt using a regular expression.
       const pattern = /src="([^"]*)/;
       const match = excerpt.rendered.match(pattern);
@@ -325,6 +343,7 @@ export const getStaticProps: GetStaticProps = async () => {
         audioUrl: audioUrl,
         title: title.rendered,
         date,
+        categories,
       };
     });
   });
