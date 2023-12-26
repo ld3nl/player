@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
+import he from "he"; // Importing he for HTML entity encoding/decoding
 
 import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
@@ -22,12 +23,13 @@ type Post = {
   audioUrl: string;
   title: string;
   date: string;
-  categories: number[];
+  categories: any;
 };
 
 type HomeProps = {
   posts: Post[];
   totalPosts: number;
+  allCategories: any;
 };
 
 const cache = new LRUCache<string, HomeProps>({
@@ -36,7 +38,11 @@ const cache = new LRUCache<string, HomeProps>({
 
 const DEFAULT_NUMBER_OF_POSTS = 30;
 
-export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
+export default function Home({
+  posts,
+  totalPosts,
+  allCategories,
+}: HomeProps): JSX.Element {
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS,
   );
@@ -145,7 +151,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             "transition duration-300 ease-in-out",
             isScrolled
               ? "bg-white/50 shadow-lg backdrop-blur-sm backdrop-filter"
-              : "dark:bg-gray-200",
+              : "bg-gray-200",
           ].join(" ")}
         >
           <div className="mx-3 flex flex-col">
@@ -178,13 +184,35 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
             />
           </div>
 
+          <div className="mx-3 mt-3 flex flex-col md:mt-0">
+            <label htmlFor="search" className="text-gray-700">
+              <span>Categories:</span>
+            </label>
+            <select
+              className="form-input mt-1 block w-full"
+              onChange={(e) => console.log(e.target.value)}
+            >
+              {allCategories.map(({ name, id }: any, index: number) => {
+                return (
+                  <option
+                    key={`category-${id}-${index}`}
+                    className="capitalize"
+                    value={id}
+                  >
+                    {he.decode(name)}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
           <div className="mx-3 mt-3 flex justify-center md:mt-0">
             <Button
               className="form-input relative mt-auto flex w-full items-center justify-center pl-9"
               onClick={() => setShowFav(!showFav)}
             >
               <Icon
-                className="absolute left-1"
+                className="absolute left-0"
                 name="Favorite"
                 size="sm"
                 variation={showFav ? "active" : "default"}
@@ -205,22 +233,10 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
           </div>
         </div>
 
-        <div className="border border-gray-200 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+        <div className="border border-gray-600 bg-gray-700 text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post, i) => {
               const { audioUrl, title, date, id, categories } = post;
-
-              const categoryDetails = categories
-                ?.map((categoryId: number) => {
-                  // Assuming you want to exclude category with id 80 and find the matching category
-                  if (categoryId === 80) {
-                    return null; // or however you want to handle this specific case
-                  }
-                  return StaticCategoryData.find(
-                    (category: any) => category.id === categoryId,
-                  );
-                })
-                .filter(Boolean); // This will remove any null values from the array
 
               return (
                 <AudioListing
@@ -233,7 +249,7 @@ export default function Home({ posts, totalPosts }: HomeProps): JSX.Element {
                   favoriteCallback={() => {
                     setFavCTATriggered(!favCTATriggered);
                   }}
-                  categories={categoryDetails}
+                  categories={categories}
                 />
               );
             })}
@@ -315,6 +331,11 @@ export const getStaticProps: GetStaticProps = async () => {
     `[getStaticProps] Number of requests to make: ${numberOfRequests}`,
   );
 
+  const allCategories = StaticCategoryData.flatMap(({ name, id }) => {
+    const cleanedNames = name.replace(/\s*\/\s*/g, "/").split("/");
+    return cleanedNames.map((partName) => ({ name: partName, id }));
+  });
+
   const promises = [];
 
   // Creating a series of promises to fetch posts in batches.
@@ -338,12 +359,24 @@ export const getStaticProps: GetStaticProps = async () => {
           )
         : "";
 
+      const categoryDetails = categories
+        ?.map((categoryId: number) => {
+          // Assuming you want to exclude category with id 80 and find the matching category
+          if (categoryId === 80) {
+            return null; // or however you want to handle this specific case
+          }
+          return StaticCategoryData.find(
+            (category: any) => category.id === categoryId,
+          );
+        })
+        .filter(Boolean); // This will remove any null values from the array
+
       return {
         id,
         audioUrl: audioUrl,
         title: title.rendered,
         date,
-        categories,
+        categories: categoryDetails,
       };
     });
   });
@@ -352,6 +385,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const data = {
     posts: postsFromServer,
     totalPosts,
+    allCategories,
   };
 
   // Storing the fetched data in cache to improve performance for subsequent requests.

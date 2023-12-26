@@ -45,25 +45,32 @@ const Icon: React.FunctionComponent<IconProps> = ({
 
   // Rendering the SVG element
   return (
-    <svg
+    <span
       className={[
         className,
+        "relative",
         customSize
           ? `h-${customSize} w-${customSize}`
           : size === "sm"
             ? "h-8 w-8"
             : "h-10 w-10",
-        variation === "active"
-          ? customVariation.active
-          : customVariation.default,
       ].join(" ")}
-      xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      viewBox={viewBox}
-      preserveAspectRatio="xMidYMid meet"
     >
-      {getSVG(svgProps)}
-    </svg>
+      <svg
+        className={[
+          "h-auto w-full",
+          variation === "active"
+            ? customVariation.active
+            : customVariation.default,
+        ].join(" ")}
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        viewBox={viewBox}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {getSVG(svgProps)}
+      </svg>
+    </span>
   );
 };
 

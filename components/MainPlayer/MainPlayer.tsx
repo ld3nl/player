@@ -236,7 +236,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
         >
           <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
             <button
-              className="absolute right-0 top-0 p-3 text-white"
+              className="absolute right-0 top-0 w-12 p-3 text-white"
               onClick={handleClose}
             >
               <Icon name={"Close"} />
@@ -302,7 +302,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"BackwardRewind"} customSize={"5"} />
+                  <Icon name={"BackwardRewind"} customSize={"8"} />
                 </button>
 
                 <button
@@ -316,7 +316,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"ForwardRewind"} customSize={"5"} />
+                  <Icon name={"ForwardRewind"} customSize={"8"} />
                 </button>
               </div>
             </div>

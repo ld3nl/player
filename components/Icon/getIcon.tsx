@@ -13,7 +13,7 @@ export function getSVG({ name }: SVGProps) {
             cy="12"
             r="10"
             stroke="fill-purple-600"
-            stroke-width="4"
+            strokeWidth="4"
           ></circle>
           <path
             className="opacity-75"

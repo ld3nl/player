@@ -93,8 +93,13 @@ const AudioPlayer: React.FC<Props> = ({
 
   return (
     // Audio player component layout
-    <div className="relative inline-flex w-full items-center border-b border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:text-white dark:focus:ring-gray-500">
-      <Button onClick={() => toggleFavorite(id)}>
+    <div
+      className={[
+        "relative inline-flex w-full items-center border-b px-4 py-2 text-sm font-medium focus:z-10 focus:ring-2 ",
+        "border-gray-600 hover:bg-gray-600 hover:text-white focus:text-white focus:ring-gray-500",
+      ].join(" ")}
+    >
+      <Button onClick={() => toggleFavorite(id)} className="w-10">
         <Icon
           className="me-2.5 h-3 w-3"
           name={"Favorite"}
