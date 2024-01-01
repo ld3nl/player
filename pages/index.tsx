@@ -51,6 +51,7 @@ export default function Home({
   const [favCTATriggered, setFavCTATriggered] = useState<boolean>(false);
 
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
+  const [filteredCategory, setFilteredCategory] = useState<number[]>([]);
 
   const { globalContext } = useContext(GlobalContext);
 
@@ -60,6 +61,7 @@ export default function Home({
     posts,
     showFav ? favoriteItems : [],
     searchTerms,
+    filteredCategory,
   );
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -190,7 +192,7 @@ export default function Home({
             </label>
             <select
               className="form-input mt-1 block w-full"
-              onChange={(e) => console.log(e.target.value)}
+              onChange={(e) => setFilteredCategory([Number(e.target.value)])}
             >
               {allCategories.map(({ name, id }: any, index: number) => {
                 return (
@@ -208,7 +210,7 @@ export default function Home({
 
           <div className="mx-3 mt-3 flex justify-center md:mt-0">
             <Button
-              className="form-input relative mt-auto flex w-full items-center justify-center pl-9"
+              className="form-input relative mt-auto flex w-full items-center justify-center"
               onClick={() => setShowFav(!showFav)}
             >
               <Icon

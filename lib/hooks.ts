@@ -30,84 +30,70 @@ export const useLockScroll = (isOpen: boolean): void => {
 
 export default useLockScroll;
 
-// Improved Post type (example)
+// Type definition for Category
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+// Type definition for Post
 type Post = {
   id: number;
   audioUrl: string;
-  title: any;
+  title: string | { rendered: string }; // Updated to use a union type
   date: string;
-  categories: any;
+  categories: Category[];
 };
 
-/**
- * Custom hook for filtering posts based on search criteria and favorite items.
- *
- * @param {Post[]} posts - Array of posts to be filtered.
- * @param {number[]} favoriteItems - Array of IDs for favorite posts.
- * @param {string[]} searchArray - Array of search terms for filtering.
- * @returns Object containing filtered posts and filter function.
- */
 export const useFilteredPosts = (
   posts: Post[],
   favoriteItems: number[],
   searchArray: string[],
+  categoryIds: number[],
 ) => {
-  // State to store the filtered list of posts.
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>(posts);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>(() => posts);
 
-  /**
-   * Filters posts based on an array of search words.
-   * Uses useCallback to memoize the function for performance optimization.
-   *
-   * @param {string[]} words - Array of words to filter posts by.
-   */
-  const filterPosts = useCallback(
-    (words: string[]): void => {
-      const newFilteredPosts = posts.filter((post) => {
-        const title = (post.title || post.title?.rendered || "").toLowerCase();
+  // Helper function to perform the actual filtering
+  const performFiltering = useCallback(() => {
+    let newFilteredPosts = posts;
 
-        const isIncluded = words.some((word) =>
-          title.includes(word.toLowerCase()),
+    if (favoriteItems.length > 0) {
+      newFilteredPosts = newFilteredPosts.filter((post) =>
+        favoriteItems.includes(post.id),
+      );
+    }
+
+    if (categoryIds.length > 0) {
+      newFilteredPosts = newFilteredPosts.filter((post) =>
+        post.categories.some((category) => categoryIds.includes(category.id)),
+      );
+    }
+
+    if (searchArray.length > 0) {
+      newFilteredPosts = newFilteredPosts.filter((post) => {
+        const titleString =
+          typeof post.title === "string" ? post.title : post.title.rendered;
+        return searchArray.some((word) =>
+          titleString.toLowerCase().includes(word.toLowerCase()),
         );
-
-        return isIncluded;
       });
+    }
 
-      // Sets the filteredPosts state to only those posts whose titles contain
-      // all of the search words.
-      setFilteredPosts(newFilteredPosts);
-    },
-    [posts],
-  );
+    return newFilteredPosts;
+  }, [posts, favoriteItems, categoryIds, searchArray]);
 
-  /**
-   * Filters posts to show only those marked as favorites.
-   * Uses useCallback to memoize the function for performance optimization.
-   */
-  const filterFavorites = useCallback(() => {
-    // If there are favorite items, filters posts to those with IDs
-    // in the favoriteItems array. Otherwise, resets to the original posts.
-
-    const newFilteredPosts =
-      favoriteItems.length > 0
-        ? posts.filter((post) => favoriteItems.includes(post.id))
-        : posts;
-
-    if (searchArray.length === 0) setFilteredPosts(newFilteredPosts);
-  }, [searchArray, favoriteItems, posts]);
-
-  // Effect hook to apply the favorite filter on component mount and
-  // whenever favoriteItems changes.
+  // Effect hook to apply the filtering
   useEffect(() => {
-    filterFavorites();
-  }, [filterFavorites]);
+    const newFilteredPosts = performFiltering();
+    setFilteredPosts(newFilteredPosts);
+  }, [performFiltering]);
 
-  // Effect hook to apply the search filter whenever the searchArray or posts change.
-  useEffect(() => {
-    // Calls filterPosts to filter based on the searchArray.
-    filterPosts(searchArray);
-  }, [posts, searchArray, filterPosts]);
+  // Exposing a function that can be used to manually trigger filtering
+  const filterPosts = () => {
+    const newFilteredPosts = performFiltering();
+    setFilteredPosts(newFilteredPosts);
+  };
 
-  // Returns the filteredPosts state and the filterPosts function.
   return { filteredPosts, filterPosts };
 };
