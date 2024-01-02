@@ -189,12 +189,14 @@ export default function Home({
   return (
     <>
       <Head>
-        <title>Paul Lowe Talks source paullowe.org</title>
+        <title>Paul Lowe Talks source https://www.paullowe.org</title>
         <meta name="description" content="Paul Lowe Talks" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
         />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-full flex-col">
