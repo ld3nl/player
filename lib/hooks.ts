@@ -53,6 +53,7 @@ export const useFilteredPosts = (
   categoryIds: number[],
 ) => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>(() => posts);
+  const [filteredPostsCategory, setFilteredPostsCategory] = useState<any>([]);
 
   // Helper function to perform the actual filtering
   const performFiltering = useCallback(() => {
@@ -84,16 +85,33 @@ export const useFilteredPosts = (
   }, [posts, favoriteItems, categoryIds, searchArray]);
 
   // Effect hook to apply the filtering
-  useEffect(() => {
-    const newFilteredPosts = performFiltering();
-    setFilteredPosts(newFilteredPosts);
-  }, [performFiltering]);
+  // useEffect(() => {
+  //   console.log("useEffect is running");
+  //   console.log("Posts:", posts);
+  //   console.log("Favorite Items:", favoriteItems);
+  //   console.log("Search Array:", searchArray);
+  //   console.log("Category IDs:", categoryIds);
+
+  //   const newFilteredPosts = performFiltering();
+  //   setFilteredPosts(newFilteredPosts);
+  // }, []);
 
   // Exposing a function that can be used to manually trigger filtering
   const filterPosts = () => {
     const newFilteredPosts = performFiltering();
+
+    const flattenedAndUniqueIds = Array.from(
+      new Set(
+        newFilteredPosts.flatMap((post) =>
+          post.categories.map((cat) => cat.id),
+        ),
+      ),
+    );
+
+    setFilteredPostsCategory(flattenedAndUniqueIds);
+
     setFilteredPosts(newFilteredPosts);
   };
 
-  return { filteredPosts, filterPosts };
+  return { filteredPosts, filterPosts, filteredPostsCategory };
 };

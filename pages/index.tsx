@@ -18,6 +18,26 @@ import { useFilteredPosts } from "../lib/hooks";
 
 import { GlobalContext } from "./_app";
 
+const debounce = (func: any, wait: any) => {
+  let timeout: any;
+
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+interface Category {
+  id: number;
+  name: string;
+  // include other properties if there are any
+}
+
 type Post = {
   id: number;
   audioUrl: string;
@@ -57,12 +77,16 @@ export default function Home({
 
   const [favoriteItems, setFavoriteItems] = useState<number[]>([]);
 
-  const { filteredPosts, filterPosts } = useFilteredPosts(
-    posts,
-    showFav ? favoriteItems : [],
-    searchTerms,
-    filteredCategory,
-  );
+  const [filteredCategoryList, setFilteredPostsCategory] =
+    useState<Category[]>(allCategories);
+
+  const { filteredPosts, filteredPostsCategory, filterPosts } =
+    useFilteredPosts(
+      posts,
+      showFav ? favoriteItems : [],
+      searchTerms,
+      filteredCategory,
+    );
 
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -83,31 +107,31 @@ export default function Home({
   }, []);
 
   useEffect(() => {
-    // Function to update favoriteItems from localStorage
     const updateFavorites = () => {
       const storedFavorites = localStorage.getItem("favoriteItems");
-      if (storedFavorites) {
-        setFavoriteItems(JSON.parse(storedFavorites));
-      } else {
-        setFavoriteItems([]); // Reset to empty if nothing is found in localStorage
+      const parsedFavorites = storedFavorites
+        ? JSON.parse(storedFavorites)
+        : [];
+
+      if (JSON.stringify(favoriteItems) !== JSON.stringify(parsedFavorites)) {
+        setFavoriteItems(parsedFavorites);
       }
     };
 
-    // Call once to set initial state
     updateFavorites();
 
-    // Optional: Set up a listener for changes in localStorage
-    window.addEventListener("storage", (event) => {
+    const storageListener = (event: any) => {
       if (event.key === "favoriteItems") {
         updateFavorites();
       }
-    });
-
-    // Cleanup listener
-    return () => {
-      window.removeEventListener("storage", updateFavorites);
     };
-  }, [showFav, favCTATriggered]);
+
+    window.addEventListener("storage", storageListener);
+
+    return () => {
+      window.removeEventListener("storage", storageListener);
+    };
+  }, [showFav, favCTATriggered, favoriteItems]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -125,14 +149,41 @@ export default function Home({
     };
   }, []);
 
+  // Define the debounced search handler outside the component
+  const debouncedSearch = debounce(
+    (searchTerms: any, filterCallback: Function) => {
+      filterCallback(searchTerms);
+    },
+    500,
+  ); // 500 ms delay
+
   // Input Handler
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target) return;
-
     const searchString = e.target.value.trim();
-    const searchTerms = searchString.split(" ").filter((term) => term);
+    const searchTerms = searchString.split(" ").filter(Boolean);
     setSearchTerms(searchTerms);
-    filterPosts(searchTerms);
+
+    // Use the debounced function
+    if (searchTerms.length === 0) {
+      setFilteredPostsCategory(allCategories);
+    }
+
+    debouncedSearch(searchTerms, () => {
+      // Directly filter and set categories based on search terms
+      const filteredCategories: Category[] = allCategories.filter(
+        ({ id }: any) => filteredPostsCategory.includes(id),
+      );
+
+      console.log(filteredCategories);
+      filterPosts();
+    });
+  };
+
+  // Extracted event handler function
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategory = Number(e.target.value);
+    setFilteredCategory([newCategory]);
+    filterPosts();
   };
 
   return (
@@ -192,9 +243,9 @@ export default function Home({
             </label>
             <select
               className="form-input mt-1 block w-full"
-              onChange={(e) => setFilteredCategory([Number(e.target.value)])}
+              onChange={handleCategoryChange}
             >
-              {allCategories.map(({ name, id }: any, index: number) => {
+              {filteredCategoryList.map(({ name, id }: any, index: number) => {
                 return (
                   <option
                     key={`category-${id}-${index}`}
@@ -243,6 +294,7 @@ export default function Home({
               return (
                 <AudioListing
                   key={`item-${i}`}
+                  // @ts-ignore
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
