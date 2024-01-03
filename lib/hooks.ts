@@ -84,18 +84,6 @@ export const useFilteredPosts = (
     return newFilteredPosts;
   }, [posts, favoriteItems, categoryIds, searchArray]);
 
-  // Effect hook to apply the filtering
-  // useEffect(() => {
-  //   console.log("useEffect is running");
-  //   console.log("Posts:", posts);
-  //   console.log("Favorite Items:", favoriteItems);
-  //   console.log("Search Array:", searchArray);
-  //   console.log("Category IDs:", categoryIds);
-
-  //   const newFilteredPosts = performFiltering();
-  //   setFilteredPosts(newFilteredPosts);
-  // }, []);
-
   // Exposing a function that can be used to manually trigger filtering
   const filterPosts = () => {
     const newFilteredPosts = performFiltering();

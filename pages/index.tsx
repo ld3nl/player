@@ -80,6 +80,8 @@ export default function Home({
   const [filteredCategoryList, setFilteredPostsCategory] =
     useState<Category[]>(allCategories);
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
   const { filteredPosts, filteredPostsCategory, filterPosts } =
     useFilteredPosts(
       posts,
@@ -87,14 +89,6 @@ export default function Home({
       searchTerms,
       filteredCategory,
     );
-
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Event handler for scroll event
-  const handleScroll = () => {
-    const top = window.scrollY < 10;
-    setIsScrolled(!top);
-  };
 
   // Set up the event listener for scrolling
   useEffect(() => {
@@ -134,6 +128,14 @@ export default function Home({
   }, [showFav, favCTATriggered, favoriteItems]);
 
   useEffect(() => {
+    if (filteredCategory.length === 0) {
+      setFilteredPostsCategory(allCategories);
+    }
+
+    filterPosts();
+  }, [filteredCategory]); // This useEffect will run whenever filteredCategory changes
+
+  useEffect(() => {
     const handleScroll = () => {
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
@@ -156,6 +158,12 @@ export default function Home({
     },
     500,
   ); // 500 ms delay
+
+  // Event handler for scroll event
+  const handleScroll = () => {
+    const top = window.scrollY < 10;
+    setIsScrolled(!top);
+  };
 
   // Input Handler
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,9 +189,9 @@ export default function Home({
 
   // Extracted event handler function
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategory = Number(e.target.value);
-    setFilteredCategory([newCategory]);
-    filterPosts();
+    const newCategory =
+      e.target.value === "all" ? [] : [Number(e.target.value)];
+    setFilteredCategory(newCategory);
   };
 
   return (
@@ -247,6 +255,7 @@ export default function Home({
               className="form-input mt-1 block w-full"
               onChange={handleCategoryChange}
             >
+              <option value={"all"}>All</option>
               {filteredCategoryList.map(({ name, id }: any, index: number) => {
                 return (
                   <option
