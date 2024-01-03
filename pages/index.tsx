@@ -133,7 +133,7 @@ export default function Home({
     }
 
     filterPosts();
-  }, [filteredCategory]); // This useEffect will run whenever filteredCategory changes
+  }, [filteredCategory, showFav]); // This useEffect will run whenever filteredCategory changes
 
   useEffect(() => {
     const handleScroll = () => {
@@ -273,10 +273,7 @@ export default function Home({
           <div className="mx-3 mt-3 flex justify-center md:mt-0">
             <Button
               className="form-input relative mt-auto flex w-full items-center justify-center"
-              onClick={() => {
-                setShowFav(!showFav);
-                filterPosts();
-              }}
+              onClick={() => setShowFav(!showFav)}
             >
               <Icon
                 className="absolute left-0"
