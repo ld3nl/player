@@ -40,6 +40,7 @@ type Category = {
 // Type definition for Post
 type Post = {
   id: number;
+  imageUrl: string;
   audioUrl: string;
   title: string | { rendered: string }; // Updated to use a union type
   date: string;

@@ -8,6 +8,7 @@ import Button from "../Button/Button";
 
 // Props definition for the AudioPlayer component
 type Props = {
+  imageSrc: string;
   src: string;
   id: string;
   title: string;
@@ -25,6 +26,7 @@ type Progress = {
 };
 
 const AudioPlayer: React.FC<Props> = ({
+  imageSrc,
   src,
   title,
   date,
@@ -115,7 +117,7 @@ const AudioPlayer: React.FC<Props> = ({
         onClick={() => {
           setGlobalContext((prev) => ({
             ...prev,
-            selectedItem: { title, date, src, id, link },
+            selectedItem: { title, date, src, id, link, imageSrc },
           }));
         }}
       >

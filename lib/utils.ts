@@ -47,7 +47,7 @@ export const getAllPostsFromServer = async (
           "categories[terms]": term,
           per_page: per_page,
           offset: offset,
-          _fields: "id,title,excerpt,categories,date,link",
+          _fields: "id,title,excerpt,content,categories,date,link",
         },
       },
     );

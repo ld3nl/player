@@ -13,6 +13,7 @@ import { Duration } from "./Duration";
 import img from "@/public/P1080841.jpg";
 
 interface Props {
+  imageSrc?: string;
   title?: string;
   src?: string;
   id?: string;
@@ -25,7 +26,8 @@ interface Props {
 //   "https://www.paullowe.org/wp-content/uploads/2016/09/IMG_0987_low_website.jpg",
 // ];
 
-const MainPlayer: FC<Props> = ({ title, src, id, link }) => {
+const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
+  console.log("imageSrc", imageSrc);
   const audioRef = useRef<any>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -246,7 +248,13 @@ const MainPlayer: FC<Props> = ({ title, src, id, link }) => {
           </div>
           <div className="mx-auto flex w-96">
             <Image
-              src={img}
+              src={
+                imageSrc
+                  ? `https://www.paullowe.org/wp-content/uploads/${imageSrc}`
+                  : img
+              }
+              width={imageSrc ? 400 : undefined}
+              height={imageSrc ? 400 : undefined}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
             />

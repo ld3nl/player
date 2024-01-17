@@ -41,6 +41,7 @@ interface Category {
 type Post = {
   id: number;
   audioUrl: string;
+  imageUrl: string;
   title: string;
   date: string;
   categories: any;
@@ -301,7 +302,8 @@ export default function Home({
         <div className="border border-gray-600 bg-gray-700 text-white">
           {filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post) => {
-              const { audioUrl, title, date, id, categories, link } = post;
+              const { audioUrl, title, date, id, categories, link, imageUrl } =
+                post;
 
               return (
                 <AudioListing
@@ -317,6 +319,7 @@ export default function Home({
                   }}
                   categories={categories}
                   link={link}
+                  imageSrc={imageUrl}
                 />
               );
             })}
@@ -417,7 +420,7 @@ export const getStaticProps: GetStaticProps = async () => {
     console.log(`[getStaticProps] Received data from all batches`);
     return results
       .flat()
-      .map(({ excerpt, title, date, id, categories, link }) => {
+      .map(({ excerpt, title, date, id, categories, link, content }) => {
         // Extracting the audio URL from the excerpt using a regular expression.
         const pattern = /src="([^"]*)/;
         const match = excerpt.rendered.match(pattern);
@@ -427,6 +430,17 @@ export const getStaticProps: GetStaticProps = async () => {
               "",
             )
           : "";
+
+        const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
+        const imageMatch = content.rendered.match(imagePattern);
+        const imageUrl = imageMatch
+          ? imageMatch[1].replace(
+              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+              "",
+            )
+          : "";
+
+        console.log(imageUrl);
 
         const categoryDetails = categories
           ?.map((categoryId: number) => {
@@ -442,6 +456,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
         return {
           id,
+          imageUrl,
           audioUrl: audioUrl,
           title: title.rendered,
           date,
