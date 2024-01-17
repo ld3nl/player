@@ -15,6 +15,7 @@ type Props = {
   // eslint-disable-next-line no-unused-vars
   favoriteCallback?: (id?: string) => void; // Optional callback for favorite action
   categories?: any;
+  link: string;
 };
 
 // Type definition for tracking audio progress
@@ -30,6 +31,7 @@ const AudioPlayer: React.FC<Props> = ({
   id,
   favoriteCallback,
   categories,
+  link,
 }) => {
   // State for tracking progress of the audio
   const [progress, setProgress] = useState<Progress>({
@@ -113,7 +115,7 @@ const AudioPlayer: React.FC<Props> = ({
         onClick={() => {
           setGlobalContext((prev) => ({
             ...prev,
-            selectedItem: { title, date, src, id },
+            selectedItem: { title, date, src, id, link },
           }));
         }}
       >

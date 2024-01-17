@@ -67,6 +67,28 @@ export function getSVG({ name }: SVGProps) {
           <path d="M0.830254 15.3536C0.634992 15.1583 0.634992 14.8417 0.830254 14.6465L14.6465 0.830255C14.8417 0.634993 15.1583 0.634993 15.3536 0.830255C15.5488 1.02552 15.5488 1.3421 15.3536 1.53736L1.53736 15.3536C1.3421 15.5488 1.02552 15.5488 0.830254 15.3536Z" />
         </>
       );
+    case "Link":
+      return (
+        <>
+          <path
+            d="M131.88,192l-9.94,9.94a48,48,0,0,1-67.88-67.88L78.17,110A48,48,0,0,1,144,108"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+          <path
+            d="M124.12,64l9.94-9.94a48,48,0,0,1,67.88,67.88l-24.11,24.11A48,48,0,0,1,112,148"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+        </>
+      );
+
     case "":
       return <></>;
     default:

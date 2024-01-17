@@ -16,6 +16,7 @@ interface Props {
   title?: string;
   src?: string;
   id?: string;
+  link?: string;
 }
 
 // const imgArray = [
@@ -24,7 +25,7 @@ interface Props {
 //   "https://www.paullowe.org/wp-content/uploads/2016/09/IMG_0987_low_website.jpg",
 // ];
 
-const MainPlayer: FC<Props> = ({ title, src, id }) => {
+const MainPlayer: FC<Props> = ({ title, src, id, link }) => {
   const audioRef = useRef<any>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -69,6 +70,7 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
     handlePlay();
   }, [src, id]);
 
+  //
   useEffect(() => {
     if (title && src) {
       handleOpen();
@@ -338,6 +340,22 @@ const MainPlayer: FC<Props> = ({ title, src, id }) => {
                   }}
                 />
               </button>
+
+              <a
+                href={link}
+                target="_blank"
+                className="ms-8 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+              >
+                <Icon
+                  name={"Link"}
+                  size={"sm"}
+                  variation={favorite ? "active" : "default"}
+                  customVariation={{
+                    active: "fill-purple-600",
+                    default: "fill-white stroke-purple-600 stroke-2",
+                  }}
+                />
+              </a>
             </div>
           )}
 

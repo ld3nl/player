@@ -22,6 +22,7 @@ interface Post {
   featured_media: number;
   author: number;
   date: string;
+  link: string;
 }
 
 /**
@@ -46,7 +47,7 @@ export const getAllPostsFromServer = async (
           "categories[terms]": term,
           per_page: per_page,
           offset: offset,
-          _fields: "id,title,excerpt,categories,date",
+          _fields: "id,title,excerpt,categories,date,link",
         },
       },
     );

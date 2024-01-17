@@ -44,6 +44,7 @@ type Post = {
   title: string | { rendered: string }; // Updated to use a union type
   date: string;
   categories: Category[];
+  link: string;
 };
 
 export const useFilteredPosts = (

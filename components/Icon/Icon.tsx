@@ -9,7 +9,8 @@ type SVGIconName =
   | "Pause"
   | "Close"
   | "Favorite"
-  | "Spinner";
+  | "Spinner"
+  | "Link";
 
 // Props interface for the Icon component
 interface IconProps {
@@ -35,7 +36,7 @@ const Icon: React.FunctionComponent<IconProps> = ({
 
   // Adjusting viewBox based on the icon name
   if (name === "Close") viewBox = "0 0 16 16";
-  if (name === "ForwardRewind" || name === "BackwardRewind")
+  if (name === "ForwardRewind" || name === "BackwardRewind" || name === "Link")
     viewBox = "0 0 256 256";
 
   if (name === "Spinner") {

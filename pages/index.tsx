@@ -44,6 +44,7 @@ type Post = {
   title: string;
   date: string;
   categories: any;
+  link: string;
 };
 
 type HomeProps = {
@@ -182,7 +183,6 @@ export default function Home({
         ({ id }: any) => filteredPostsCategory.includes(id),
       );
 
-      console.log(filteredCategories);
       filterPosts();
     });
   };
@@ -299,12 +299,12 @@ export default function Home({
 
         <div className="border border-gray-600 bg-gray-700 text-white">
           {filteredPosts &&
-            filteredPosts.slice(0, numberOfPosts).map((post, i) => {
-              const { audioUrl, title, date, id, categories } = post;
+            filteredPosts.slice(0, numberOfPosts).map((post) => {
+              const { audioUrl, title, date, id, categories, link } = post;
 
               return (
                 <AudioListing
-                  key={`item-${i}`}
+                  key={`item-${id}`}
                   // @ts-ignore
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
@@ -315,6 +315,7 @@ export default function Home({
                     setFavCTATriggered(!favCTATriggered);
                   }}
                   categories={categories}
+                  link={link}
                 />
               );
             })}
@@ -413,37 +414,40 @@ export const getStaticProps: GetStaticProps = async () => {
   // Wait for all promises to resolve, then process the results.
   const postsFromServer = await Promise.all(promises).then((results) => {
     console.log(`[getStaticProps] Received data from all batches`);
-    return results.flat().map(({ excerpt, title, date, id, categories }) => {
-      // Extracting the audio URL from the excerpt using a regular expression.
-      const pattern = /src="([^"]*)/;
-      const match = excerpt.rendered.match(pattern);
-      const audioUrl = match
-        ? match[1].replace(
-            /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-            "",
-          )
-        : "";
+    return results
+      .flat()
+      .map(({ excerpt, title, date, id, categories, link }) => {
+        // Extracting the audio URL from the excerpt using a regular expression.
+        const pattern = /src="([^"]*)/;
+        const match = excerpt.rendered.match(pattern);
+        const audioUrl = match
+          ? match[1].replace(
+              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+              "",
+            )
+          : "";
 
-      const categoryDetails = categories
-        ?.map((categoryId: number) => {
-          // Assuming you want to exclude category with id 80 and find the matching category
-          if (categoryId === 80) {
-            return null; // or however you want to handle this specific case
-          }
-          return StaticCategoryData.find(
-            (category: any) => category.id === categoryId,
-          );
-        })
-        .filter(Boolean); // This will remove any null values from the array
+        const categoryDetails = categories
+          ?.map((categoryId: number) => {
+            // Assuming you want to exclude category with id 80 and find the matching category
+            if (categoryId === 80) {
+              return null; // or however you want to handle this specific case
+            }
+            return StaticCategoryData.find(
+              (category: any) => category.id === categoryId,
+            );
+          })
+          .filter(Boolean); // This will remove any null values from the array
 
-      return {
-        id,
-        audioUrl: audioUrl,
-        title: title.rendered,
-        date,
-        categories: categoryDetails,
-      };
-    });
+        return {
+          id,
+          audioUrl: audioUrl,
+          title: title.rendered,
+          date,
+          categories: categoryDetails,
+          link,
+        };
+      });
   });
 
   // Preparing the data to be returned and cached.
