@@ -346,15 +346,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link }) => {
                 target="_blank"
                 className="ms-8 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
-                <Icon
-                  name={"Link"}
-                  size={"sm"}
-                  variation={favorite ? "active" : "default"}
-                  customVariation={{
-                    active: "fill-purple-600",
-                    default: "fill-white stroke-purple-600 stroke-2",
-                  }}
-                />
+                <Icon name={"Link"} customSize={"8"} />
               </a>
             </div>
           )}

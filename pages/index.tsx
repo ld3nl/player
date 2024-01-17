@@ -183,6 +183,7 @@ export default function Home({
         ({ id }: any) => filteredPostsCategory.includes(id),
       );
 
+      console.log(filteredCategories);
       filterPosts();
     });
   };
