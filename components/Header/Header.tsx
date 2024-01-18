@@ -16,8 +16,7 @@ interface HeaderProps {
   numberOfPosts: number;
   setNumberOfPosts: React.Dispatch<React.SetStateAction<number>>;
   handleSearchChange: React.Dispatch<React.SetStateAction<string[]>>;
-  // eslint-disable-next-line no-unused-vars
-  handleCategoryChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleCategoryChange: React.Dispatch<React.SetStateAction<number[]>>;
   toggleFavorites: () => void;
   showFav: boolean;
   filteredCategoryList: Category[];
@@ -116,6 +115,13 @@ const Header: React.FC<HeaderProps> = ({
     });
   };
 
+  const categoryChangeHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategory =
+      e.target.value === "all" ? [] : [Number(e.target.value)];
+
+    handleCategoryChange(newCategory);
+  };
+
   return (
     <div
       ref={elementRef}
@@ -167,7 +173,7 @@ const Header: React.FC<HeaderProps> = ({
         </label>
         <select
           className="form-input mt-1 block w-full"
-          onChange={handleCategoryChange}
+          onChange={categoryChangeHandler}
         >
           <option value="all">All</option>
           {filteredCategoryList.map(({ name, id }, index) => (

@@ -96,14 +96,6 @@ export default function Home({
     filterPosts();
   }, [filteredCategory, showFav, searchTerms]); // This useEffect will run whenever filteredCategory changes
 
-  // to-do: use same aproach as handleSearchChange and setNumberOfPosts
-  // Extracted event handler function
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategory =
-      e.target.value === "all" ? [] : [Number(e.target.value)];
-    setFilteredCategory(newCategory);
-  };
-
   const toggleFavorites = () => {
     setShowFav(!showFav);
     // Optionally trigger any additional logic when favorites are toggled
@@ -128,7 +120,7 @@ export default function Home({
           numberOfPosts={numberOfPosts}
           setNumberOfPosts={setNumberOfPosts}
           handleSearchChange={setSearchTerms}
-          handleCategoryChange={handleCategoryChange}
+          handleCategoryChange={setFilteredCategory}
           toggleFavorites={toggleFavorites}
           showFav={showFav}
           filteredCategoryList={filteredCategoryList}
