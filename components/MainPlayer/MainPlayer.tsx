@@ -307,12 +307,12 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
 
           {duration !== 0 && (
             <div className="flex items-center justify-center p-4">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 <button
                   onClick={() => handleSeekTo("backward", 15)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"BackwardRewind"} customSize={"8"} />
+                  <Icon name={"BackwardRewind"} size="twoThirds" />
                 </button>
 
                 <button
@@ -324,9 +324,9 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"ForwardRewind"} customSize={"8"} />
+                  <Icon name={"ForwardRewind"} size="twoThirds" />
                 </button>
               </div>
             </div>
