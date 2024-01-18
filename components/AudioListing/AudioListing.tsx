@@ -43,9 +43,7 @@ const AudioPlayer: React.FC<Props> = ({
   const [favorite, setFavorite] = useState(false); // State to track if item is favorited
 
   // State for formatted publish date
-  const [publishDate, setPublishDate] = useState(
-    new Date().toLocaleDateString("en-AU"),
-  );
+  const [publishDate, setPublishDate] = useState<string>();
 
   // Accessing global context
   const { globalContext, setGlobalContext } = useContext(GlobalContext);
@@ -147,7 +145,9 @@ const AudioPlayer: React.FC<Props> = ({
           </div>
         )}
 
-        <p className="mb-2 text-xs text-slate-300">{publishDate}</p>
+        {publishDate && (
+          <p className="mb-2 text-xs text-slate-300">{publishDate}</p>
+        )}
 
         {progress.playedSeconds != 0 && (
           // Display of the progress bar

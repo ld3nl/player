@@ -384,9 +384,11 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 
   // Add a timestamp to see when data fetching starts.
-  console.log(
-    `[getStaticProps] Starting data fetch at: ${new Date().toISOString()}`,
-  );
+  // console.log(
+  //   `[getStaticProps] Starting data fetch at: ${new Date().toLocaleDateString(
+  //     "en-AU",
+  //   )}`,
+  // );
 
   // Get the count of categories, which is used as an approximation for total posts.
   const categoriesCount = await getCategoryCount(80);

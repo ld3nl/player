@@ -356,7 +356,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               >
                 <Icon
                   name={"Link"}
-                  customSize="2/3"
+                  size="twoThirds"
                   customVariation={{
                     active: "fill-purple-600",
                     default: "fill-purple-600",

@@ -16,7 +16,7 @@ type SVGIconName =
 interface IconProps {
   className?: string; // Optional className for styling
   name: SVGIconName; // Name of the icon to be rendered
-  size?: "sm" | "md"; // Optional size of the icon, with default sizes available
+  size?: "sm" | "md" | "twoThirds"; // Optional size of the icon, with default sizes available
   variation?: "active" | "default"; // Optional variation for different icon styles
   customVariation?: { active: string; default: string }; // Optional custom variation for more control
   customSize?: string; // Optional custom size for exact sizing
@@ -44,6 +44,12 @@ const Icon: React.FunctionComponent<IconProps> = ({
     viewBox = "0 0 24 24";
   }
 
+  const sizes = {
+    sm: "h-8 w-8",
+    md: "h-10 w-10",
+    twoThirds: "h-2/3 w-2/3",
+  };
+
   // Rendering the SVG element
   return (
     <span
@@ -52,9 +58,7 @@ const Icon: React.FunctionComponent<IconProps> = ({
         "relative",
         customSize
           ? `h-${customSize} w-${customSize}`
-          : size === "sm"
-            ? "h-8 w-8"
-            : "h-10 w-10",
+          : sizes[size as keyof typeof sizes],
       ].join(" ")}
     >
       <svg
