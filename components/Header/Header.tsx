@@ -74,10 +74,17 @@ const Header: React.FC<HeaderProps> = ({
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const scrollingUp = currentScrollY > lastScrollY; // Check if scrolling up
+      const scrollingUp = currentScrollY > lastScrollY; // Corrected the logic here
 
-      setIsScrolledAndHide(scrollingUp && currentScrollY > height * 5);
-      setIsScrolled(currentScrollY > height);
+      // Using document.documentElement.scrollHeight to get the total content height
+      const notAtBottom =
+        window.innerHeight + window.scrollY <
+        document.documentElement.scrollHeight - 50; // Adding a threshold to account for iOS bounce
+
+      if (notAtBottom) {
+        setIsScrolledAndHide(scrollingUp && currentScrollY > height * 5);
+        setIsScrolled(currentScrollY > height);
+      }
 
       console.log(
         "scrollingUp && currentScrollY > height * 5",
@@ -96,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [height]);
+  }, [height, setIsScrolledAndHide, setIsScrolled]); // Ensure all used states and props are in dependency array
 
   const debouncedSearch = debounce(
     (searchTerms: string[], filterCallback: Function) => {
@@ -127,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({
       ref={elementRef}
       className={[
         "sticky z-50 flex flex-col p-3 md:flex-row",
-        "transition-all duration-300 ease-in-out",
+        "duration-600 transition-all ease-in-out",
         isScrolledAndHide ? "-top-full" : "top-0",
         isScrolled
           ? "bg-white/50 shadow-lg backdrop-blur-sm backdrop-filter"
