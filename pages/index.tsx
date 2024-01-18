@@ -1,13 +1,11 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
-import he from "he"; // Importing he for HTML entity encoding/decoding
 
 import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
-import Icon from "@/components/Icon/Icon";
-import Button from "@/components/Button/Button";
+import Header from "@/components/Header/Header";
 
 import {
   getAllPostsFromServer,
@@ -17,20 +15,6 @@ import {
 import { useFilteredPosts } from "../lib/hooks";
 
 import { GlobalContext } from "./_app";
-
-const debounce = (func: any, wait: any) => {
-  let timeout: any;
-
-  return function executedFunction(...args: any[]) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
 
 interface Category {
   id: number;
@@ -70,20 +54,15 @@ export default function Home({
   );
 
   const [showFav, setShowFav] = useState<boolean>(false);
-  const [favCTATriggered, setFavCTATriggered] = useState<boolean>(false);
+  const [favoriteItems, setFavoriteItems] = useState<number[]>([]);
 
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [filteredCategory, setFilteredCategory] = useState<number[]>([]);
 
   const { globalContext } = useContext(GlobalContext);
 
-  const [favoriteItems, setFavoriteItems] = useState<number[]>([]);
-
   const [filteredCategoryList, setFilteredPostsCategory] =
     useState<Category[]>(allCategories);
-
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isScrolledAndHide, setIsScrolledAndHide] = useState(false);
 
   const { filteredPosts, filteredPostsCategory, filterPosts } =
     useFilteredPosts(
@@ -93,123 +72,41 @@ export default function Home({
       filteredCategory,
     );
 
-  const elementRef = useRef<HTMLDivElement>(null);
-
-  const [height, setHeight] = useState(0);
-
-  // Set up the event listener for scrolling
-  useEffect(() => {
-    let lastScrollY = window.scrollY; // Track the last scroll position
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollingUp = currentScrollY > lastScrollY; // Check if scrolling up
-
-      setIsScrolledAndHide(scrollingUp && currentScrollY > height * 5);
-      setIsScrolled(currentScrollY > height);
-
-      lastScrollY = currentScrollY; // Update the last scroll position
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [height]);
+  const updateFavoriteItemsFromStorage = () => {
+    const storedFavorites = localStorage.getItem("favoriteItems");
+    const parsedFavorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+    setFavoriteItems(parsedFavorites);
+  };
 
   useEffect(() => {
-    // Make sure the element is not null
-    if (elementRef.current) {
-      setHeight(elementRef.current.offsetHeight);
-    }
-
-    const handleResize = () => {
-      if (elementRef.current) {
-        setHeight(elementRef.current.offsetHeight);
-      }
-    };
-
-    // Add event listener for window resize
-    window.addEventListener("resize", handleResize);
-
-    // Remove event listener on cleanup
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const updateFavorites = () => {
-      const storedFavorites = localStorage.getItem("favoriteItems");
-      const parsedFavorites = storedFavorites
-        ? JSON.parse(storedFavorites)
-        : [];
-
-      if (JSON.stringify(favoriteItems) !== JSON.stringify(parsedFavorites)) {
-        setFavoriteItems(parsedFavorites);
-      }
-    };
-
-    updateFavorites();
-
-    const storageListener = (event: any) => {
-      if (event.key === "favoriteItems") {
-        updateFavorites();
-      }
-    };
-
-    window.addEventListener("storage", storageListener);
-
-    return () => {
-      window.removeEventListener("storage", storageListener);
-    };
-  }, [showFav, favCTATriggered, favoriteItems]);
+    updateFavoriteItemsFromStorage();
+  }, [showFav]);
 
   useEffect(() => {
     if (filteredCategory.length === 0) {
       setFilteredPostsCategory(allCategories);
     }
 
+    const filteredCategories: Category[] = allCategories.filter(({ id }: any) =>
+      filteredPostsCategory.includes(id),
+    );
+
+    console.log(filteredCategories);
+
     filterPosts();
-  }, [filteredCategory, showFav]); // This useEffect will run whenever filteredCategory changes
+  }, [filteredCategory, showFav, searchTerms]); // This useEffect will run whenever filteredCategory changes
 
-  // Define the debounced search handler outside the component
-  const debouncedSearch = debounce(
-    (searchTerms: any, filterCallback: Function) => {
-      filterCallback(searchTerms);
-    },
-    500,
-  ); // 500 ms delay
-
-  // Event handler for scroll event
-
-  // Input Handler
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchString = e.target.value.trim();
-    const searchTerms = searchString.split(" ").filter(Boolean);
-    setSearchTerms(searchTerms);
-
-    // Use the debounced function
-    if (searchTerms.length === 0) {
-      setFilteredPostsCategory(allCategories);
-    }
-
-    debouncedSearch(searchTerms, () => {
-      // Directly filter and set categories based on search terms
-      const filteredCategories: Category[] = allCategories.filter(
-        ({ id }: any) => filteredPostsCategory.includes(id),
-      );
-
-      console.log(filteredCategories);
-      filterPosts();
-    });
-  };
-
+  // to-do: use same aproach as handleSearchChange and setNumberOfPosts
   // Extracted event handler function
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCategory =
       e.target.value === "all" ? [] : [Number(e.target.value)];
     setFilteredCategory(newCategory);
+  };
+
+  const toggleFavorites = () => {
+    setShowFav(!showFav);
+    // Optionally trigger any additional logic when favorites are toggled
   };
 
   return (
@@ -226,96 +123,16 @@ export default function Home({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-full flex-col">
-        <div
-          ref={elementRef}
-          className={[
-            "sticky z-50 flex flex-col p-3 md:flex-row",
-            "transition-all duration-300 ease-in-out",
-            isScrolledAndHide ? "-top-full" : "top-0",
-            isScrolled
-              ? "bg-white/50 shadow-lg backdrop-blur-sm backdrop-filter"
-              : "bg-gray-200",
-          ].join(" ")}
-        >
-          <div className="mx-3 flex flex-col">
-            <label htmlFor="numberOfPosts" className="text-gray-700">
-              <span className="hidden md:inline">Number of posts:</span>
-              <span className="md:hidden">Posts:</span>
-            </label>
-            <input
-              className="form-input mt-1 block w-full md:w-20"
-              id="numberOfPosts"
-              type="number"
-              step="30"
-              max={totalPosts}
-              min={DEFAULT_NUMBER_OF_POSTS}
-              defaultValue={numberOfPosts}
-              onChange={(e) => setNumberOfPosts(Number(e.target.value))}
-            />
-          </div>
-          <div className="mx-3 mt-3 flex flex-col md:mt-0">
-            <label htmlFor="search" className="text-gray-700">
-              <span className="hidden md:inline">Search:</span>
-              <span className="md:hidden">Search:</span>
-            </label>
-            <input
-              className="form-input mt-1 block w-full"
-              id="search"
-              type="text"
-              placeholder="Search"
-              onChange={handleSearchChange}
-            />
-          </div>
-
-          <div className="mx-3 mt-3 flex flex-col md:mt-0">
-            <label htmlFor="search" className="text-gray-700">
-              <span>Categories:</span>
-            </label>
-            <select
-              className="form-input mt-1 block w-full"
-              onChange={handleCategoryChange}
-            >
-              <option value={"all"}>All</option>
-              {filteredCategoryList.map(({ name, id }: any, index: number) => {
-                return (
-                  <option
-                    key={`category-${id}-${index}`}
-                    className="capitalize"
-                    value={id}
-                  >
-                    {he.decode(name)}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div className="mx-3 mt-3 flex justify-center md:mt-0">
-            <Button
-              className="form-input relative mt-auto flex w-full items-center justify-center"
-              onClick={() => setShowFav(!showFav)}
-            >
-              <Icon
-                className="absolute left-0"
-                name="Favorite"
-                size="sm"
-                variation={showFav ? "active" : "default"}
-                customVariation={{
-                  active: "fill-purple-600",
-                  default: "fill-white stroke-purple-600 stroke-2",
-                }}
-              />
-              <span>
-                <span className="hidden md:inline">
-                  {!showFav ? "Show Favorite Items" : "Show All Items"}
-                </span>
-                <span className="md:hidden">
-                  {!showFav ? "Favorites" : "All Items"}
-                </span>
-              </span>
-            </Button>
-          </div>
-        </div>
+        <Header
+          totalPosts={totalPosts}
+          numberOfPosts={numberOfPosts}
+          setNumberOfPosts={setNumberOfPosts}
+          handleSearchChange={setSearchTerms}
+          handleCategoryChange={handleCategoryChange}
+          toggleFavorites={toggleFavorites}
+          showFav={showFav}
+          filteredCategoryList={filteredCategoryList}
+        />
 
         <div className="border border-gray-600 bg-gray-700 text-white">
           {filteredPosts &&
@@ -332,9 +149,7 @@ export default function Home({
                   date={date}
                   // @ts-ignore
                   id={id}
-                  favoriteCallback={() => {
-                    setFavCTATriggered(!favCTATriggered);
-                  }}
+                  favoriteCallback={updateFavoriteItemsFromStorage}
                   categories={categories}
                   link={link}
                   imageSrc={imageUrl}

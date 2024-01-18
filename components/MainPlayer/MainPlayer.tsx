@@ -20,14 +20,7 @@ interface Props {
   link?: string;
 }
 
-// const imgArray = [
-//   "https://www.paullowe.org/wp-content/uploads/2017/06/P1080841.jpg",
-//   "https://www.paullowe.org/wp-content/uploads/2016/03/waterfall_1.jpg",
-//   "https://www.paullowe.org/wp-content/uploads/2016/09/IMG_0987_low_website.jpg",
-// ];
-
 const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
-  console.log("imageSrc", imageSrc);
   const audioRef = useRef<any>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
