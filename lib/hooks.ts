@@ -42,7 +42,6 @@ type Post = {
   id: number;
   imageUrl: string;
   audioUrl: string;
-  title: string | { rendered: string }; // Updated to use a union type
   date: string;
   categories: Category[];
   link: string;

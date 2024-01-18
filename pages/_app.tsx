@@ -5,7 +5,7 @@ import { createContext, useState } from "react";
 
 type GlobalContextValue = {
   isModalActive: boolean;
-  selectedItem: { title: string; date: string; src: string; id: string };
+  selectedItem: { title: string; date: string; src: string; id: number };
 };
 
 export const GlobalContext = createContext<{
@@ -14,7 +14,7 @@ export const GlobalContext = createContext<{
 }>({
   globalContext: {
     isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: "" },
+    selectedItem: { title: "", date: "", src: "", id: 0 },
   },
   setGlobalContext: () => {},
 });
@@ -22,7 +22,7 @@ export const GlobalContext = createContext<{
 export default function MyApp({ Component, pageProps }: AppProps) {
   const [globalContext, setGlobalContext] = useState({
     isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: "" },
+    selectedItem: { title: "", date: "", src: "", id: 0 },
   });
 
   return (

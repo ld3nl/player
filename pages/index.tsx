@@ -139,7 +139,6 @@ export default function Home({
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
-                  // @ts-ignore
                   id={id}
                   favoriteCallback={updateFavoriteItemsFromStorage}
                   categories={categories}

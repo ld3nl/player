@@ -16,7 +16,7 @@ interface Props {
   imageSrc?: string;
   title?: string;
   src?: string;
-  id?: string;
+  id?: number;
   link?: string;
 }
 
@@ -82,7 +82,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
       setGlobalContext((prev) => ({
         ...prev,
         isModalActive: false,
-        selectedItem: { title: "", date: "", src: "", id: "" },
+        selectedItem: { title: "", date: "", src: "", id: 0 },
       }));
 
       // Reset other states

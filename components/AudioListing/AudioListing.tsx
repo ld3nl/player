@@ -10,8 +10,8 @@ import Button from "../Button/Button";
 type Props = {
   imageSrc: string;
   src: string;
-  id: string;
   title: string;
+  id: number;
   date: string;
   // eslint-disable-next-line no-unused-vars
   favoriteCallback?: (id?: string) => void; // Optional callback for favorite action
@@ -86,6 +86,7 @@ const AudioPlayer: React.FC<Props> = ({
         localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
       }
 
+      console.log("favoriteItems", favoriteItems);
       if (typeof favoriteCallback === "function") favoriteCallback(id);
 
       setFavorite(!isFavorite);
