@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
@@ -83,6 +83,7 @@ export default function Home({
     useState<Category[]>(allCategories);
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolledAndHide, setIsScrolledAndHide] = useState(false);
 
   const { filteredPosts, filteredPostsCategory, filterPosts } =
     useFilteredPosts(
@@ -92,14 +93,49 @@ export default function Home({
       filteredCategory,
     );
 
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  const [height, setHeight] = useState(0);
+
   // Set up the event listener for scrolling
   useEffect(() => {
+    let lastScrollY = window.scrollY; // Track the last scroll position
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollingUp = currentScrollY > lastScrollY; // Check if scrolling up
+
+      setIsScrolledAndHide(scrollingUp && currentScrollY > height * 5);
+      setIsScrolled(currentScrollY > height);
+
+      lastScrollY = currentScrollY; // Update the last scroll position
+    };
+
     window.addEventListener("scroll", handleScroll);
 
     // Clean up the event listener
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
+  }, [height]);
+
+  useEffect(() => {
+    // Make sure the element is not null
+    if (elementRef.current) {
+      setHeight(elementRef.current.offsetHeight);
+    }
+
+    const handleResize = () => {
+      if (elementRef.current) {
+        setHeight(elementRef.current.offsetHeight);
+      }
+    };
+
+    // Add event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Remove event listener on cleanup
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -137,22 +173,6 @@ export default function Home({
     filterPosts();
   }, [filteredCategory, showFav]); // This useEffect will run whenever filteredCategory changes
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop === 0) {
-        window.scrollTo(0, 1);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   // Define the debounced search handler outside the component
   const debouncedSearch = debounce(
     (searchTerms: any, filterCallback: Function) => {
@@ -162,10 +182,6 @@ export default function Home({
   ); // 500 ms delay
 
   // Event handler for scroll event
-  const handleScroll = () => {
-    const top = window.scrollY < 10;
-    setIsScrolled(!top);
-  };
 
   // Input Handler
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,9 +227,11 @@ export default function Home({
       </Head>
       <div className="flex h-full flex-col">
         <div
+          ref={elementRef}
           className={[
-            "sticky top-0 z-50 flex flex-col p-3 md:flex-row",
-            "transition duration-300 ease-in-out",
+            "sticky z-50 flex flex-col p-3 md:flex-row",
+            "transition-all duration-300 ease-in-out",
+            isScrolledAndHide ? "-top-full" : "top-0",
             isScrolled
               ? "bg-white/50 shadow-lg backdrop-blur-sm backdrop-filter"
               : "bg-gray-200",
@@ -441,8 +459,6 @@ export const getStaticProps: GetStaticProps = async () => {
               "",
             )
           : "";
-
-        console.log(imageUrl);
 
         const categoryDetails = categories
           ?.map((categoryId: number) => {
