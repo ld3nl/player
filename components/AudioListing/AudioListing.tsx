@@ -128,16 +128,12 @@ const AudioPlayer: React.FC<Props> = ({
             </span>{" "}
             {categories.map((category: any, index: number) => {
               let name = category.name;
-              // name.replace(" /", ", ");
-              // console.log(name);
               return (
                 <span
                   key={`category-${index}`}
-                  className={[
-                    "text-xs font-light italic text-slate-300",
-                    // index === 0 ? "" : "ms-2",
-                    // "inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10",
-                  ].join(" ")}
+                  className={["text-xs font-light italic text-slate-300"].join(
+                    " ",
+                  )}
                 >
                   {index !== 0 && " / "} {he.decode(name)}
                 </span>

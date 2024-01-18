@@ -42,7 +42,7 @@ type Post = {
   id: number;
   imageUrl: string;
   audioUrl: string;
-  title: string | { rendered: string }; // Updated to use a union type
+  title: string; // Updated to use a union type
   date: string;
   categories: Category[];
   link: string;
@@ -75,8 +75,8 @@ export const useFilteredPosts = (
 
     if (searchArray.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) => {
-        const titleString =
-          typeof post.title === "string" ? post.title : post.title.rendered;
+        const { title } = post;
+        const titleString = title;
         return searchArray.some((word) =>
           titleString.toLowerCase().includes(word.toLowerCase()),
         );

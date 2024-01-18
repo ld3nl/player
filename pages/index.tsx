@@ -135,7 +135,6 @@ export default function Home({
               return (
                 <AudioListing
                   key={`item-${id}`}
-                  // @ts-ignore
                   title={title}
                   src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
