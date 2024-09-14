@@ -65,12 +65,13 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     handlePlay();
   }, [src, id]);
 
-  //
+  // todo: refactor this 
   useEffect(() => {
     if (title && src) {
       handleOpen();
     }
   }, [title, src]);
+
 
   // useEffect for handling other state updates when the modal closes
   useEffect(() => {
@@ -303,21 +304,21 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               <div className="flex items-center space-x-6">
                 <button
                   onClick={() => handleSeekTo("backward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"BackwardRewind"} size="twoThirds" />
                 </button>
 
                 <button
                   onClick={handlePlayPause}
-                  className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={playing ? "Pause" : "Play"} size={"md"} />
                 </button>
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"ForwardRewind"} size="twoThirds" />
                 </button>
@@ -329,7 +330,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
             <div className="mt-2 flex items-center justify-center">
               <button
                 onClick={() => toggleFavorite(id)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
                   name={"Favorite"}
@@ -345,7 +346,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               <a
                 href={link}
                 target="_blank"
-                className="ms-8 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
                   name={"Link"}

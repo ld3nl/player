@@ -3,30 +3,45 @@ import "../styles/index.css";
 
 import { createContext, useState } from "react";
 
+// Defines the shape of the global context data.
+// TODO: Consider splitting this context if different parts are used independently in the app.
 type GlobalContextValue = {
   isModalActive: boolean;
   selectedItem: { title: string; date: string; src: string; id: number };
 };
 
+// Creates a global context for managing application-wide state.
+// TODO: Refactor to use a constant for the default state to avoid repetition.
 export const GlobalContext = createContext<{
   globalContext: GlobalContextValue;
   setGlobalContext: React.Dispatch<React.SetStateAction<GlobalContextValue>>;
 }>({
+  // Initial value for the global context.
   globalContext: {
     isModalActive: false,
     selectedItem: { title: "", date: "", src: "", id: 0 },
   },
+  // A placeholder function for setting the global context, to be overridden by the Provider.
+  // Best Practice: Consider throwing an error or a warning in this default function to indicate misuse.
   setGlobalContext: () => {},
 });
 
+// The main app component.
 export default function MyApp({ Component, pageProps }: AppProps) {
+  // State hook for managing the global context. This state will be accessible to all child components.
+  // Best Practice: Use a constant for the initial state to maintain consistency and DRY code.
+
   const [globalContext, setGlobalContext] = useState({
     isModalActive: false,
     selectedItem: { title: "", date: "", src: "", id: 0 },
   });
 
   return (
+    // GlobalContext.Provider makes the global context available to all child components.
+    // Best Practice: Provide a clear and concise context value.
+
     <GlobalContext.Provider value={{ globalContext, setGlobalContext }}>
+      {/* Component represents the page being rendered, pageProps are the props passed to this page. */}
       <Component {...pageProps} />
     </GlobalContext.Provider>
   );
