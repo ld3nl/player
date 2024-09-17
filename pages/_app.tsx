@@ -38,8 +38,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   // Best Practice: Use a constant for the initial state to maintain consistency and DRY code.
 
   const [globalContext, setGlobalContext] = useState({
-    isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: 0 },
+    ...DEFAULT_GLOBAL_CONTEXT,
   });
 
   return (
