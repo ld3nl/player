@@ -1,11 +1,11 @@
 import { FC, useEffect, useState, useRef, useContext } from "react";
 import Image from "next/image";
 import he from "he";
-import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
 
+import ReactSlider from "react-slider";
 import ReactPlayer from "react-player";
 
 import { Duration } from "./Duration";
@@ -65,13 +65,12 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     handlePlay();
   }, [src, id]);
 
-  // todo: refactor this 
+  // todo: refactor this
   useEffect(() => {
     if (title && src) {
       handleOpen();
     }
   }, [title, src]);
-
 
   // useEffect for handling other state updates when the modal closes
   useEffect(() => {
@@ -281,11 +280,12 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
           {duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
+                {/* @ts-ignore */}
                 <ReactSlider
                   value={played * 100}
                   step={0.000001}
-                  onChange={(e) => handleSeekChange(e / 100)}
-                  onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+                  onChange={(e: any) => handleSeekChange(e / 100)}
+                  onAfterChange={(e: any) => handleSeekMouseUp(e / 100)}
                   className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
                   thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
                   trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
