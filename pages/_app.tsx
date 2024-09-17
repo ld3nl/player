@@ -10,6 +10,11 @@ type GlobalContextValue = {
   selectedItem: { title: string; date: string; src: string; id: number };
 };
 
+const DEFAULT_GLOBAL_CONTEXT: GlobalContextValue = {
+  isModalActive: false,
+  selectedItem: { title: "", date: "", src: "", id: 0 },
+};
+
 // Creates a global context for managing application-wide state.
 // TODO: Refactor to use a constant for the default state to avoid repetition.
 export const GlobalContext = createContext<{
@@ -17,13 +22,14 @@ export const GlobalContext = createContext<{
   setGlobalContext: React.Dispatch<React.SetStateAction<GlobalContextValue>>;
 }>({
   // Initial value for the global context.
-  globalContext: {
-    isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: 0 },
-  },
+  globalContext: DEFAULT_GLOBAL_CONTEXT,
   // A placeholder function for setting the global context, to be overridden by the Provider.
   // Best Practice: Consider throwing an error or a warning in this default function to indicate misuse.
-  setGlobalContext: () => {},
+  setGlobalContext: () => {
+    throw new Error(
+      "setGlobalContext must be overridden by the GlobalContext.Provider",
+    );
+  },
 });
 
 // The main app component.
