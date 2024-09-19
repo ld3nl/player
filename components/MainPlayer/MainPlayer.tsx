@@ -8,7 +8,7 @@ import useLockScroll from "@/lib/hooks";
 import { PlayerProps } from "@/lib/types";
 import ReactPlayer from "react-player";
 
-import Icon from "../Icon/Icon";
+import Icon from "@/components/Icon/Icon";
 
 import { Duration } from "./Duration";
 
