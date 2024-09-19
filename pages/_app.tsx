@@ -2,12 +2,14 @@ import type { AppProps } from "next/app";
 import "../styles/index.css";
 
 import { createContext, useState } from "react";
+import { GlobalContextValue } from "@/lib/types";
 
 // Defines the shape of the global context data.
 // TODO: Consider splitting this context if different parts are used independently in the app.
-type GlobalContextValue = {
-  isModalActive: boolean;
-  selectedItem: { title: string; date: string; src: string; id: number };
+
+const DEFAULT_GLOBAL_CONTEXT: GlobalContextValue = {
+  isModalActive: false,
+  selectedItem: { title: "", date: "", src: "", id: 0 },
 };
 
 // Creates a global context for managing application-wide state.
@@ -17,13 +19,14 @@ export const GlobalContext = createContext<{
   setGlobalContext: React.Dispatch<React.SetStateAction<GlobalContextValue>>;
 }>({
   // Initial value for the global context.
-  globalContext: {
-    isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: 0 },
-  },
+  globalContext: DEFAULT_GLOBAL_CONTEXT,
   // A placeholder function for setting the global context, to be overridden by the Provider.
   // Best Practice: Consider throwing an error or a warning in this default function to indicate misuse.
-  setGlobalContext: () => {},
+  setGlobalContext: () => {
+    throw new Error(
+      "setGlobalContext must be overridden by the GlobalContext.Provider",
+    );
+  },
 });
 
 // The main app component.
@@ -32,8 +35,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   // Best Practice: Use a constant for the initial state to maintain consistency and DRY code.
 
   const [globalContext, setGlobalContext] = useState({
-    isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: 0 },
+    ...DEFAULT_GLOBAL_CONTEXT,
   });
 
   return (

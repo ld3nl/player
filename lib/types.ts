@@ -1,12 +1,16 @@
 import { ButtonHTMLAttributes } from "react";
 
+export type GlobalContextValue = {
+  isModalActive: boolean;
+  selectedItem: { title: string; date: string; src: string; id: number };
+};
+
 // Using interface for easier extension in the future
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
 
 // Using a centralized enum for icon names to avoid typos
-// eslint-disable  @typescript-eslint/naming-convention
 type SVGIconName =
   | "Play"
   | "ForwardRewind"
