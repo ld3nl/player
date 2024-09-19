@@ -246,13 +246,11 @@ export const getStaticProps: GetStaticProps = async () => {
 
         const categoryDetails = categories
           ?.map((categoryId: number) => {
-            if (categoryId === 80) {
-              return null;
-            }
-            return StaticCategoryData.find(
-              (category: Category | null | undefined) =>
-                category?.id === categoryId,
-            );
+            if (categoryId !== 80)
+              return StaticCategoryData.find(
+                (category: Category | null | undefined) =>
+                  category?.id === categoryId,
+              );
           })
           .filter((category) => !!category && category.slug !== undefined); // Ensure `slug` is defined
 
