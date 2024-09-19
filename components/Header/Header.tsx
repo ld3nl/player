@@ -4,23 +4,9 @@ import Icon from "@/components/Icon/Icon";
 import he from "he";
 import debounce from "debounce";
 
-const DEFAULT_NUMBER_OF_POSTS = 30;
+import { HeaderProps, SimpleCategory } from "@/lib/types";
 
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface HeaderProps {
-  totalPosts: number;
-  numberOfPosts: number;
-  setNumberOfPosts: React.Dispatch<React.SetStateAction<number>>;
-  handleSearchChange: React.Dispatch<React.SetStateAction<string[]>>;
-  handleCategoryChange: React.Dispatch<React.SetStateAction<number[]>>;
-  toggleFavorites: () => void;
-  showFav: boolean;
-  filteredCategoryList: Category[];
-}
+import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
 // const noop = () => {}; // Default no-operation function
 
@@ -183,11 +169,18 @@ const Header: React.FC<HeaderProps> = ({
           onChange={categoryChangeHandler}
         >
           <option value="all">All</option>
-          {filteredCategoryList.map(({ name, id }, index) => (
-            <option key={`category-${id}-${index}`} value={id}>
-              {he.decode(name)}
-            </option>
-          ))}
+          {filteredCategoryList.map(
+            (category: SimpleCategory | null | undefined, index: number) => {
+              if (!category) return null; // Check for null or undefined
+
+              const { name, id } = category;
+              return (
+                <option key={`category-${id}-${index}`} value={id}>
+                  {he.decode(name)}
+                </option>
+              );
+            },
+          )}
         </select>
       </div>
 

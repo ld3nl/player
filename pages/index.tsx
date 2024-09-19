@@ -7,42 +7,22 @@ import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 import Header from "@/components/Header/Header";
 
+import { HomeProps, Category, SimpleCategory } from "@/lib/types";
+
 import {
   getAllPostsFromServer,
   getCategoryCount,
   StaticCategoryData,
 } from "../lib/utils";
-import { useFilteredPosts } from "../lib/hooks";
+import { useFilteredPosts } from "@/lib/hooks";
+
+import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
 import { GlobalContext } from "./_app";
-
-interface Category {
-  id: number;
-  name: string;
-  // include other properties if there are any
-}
-
-type Post = {
-  id: number;
-  audioUrl: string;
-  imageUrl: string;
-  title: string;
-  date: string;
-  categories: any;
-  link: string;
-};
-
-type HomeProps = {
-  posts: Post[];
-  totalPosts: number;
-  allCategories: any;
-};
 
 const cache = new LRUCache<string, HomeProps>({
   max: 500, // maximum number of entries
 });
-
-const DEFAULT_NUMBER_OF_POSTS = 30;
 
 export default function Home({
   posts,
@@ -62,7 +42,7 @@ export default function Home({
   const { globalContext } = useContext(GlobalContext);
 
   const [filteredCategoryList, setFilteredPostsCategory] =
-    useState<Category[]>(allCategories);
+    useState<(SimpleCategory | null | undefined)[]>(allCategories);
 
   const { filteredPosts, filteredPostsCategory, filterPosts } =
     useFilteredPosts(
@@ -87,9 +67,8 @@ export default function Home({
       setFilteredPostsCategory(allCategories);
     }
 
-    const filteredCategories: Category[] = allCategories.filter(({ id }: any) =>
-      filteredPostsCategory.includes(id),
-    );
+    const filteredCategories: (SimpleCategory | null | undefined)[] =
+      allCategories.filter(({ id }: any) => filteredPostsCategory.includes(id));
 
     console.log(filteredCategories);
 
@@ -267,15 +246,15 @@ export const getStaticProps: GetStaticProps = async () => {
 
         const categoryDetails = categories
           ?.map((categoryId: number) => {
-            // Assuming you want to exclude category with id 80 and find the matching category
             if (categoryId === 80) {
-              return null; // or however you want to handle this specific case
+              return null;
             }
             return StaticCategoryData.find(
-              (category: any) => category.id === categoryId,
+              (category: Category | null | undefined) =>
+                category?.id === categoryId,
             );
           })
-          .filter(Boolean); // This will remove any null values from the array
+          .filter((category) => !!category && category.slug !== undefined); // Ensure `slug` is defined
 
         return {
           id,

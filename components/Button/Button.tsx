@@ -1,8 +1,4 @@
-import { ButtonHTMLAttributes } from "react";
-
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  className?: string;
-};
+import { ButtonProps } from "../../lib/types";
 
 const Button: React.FC<ButtonProps> = ({ className, children, ...props }) => {
   return (

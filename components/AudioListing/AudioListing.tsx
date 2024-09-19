@@ -3,29 +3,12 @@ import { useContext, useState, useEffect, useCallback } from "react";
 import he from "he"; // Importing he for HTML entity encoding/decoding
 import { GlobalContext } from "../../pages/_app";
 
+import { AudioListingProps, Progress } from "../../lib/types";
+
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
 
-// Props definition for the AudioPlayer component
-type Props = {
-  imageSrc: string;
-  src: string;
-  title: string;
-  id: number;
-  date: string;
-  // eslint-disable-next-line no-unused-vars
-  favoriteCallback?: (id?: string) => void; // Optional callback for favorite action
-  categories?: any;
-  link: string;
-};
-
-// Type definition for tracking audio progress
-type Progress = {
-  playedSeconds: number;
-  duration: number;
-};
-
-const AudioPlayer: React.FC<Props> = ({
+const AudioPlayer: React.FC<AudioListingProps> = ({
   imageSrc,
   src,
   title,
@@ -126,7 +109,7 @@ const AudioPlayer: React.FC<Props> = ({
             <span className="text-xs font-bold text-slate-300">
               Categories:
             </span>{" "}
-            {categories.map((category: any, index: number) => {
+            {categories?.map((category: any, index: number) => {
               let name = category.name;
               return (
                 <span

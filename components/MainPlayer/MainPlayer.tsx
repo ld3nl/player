@@ -2,25 +2,19 @@ import { FC, useEffect, useState, useRef, useContext } from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
-import { GlobalContext } from "../../pages/_app";
-import useLockScroll from "../../lib/hooks";
-import Icon from "../Icon/Icon";
 
+import { GlobalContext } from "@/pages/_app";
+import useLockScroll from "@/lib/hooks";
+import { PlayerProps } from "@/lib/types";
 import ReactPlayer from "react-player";
+
+import Icon from "../Icon/Icon";
 
 import { Duration } from "./Duration";
 
 import img from "@/public/P1080841.jpg";
 
-interface Props {
-  imageSrc?: string;
-  title?: string;
-  src?: string;
-  id?: number;
-  link?: string;
-}
-
-const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
+const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
   const audioRef = useRef<any>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -65,13 +59,12 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     handlePlay();
   }, [src, id]);
 
-  // todo: refactor this 
+  // todo: refactor this
   useEffect(() => {
     if (title && src) {
       handleOpen();
     }
   }, [title, src]);
-
 
   // useEffect for handling other state updates when the modal closes
   useEffect(() => {

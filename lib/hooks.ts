@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { homePost, Category } from "@/lib/types";
 
 export const useLockScroll = (isOpen: boolean): void => {
   useEffect(() => {
@@ -30,31 +31,13 @@ export const useLockScroll = (isOpen: boolean): void => {
 
 export default useLockScroll;
 
-// Type definition for Category
-type Category = {
-  id: number;
-  name: string;
-  slug: string;
-};
-
-// Type definition for Post
-type Post = {
-  id: number;
-  imageUrl: string;
-  audioUrl: string;
-  title: string; // Updated to use a union type
-  date: string;
-  categories: Category[];
-  link: string;
-};
-
 export const useFilteredPosts = (
-  posts: Post[],
+  posts: homePost[],
   favoriteItems: number[],
   searchArray: string[],
   categoryIds: number[],
 ) => {
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>(() => posts);
+  const [filteredPosts, setFilteredPosts] = useState<homePost[]>(() => posts);
   const [filteredPostsCategory, setFilteredPostsCategory] = useState<any>([]);
 
   // Helper function to perform the actual filtering
@@ -69,20 +52,23 @@ export const useFilteredPosts = (
 
     if (categoryIds.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
-        post.categories.some((category) => categoryIds.includes(category.id)),
+        post.categories.some(
+          (category) => category?.id && categoryIds.includes(category.id),
+        ),
       );
     }
 
     if (searchArray.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) => {
         const { title } = post;
-        const titleString = title;
+
         return searchArray.some((word) =>
-          titleString.toLowerCase().includes(word.toLowerCase()),
+          title?.toLowerCase().includes(word.toLowerCase()),
         );
       });
     }
 
+    // Should return the filtered posts array
     return newFilteredPosts;
   }, [posts, favoriteItems, categoryIds, searchArray]);
 
@@ -92,8 +78,10 @@ export const useFilteredPosts = (
 
     const flattenedAndUniqueIds = Array.from(
       new Set(
-        newFilteredPosts.flatMap((post) =>
-          post.categories.map((cat) => cat.id),
+        newFilteredPosts.flatMap((post: homePost) =>
+          post.categories
+            .filter((cat): cat is Category => cat !== null && cat !== undefined) // Ensure `cat` is not null or undefined
+            .map((cat) => cat.id),
         ),
       ),
     );

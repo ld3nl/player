@@ -1,35 +1,16 @@
 import * as React from "react";
-import { getSVG, SVGProps } from "./getIcon";
+import { getSVG } from "./getIcon";
 
-// Define the types of icons available in your application
-type SVGIconName =
-  | "Play"
-  | "ForwardRewind"
-  | "BackwardRewind"
-  | "Pause"
-  | "Close"
-  | "Favorite"
-  | "Spinner"
-  | "Link";
-
-// Props interface for the Icon component
-interface IconProps {
-  className?: string; // Optional className for styling
-  name: SVGIconName; // Name of the icon to be rendered
-  size?: "sm" | "md" | "twoThirds"; // Optional size of the icon, with default sizes available
-  variation?: "active" | "default"; // Optional variation for different icon styles
-  customVariation?: { active: string; default: string }; // Optional custom variation for more control
-  customSize?: string; // Optional custom size for exact sizing
-}
+import { IconProps, SVGProps } from "../../lib/types";
 
 // Icon component definition
 const Icon: React.FunctionComponent<IconProps> = ({
   className = "",
-  name,
+  name = "Play",
   size = "md",
   variation = "default",
   customVariation = { active: "fill-purple-600", default: "fill-blue-100" },
-  customSize,
+  customSize = "",
 }) => {
   const svgProps: SVGProps = { name }; // Properties passed to the getSVG function
   let viewBox = "0 0 120 120"; // Default viewBox size

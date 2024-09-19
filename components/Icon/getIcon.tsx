@@ -1,6 +1,4 @@
-export interface SVGProps {
-  name: string;
-}
+import { SVGProps } from "@/lib/types";
 
 export function getSVG({ name }: SVGProps) {
   switch (name) {
@@ -74,8 +72,8 @@ export function getSVG({ name }: SVGProps) {
         </>
       );
 
-    case "":
-      return <></>;
+    // case "":
+    //   return <></>;
     default:
       return <path />;
   }
