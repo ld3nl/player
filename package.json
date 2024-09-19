@@ -15,7 +15,7 @@
     "debounce": "^2.1.1",
     "he": "^1.2.0",
     "lru-cache": "^8.0.5",
-    "next": "15.0.0-canary.155",
+    "next": "15.0.0-canary.159",
     "normalize.css": "^8.0.1",
     "react": "19.0.0-beta-26f2496093-20240514",
     "react-dom": "19.0.0-beta-26f2496093-20240514",
