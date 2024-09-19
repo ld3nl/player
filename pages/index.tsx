@@ -67,8 +67,11 @@ export default function Home({
       setFilteredPostsCategory(allCategories);
     }
 
-    const filteredCategories: (SimpleCategory | null | undefined)[] =
-      allCategories.filter(({ id }: any) => filteredPostsCategory.includes(id));
+    const filteredCategories: (Category | null | undefined)[] =
+      allCategories.filter(
+        (category: Category | null | undefined) =>
+          category?.id && filteredPostsCategory.includes(category.id),
+      );
 
     console.log(filteredCategories);
 
