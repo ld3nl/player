@@ -104,7 +104,7 @@ const AudioPlayer: React.FC<Props> = ({
     >
       <Button onClick={() => toggleFavorite(id)} className="w-10">
         <Icon
-          className="me-2.5 h-3 w-3"
+          className="me-2.5 size-3"
           name={"Favorite"}
           size={"sm"}
           variation={favorite ? "active" : "default"}

@@ -1,11 +1,11 @@
 import { FC, useEffect, useState, useRef, useContext } from "react";
 import Image from "next/image";
 import he from "he";
-import ReactSlider from "react-slider";
 import { GlobalContext } from "../../pages/_app";
 import useLockScroll from "../../lib/hooks";
 import Icon from "../Icon/Icon";
 
+import ReactSlider from "react-slider";
 import ReactPlayer from "react-player";
 
 import { Duration } from "./Duration";
@@ -65,7 +65,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     handlePlay();
   }, [src, id]);
 
-  //
+  // todo: refactor this
   useEffect(() => {
     if (title && src) {
       handleOpen();
@@ -280,11 +280,12 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
           {duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
+                {/* @ts-ignore */}
                 <ReactSlider
                   value={played * 100}
                   step={0.000001}
-                  onChange={(e) => handleSeekChange(e / 100)}
-                  onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+                  onChange={(e: any) => handleSeekChange(e / 100)}
+                  onAfterChange={(e: any) => handleSeekMouseUp(e / 100)}
                   className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
                   thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
                   trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
@@ -303,21 +304,21 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               <div className="flex items-center space-x-6">
                 <button
                   onClick={() => handleSeekTo("backward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"BackwardRewind"} size="twoThirds" />
                 </button>
 
                 <button
                   onClick={handlePlayPause}
-                  className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={playing ? "Pause" : "Play"} size={"md"} />
                 </button>
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
                   <Icon name={"ForwardRewind"} size="twoThirds" />
                 </button>
@@ -329,7 +330,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
             <div className="mt-2 flex items-center justify-center">
               <button
                 onClick={() => toggleFavorite(id)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
                   name={"Favorite"}
@@ -345,7 +346,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               <a
                 href={link}
                 target="_blank"
-                className="ms-8 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
                   name={"Link"}
