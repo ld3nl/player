@@ -242,7 +242,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
               height={imageSrc ? 400 : undefined}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
-              fetchpriority="high"
+              fetchPriority="high"
             />
           </div>
           {duration !== 0 && (
