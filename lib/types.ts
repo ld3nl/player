@@ -1,8 +1,34 @@
 import { ButtonHTMLAttributes } from "react";
 
+// Consider how many optional props you're passing for component clarity
+export interface PlayerProps {
+  mediaItem: {
+    imageSrc?: string;
+    title?: string;
+    src?: string;
+    id?: number;
+    link?: string;
+    date?: string;
+  };
+  // eslint-disable-next-line no-unused-vars
+  // setModalCallback: (modal: Modal) => void;
+}
+
 export type GlobalContextValue = {
   isModalActive: boolean;
   selectedItem: { title: string; date: string; src: string; id: number };
+};
+
+export type Modal = {
+  isModalActive: boolean;
+  selectedItem?: {
+    imageSrc?: string;
+    title?: string;
+    src?: string;
+    id?: number;
+    link?: string;
+    date?: string;
+  };
 };
 
 // Using interface for easier extension in the future
@@ -57,6 +83,8 @@ export type AudioListingProps = {
   favoriteCallback?: (id?: number) => void; // Ensure consistency: id is a number
   categories?: (Category | null | undefined)[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
+  // eslint-disable-next-line no-unused-vars
+  setModalCallback: (modal: Modal) => void;
 };
 
 // Explicitly typed for better clarity
@@ -86,15 +114,6 @@ export interface SVGProps {
 export interface DurationProps {
   className?: string;
   seconds: number;
-}
-
-// Consider how many optional props you're passing for component clarity
-export interface PlayerProps {
-  imageSrc?: string;
-  title?: string;
-  src?: string;
-  id?: number;
-  link?: string;
 }
 
 // Using union types for safety, especially with `null | undefined`

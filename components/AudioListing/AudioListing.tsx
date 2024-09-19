@@ -1,12 +1,10 @@
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import he from "he"; // Importing he for HTML entity encoding/decoding
-import { GlobalContext } from "../../pages/_app";
 
 import {
   AudioListingProps,
   Category,
-  GlobalContextValue,
   Progress,
   SVGIconName,
 } from "../../lib/types";
@@ -14,7 +12,7 @@ import {
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
 
-const AudioPlayer: React.FC<AudioListingProps> = ({
+const AudioListing: React.FC<AudioListingProps> = ({
   imageSrc,
   src,
   title,
@@ -23,6 +21,7 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
   favoriteCallback,
   categories,
   link,
+  setModalCallback,
 }) => {
   // State for tracking progress of the audio
   const [progress, setProgress] = useState<Progress>({
@@ -35,7 +34,6 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
   const [publishDate, setPublishDate] = useState<string>();
 
   // Accessing global context
-  const { globalContext, setGlobalContext } = useContext(GlobalContext);
 
   // Effect for loading progress and favorite status from localStorage
   useEffect(() => {
@@ -50,7 +48,7 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
       setProgress(JSON.parse(storedProgress));
     }
     setPublishDate(new Date(date).toLocaleDateString("en-AU"));
-  }, [src, id, globalContext, date]);
+  }, [src, id, date]);
 
   // Calculating remaining time for display
   const remainingTime = progress.duration - progress.playedSeconds;
@@ -60,7 +58,7 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
   // Function to toggle favorite status
   // Memoized toggleFavorite function
   const toggleFavorite = useCallback(
-    (id: any) => {
+    (id: number) => {
       const favoriteItems = JSON.parse(
         localStorage.getItem("favoriteItems") || "[]",
       );
@@ -103,10 +101,11 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
       <div
         className="w-full cursor-pointer"
         onClick={() => {
-          setGlobalContext((prev: GlobalContextValue) => ({
-            ...prev,
-            selectedItem: { title, date, src, id, link, imageSrc },
-          }));
+          if (typeof setModalCallback === "function")
+            setModalCallback({
+              isModalActive: true,
+              selectedItem: { title, date, src, id, link, imageSrc },
+            });
         }}
       >
         {title && (
@@ -165,4 +164,4 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
   );
 };
 
-export default AudioPlayer;
+export default AudioListing;

@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
@@ -7,7 +7,7 @@ import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 import Header from "@/components/Header/Header";
 
-import { HomeProps, Category, SimpleCategory } from "@/lib/types";
+import { HomeProps, Category, SimpleCategory, Modal } from "@/lib/types";
 
 import {
   getAllPostsFromServer,
@@ -17,8 +17,6 @@ import {
 import { useFilteredPosts } from "@/lib/hooks";
 
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
-
-import { GlobalContext } from "./_app";
 
 const cache = new LRUCache<string, HomeProps>({
   max: 500, // maximum number of entries
@@ -39,7 +37,16 @@ export default function Home({
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [filteredCategory, setFilteredCategory] = useState<number[]>([]);
 
-  const { globalContext } = useContext(GlobalContext);
+  const DEFAULT_MODAL: Modal = {
+    isModalActive: false,
+    selectedItem: { title: "", date: "", src: "", id: 0 },
+  };
+
+  const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
+
+  useEffect(() => {
+    console.log(modal);
+  }, [modal]);
 
   const [filteredCategoryList, setFilteredPostsCategory] =
     useState<(SimpleCategory | null | undefined)[]>(allCategories);
@@ -125,12 +132,12 @@ export default function Home({
                   categories={categories}
                   link={link}
                   imageSrc={imageUrl}
+                  setModalCallback={setModal}
                 />
               );
             })}
         </div>
-
-        <MainPlayer {...globalContext.selectedItem} />
+        {modal.selectedItem && <MainPlayer mediaItem={modal.selectedItem} />}
       </div>
     </>
   );

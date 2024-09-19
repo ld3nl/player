@@ -1,9 +1,8 @@
-import { FC, useEffect, useState, useRef, useContext } from "react";
+import { FC, useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
 
-import { GlobalContext } from "@/pages/_app";
 import useLockScroll from "@/lib/hooks";
 import { PlayerProps, SVGIconName } from "@/lib/types";
 import ReactPlayer from "react-player";
@@ -14,7 +13,10 @@ import { Duration } from "./Duration";
 
 import img from "@/public/P1080841.jpg";
 
-const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
+const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
+  const { title, src, id, link, imageSrc } = mediaItem;
+
+  // todo: refactor this type `any`
   const audioRef = useRef<any>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -44,8 +46,6 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
   // const [audioIsLoading, setAudioIsLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
 
-  const { setGlobalContext } = useContext(GlobalContext);
-
   useLockScroll(isOpen);
 
   useEffect(() => {
@@ -73,12 +73,6 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
         handleStop();
       }
 
-      setGlobalContext((prev) => ({
-        ...prev,
-        isModalActive: false,
-        selectedItem: { title: "", date: "", src: "", id: 0 },
-      }));
-
       // Reset other states
       // setUrl(null);
       setPip(false);
@@ -103,7 +97,6 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     setTimeout(() => {
       setIsOpen(true);
       setIsDelayingOpen(false); // End delaying
-      setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
     }, 10); // Short delay, just enough for the browser to render the initial state
   };
 
@@ -115,6 +108,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     }, 500); // Duration of the closing animation
   };
 
+  // todo: refactor this type `any`
   const toggleFavorite = (id: any) => {
     const favoriteItems = JSON.parse(
       localStorage.getItem("favoriteItems") || "[]",
@@ -123,6 +117,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     const isFavorite = favoriteItems.includes(id);
 
     if (isFavorite) {
+      // todo: refactor this type `any`
       const updatedItems = favoriteItems.filter((item: any) => item !== id);
       localStorage.setItem("favoriteItems", JSON.stringify(updatedItems));
     } else {
@@ -166,6 +161,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     setPlaying(!playing);
   };
 
+  // todo: refactor this type `any`
   const handleSeekChange = (e: any) => {
     const newValue = e.target?.value || e;
     if (newValue) {
@@ -173,6 +169,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     }
   };
 
+  // todo: refactor this type `any`
   const handleSeekMouseUp = (e: any) => {
     const newValue = e.target?.value || e;
     setSeeking(false);
@@ -200,6 +197,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
     }
   };
 
+  // todo: refactor this type `any`
   const handleDuration = (duration: any) => {
     setDuration(duration);
 
@@ -244,6 +242,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
               height={imageSrc ? 400 : undefined}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
+              fetchpriority="high"
             />
           </div>
           {duration !== 0 && (
