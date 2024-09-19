@@ -8,18 +8,23 @@ export type GlobalContextValue = {
 // Using interface for easier extension in the future
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
+  children: React.ReactNode;
+  onClick?: () => void;
 }
 
 // Using a centralized enum for icon names to avoid typos
-type SVGIconName =
-  | "Play"
-  | "ForwardRewind"
-  | "BackwardRewind"
-  | "Pause"
-  | "Close"
-  | "Favorite"
-  | "Spinner"
-  | "Link";
+/* eslint-disable no-unused-vars */
+export enum SVGIconName {
+  Play = "Play",
+  ForwardRewind = "ForwardRewind",
+  BackwardRewind = "BackwardRewind",
+  Pause = "Pause",
+  Close = "Close",
+  Favorite = "Favorite",
+  Spinner = "Spinner",
+  Link = "Link",
+}
+/* eslint-enable no-unused-vars */
 
 // Ensuring Size and Variation are properly used across the codebase
 export type Size = "sm" | "md" | "twoThirds";

@@ -3,7 +3,13 @@ import { useContext, useState, useEffect, useCallback } from "react";
 import he from "he"; // Importing he for HTML entity encoding/decoding
 import { GlobalContext } from "../../pages/_app";
 
-import { AudioListingProps, Progress } from "../../lib/types";
+import {
+  AudioListingProps,
+  Category,
+  GlobalContextValue,
+  Progress,
+  SVGIconName,
+} from "../../lib/types";
 
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
@@ -88,7 +94,7 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
       <Button onClick={() => toggleFavorite(id)} className="w-10">
         <Icon
           className="me-2.5 size-3"
-          name={"Favorite"}
+          name={SVGIconName.Favorite}
           size={"sm"}
           variation={favorite ? "active" : "default"}
         />
@@ -97,7 +103,7 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
       <div
         className="w-full cursor-pointer"
         onClick={() => {
-          setGlobalContext((prev) => ({
+          setGlobalContext((prev: GlobalContextValue) => ({
             ...prev,
             selectedItem: { title, date, src, id, link, imageSrc },
           }));
@@ -109,19 +115,23 @@ const AudioPlayer: React.FC<AudioListingProps> = ({
             <span className="text-xs font-bold text-slate-300">
               Categories:
             </span>{" "}
-            {categories?.map((category: any, index: number) => {
-              let name = category.name;
-              return (
-                <span
-                  key={`category-${index}`}
-                  className={["text-xs font-light italic text-slate-300"].join(
-                    " ",
-                  )}
-                >
-                  {index !== 0 && " / "} {he.decode(name)}
-                </span>
-              );
-            })}
+            {categories?.map(
+              (category: Category | null | undefined, index: number) => {
+                if (!category) return null;
+
+                const { name } = category;
+                return (
+                  <span
+                    key={`category-${index}`}
+                    className={[
+                      "text-xs font-light italic text-slate-300",
+                    ].join(" ")}
+                  >
+                    {index !== 0 && " / "} {name && he.decode(name)}
+                  </span>
+                );
+              },
+            )}
           </div>
         )}
 

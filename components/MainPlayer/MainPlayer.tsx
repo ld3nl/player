@@ -5,7 +5,7 @@ import ReactSlider from "react-slider";
 
 import { GlobalContext } from "@/pages/_app";
 import useLockScroll from "@/lib/hooks";
-import { PlayerProps } from "@/lib/types";
+import { PlayerProps, SVGIconName } from "@/lib/types";
 import ReactPlayer from "react-player";
 
 import Icon from "@/components/Icon/Icon";
@@ -230,7 +230,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
               className="absolute right-0 top-0 w-12 p-3 text-white"
               onClick={handleClose}
             >
-              <Icon name={"Close"} />
+              <Icon name={SVGIconName.Close} />
             </button>
           </div>
           <div className="mx-auto flex w-96">
@@ -299,21 +299,24 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"BackwardRewind"} size="twoThirds" />
+                  <Icon name={SVGIconName.BackwardRewind} size="twoThirds" />
                 </button>
 
                 <button
                   onClick={handlePlayPause}
                   className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={playing ? "Pause" : "Play"} size={"md"} />
+                  <Icon
+                    name={playing ? SVGIconName.Pause : SVGIconName.Play}
+                    size={"md"}
+                  />
                 </button>
 
                 <button
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  <Icon name={"ForwardRewind"} size="twoThirds" />
+                  <Icon name={SVGIconName.ForwardRewind} size="twoThirds" />
                 </button>
               </div>
             </div>
@@ -326,7 +329,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
                 className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
-                  name={"Favorite"}
+                  name={SVGIconName.Favorite}
                   size={"sm"}
                   variation={favorite ? "active" : "default"}
                   customVariation={{
@@ -342,7 +345,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
                 className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
-                  name={"Link"}
+                  name={SVGIconName.Link}
                   size="twoThirds"
                   customVariation={{
                     active: "fill-purple-600",
@@ -356,7 +359,7 @@ const MainPlayer: FC<PlayerProps> = ({ title, src, id, link, imageSrc }) => {
           {duration === 0 && (
             <div className="flex p-10">
               <Icon
-                name={"Spinner"}
+                name={SVGIconName.Spinner}
                 customVariation={{
                   active: "fill-purple-600",
                   default: "fill-purple-600",

@@ -4,7 +4,7 @@ import Icon from "@/components/Icon/Icon";
 import he from "he";
 import debounce from "debounce";
 
-import { HeaderProps, SimpleCategory } from "@/lib/types";
+import { HeaderProps, SimpleCategory, SVGIconName } from "@/lib/types";
 
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
@@ -194,7 +194,7 @@ const Header: React.FC<HeaderProps> = ({
         >
           <Icon
             className="absolute left-0"
-            name="Favorite"
+            name={SVGIconName.Favorite}
             size="sm"
             variation={showFav ? "active" : "default"}
             customVariation={{

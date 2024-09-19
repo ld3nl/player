@@ -1,12 +1,12 @@
 import * as React from "react";
 import { getSVG } from "./getIcon";
 
-import { IconProps, SVGProps } from "../../lib/types";
+import { IconProps, SVGProps, SVGIconName } from "../../lib/types";
 
 // Icon component definition
 const Icon: React.FunctionComponent<IconProps> = ({
   className = "",
-  name = "Play",
+  name = SVGIconName.Play,
   size = "md",
   variation = "default",
   customVariation = { active: "fill-purple-600", default: "fill-blue-100" },
