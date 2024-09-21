@@ -6,12 +6,26 @@ export interface PlayerProps {
     imageSrc?: string;
     title?: string;
     src?: string;
-    id?: number;
+    // id?: number;
     link?: string;
     date?: string;
+    id?: number;
+    playedSeconds: number;
+    duration: number;
+    isFavorite: boolean;
   };
   // eslint-disable-next-line no-unused-vars
   // setModalCallback: (modal: Modal) => void;
+  setGlobalMediaState: (
+    // eslint-disable-next-line no-unused-vars
+    id: number,
+    // eslint-disable-next-line no-unused-vars
+    playedSeconds: number,
+    // eslint-disable-next-line no-unused-vars
+    duration: number,
+    // eslint-disable-next-line no-unused-vars
+    isFavorite: boolean,
+  ) => void;
 }
 
 export type GlobalContextValue = {
@@ -28,6 +42,9 @@ export type Modal = {
     id?: number;
     link?: string;
     date?: string;
+    playedSeconds: number;
+    duration: number;
+    isFavorite: boolean;
   };
 };
 
@@ -74,17 +91,17 @@ export type Category = Partial<{
 
 // Ensuring consistency: id is a number
 export type AudioListingProps = {
-  imageSrc: string;
-  src: string;
   title: string;
-  id: number;
   date: string;
   // eslint-disable-next-line no-unused-vars
   favoriteCallback?: (id?: number) => void; // Ensure consistency: id is a number
   categories?: (Category | null | undefined)[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
   // eslint-disable-next-line no-unused-vars
-  setModalCallback: (modal: Modal) => void;
+  setModalCallback?: any;
+  playedSeconds: number; // Explicitly typed, good for clarity.
+  duration: number; // Explicitly typed, no issues here.
+  children?: React.ReactNode;
 };
 
 // Explicitly typed for better clarity
@@ -151,3 +168,13 @@ export interface Post {
   date: string;
   link: string;
 }
+
+// eslint-disable-next-line no-unused-vars
+export type ValueSetter<T> = T | ((value: T) => T);
+
+export type MediaState = {
+  id: number;
+  playedSeconds: number;
+  duration: number;
+  isFavorite: boolean;
+};
