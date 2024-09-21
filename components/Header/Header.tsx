@@ -4,7 +4,7 @@ import Icon from "@/components/Icon/Icon";
 import he from "he";
 import debounce from "debounce";
 
-import { HeaderProps, SimpleCategory, SVGIconName } from "@/lib/types";
+import { Category, HeaderProps, SVGIconName } from "@/lib/types";
 
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
@@ -169,18 +169,16 @@ const Header: React.FC<HeaderProps> = ({
           onChange={categoryChangeHandler}
         >
           <option value="all">All</option>
-          {filteredCategoryList.map(
-            (category: SimpleCategory | null | undefined, index: number) => {
-              if (!category) return null; // Check for null or undefined
+          {filteredCategoryList.map((category: Category, index: number) => {
+            if (!category) return null; // Check for null or undefined
 
-              const { name, id } = category;
-              return (
-                <option key={`category-${id}-${index}`} value={id}>
-                  {he.decode(name)}
-                </option>
-              );
-            },
-          )}
+            const { name, id } = category;
+            return (
+              <option key={`category-${id}-${index}`} value={id}>
+                {he.decode(name)}
+              </option>
+            );
+          })}
         </select>
       </div>
 

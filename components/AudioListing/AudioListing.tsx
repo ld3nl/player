@@ -13,7 +13,7 @@ import { AudioListingProps, Category } from "../../lib/types"; // Importing type
  * - categories: An array of category objects or undefined/null values.
  */
 const CategoryDisplay: React.FC<{
-  categories: (Category | null | undefined)[];
+  categories: Category[];
 }> = ({ categories }) => {
   // If there are no categories or an empty array, return null (don't render anything)
   if (!categories || categories?.length === 0) return null;

@@ -10,7 +10,7 @@ import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import { SVGIconName } from "@/lib/types";
 
-import { HomeProps, Category, SimpleCategory, Modal } from "@/lib/types";
+import { HomeProps, Category, Modal } from "@/lib/types";
 
 import {
   getAllPostsFromServer,
@@ -71,7 +71,7 @@ export default function Home({
   }, [modal]);
 
   const [filteredCategoryList, setFilteredPostsCategory] =
-    useState<(SimpleCategory | null | undefined)[]>(allCategories);
+    useState<Category[]>(allCategories);
 
   const { filteredPosts, filteredPostsCategory, filterPosts } =
     useFilteredPosts(
@@ -96,11 +96,9 @@ export default function Home({
       setFilteredPostsCategory(allCategories);
     }
 
-    const filteredCategories: (Category | null | undefined)[] =
-      allCategories.filter(
-        (category: Category | null | undefined) =>
-          category?.id && filteredPostsCategory.includes(category.id),
-      );
+    const filteredCategories: Category[] = allCategories.filter(
+      (category) => category?.id && filteredPostsCategory.includes(category.id),
+    );
 
     console.log(filteredCategories);
 
@@ -318,11 +316,14 @@ export const getStaticProps: GetStaticProps = async () => {
     `[getStaticProps] Number of requests to make: ${numberOfRequests}`,
   );
 
-  const allCategories = StaticCategoryData.flatMap(({ name, id }) => {
+  const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {
     const cleanedNames = name.replace(/\s*\/\s*/g, "/").split("/");
-    return cleanedNames.map((partName) => ({ name: partName, id }));
+    return cleanedNames.map((partName) => ({
+      name: partName,
+      id,
+      slug,
+    }));
   });
-
   const promises = [];
 
   // Creating a series of promises to fetch posts in batches.
@@ -357,15 +358,16 @@ export const getStaticProps: GetStaticProps = async () => {
             )
           : "";
 
+        // Filter out undefined categories
         const categoryDetails = categories
           ?.map((categoryId: number) => {
-            if (categoryId !== 80)
+            if (categoryId !== 80) {
               return StaticCategoryData.find(
-                (category: Category | null | undefined) =>
-                  category?.id === categoryId,
+                (category: Category) => category?.id === categoryId,
               );
+            }
           })
-          .filter((category) => !!category && category.slug !== undefined); // Ensure `slug` is defined
+          .filter((category): category is Category => !!category); // No need to check for undefined `slug`
 
         return {
           id,

@@ -83,11 +83,11 @@ export interface IconProps {
 }
 
 // Using utility type Partial for flexibility with many nullable or optional fields
-export type Category = Partial<{
+export type Category = {
   id: number;
   name: string;
-  slug: string;
-}>;
+  slug: string; // Optional fields can remain
+};
 
 // Ensuring consistency: id is a number
 export type AudioListingProps = {
@@ -95,7 +95,7 @@ export type AudioListingProps = {
   date: string;
   // eslint-disable-next-line no-unused-vars
   favoriteCallback?: (id?: number) => void; // Ensure consistency: id is a number
-  categories?: (Category | null | undefined)[]; // Changed to `Category[]` for better type safety, good practice.
+  categories?: Category[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
   // eslint-disable-next-line no-unused-vars
   setModalCallback?: any;
@@ -119,7 +119,7 @@ export interface HeaderProps {
   handleCategoryChange: React.Dispatch<React.SetStateAction<number[]>>;
   toggleFavorites: () => void;
   showFav: boolean;
-  filteredCategoryList: (SimpleCategory | null | undefined)[];
+  filteredCategoryList: Category[];
 }
 
 // Making SVGProps extendable for future customizations
@@ -140,20 +140,15 @@ export type homePost = {
   imageUrl: string;
   title: string;
   date: string;
-  categories: (Category | null | undefined)[]; // Updated for better type safety
+  categories: Category[]; // Updated for better type safety
   link: string;
-};
-
-export type SimpleCategory = {
-  id: number;
-  name: string;
 };
 
 // Consistent usage of `Category[]` is the best approach here
 export type HomeProps = {
   posts: homePost[];
   totalPosts: number;
-  allCategories: (SimpleCategory | null | undefined)[]; // Updated for better type safety
+  allCategories: Category[]; // Updated for better type safety
 };
 
 // Using utility types like `Pick` or `Omit` for deeply nested fields
