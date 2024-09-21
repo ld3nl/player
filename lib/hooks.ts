@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { homePost, Category } from "@/lib/types";
+import { homePost, Category, MediaState } from "@/lib/types";
 
 export const useLockScroll = (isOpen: boolean): void => {
   useEffect(() => {
@@ -92,4 +92,66 @@ export const useFilteredPosts = (
   };
 
   return { filteredPosts, filterPosts, filteredPostsCategory };
+};
+
+/**
+ * Custom hook to manage media state.
+ *
+ * @returns {object} - An object containing media states, a function to set media states, and a function to update media state.
+ */
+export const useGetMediaState = () => {
+  const [mediaStates, setMediaStates] = useState<MediaState[]>(() => {
+    // Initialize state from localStorage if available
+    const storedState =
+      typeof window !== "undefined" && localStorage.getItem("storedMediaState");
+    return storedState ? JSON.parse(storedState) : [];
+  });
+
+  /**
+   * Updates the media state for a given media item.
+   *
+   * @param {number} id - The ID of the media item.
+   * @param {number} playedSeconds - The number of seconds the media has been played.
+   * @param {number} duration - The total duration of the media.
+   */
+  const updateMediaState = (
+    id: number,
+    playedSeconds: number,
+    duration: number,
+    isFavorite: boolean,
+  ) => {
+    setMediaStates((prevState) => {
+      const existingItemIndex = prevState.findIndex((item) => item.id === id);
+
+      if (existingItemIndex !== -1) {
+        // Update existing media state
+        const updatedState = [...prevState];
+        updatedState[existingItemIndex] = {
+          ...updatedState[existingItemIndex],
+          playedSeconds,
+          duration,
+          isFavorite,
+        };
+        return updatedState;
+      } else {
+        // Add new media state
+        return [
+          ...prevState,
+          { id, playedSeconds, duration, isFavorite: isFavorite },
+        ];
+      }
+    });
+  };
+
+  // Persist media states to localStorage whenever they change
+  useEffect(() => {
+    typeof window !== "undefined" &&
+      localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
+  }, [mediaStates]);
+
+  return {
+    mediaStates,
+    setMediaStates,
+    updateMediaState,
+  };
 };

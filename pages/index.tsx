@@ -6,6 +6,9 @@ import Head from "next/head";
 import AudioListing from "@/components/AudioListing/AudioListing";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 import Header from "@/components/Header/Header";
+import Button from "@/components/Button/Button";
+import Icon from "@/components/Icon/Icon";
+import { SVGIconName } from "@/lib/types";
 
 import { HomeProps, Category, SimpleCategory, Modal } from "@/lib/types";
 
@@ -14,7 +17,7 @@ import {
   getCategoryCount,
   StaticCategoryData,
 } from "../lib/utils";
-import { useFilteredPosts } from "@/lib/hooks";
+import { useFilteredPosts, useGetMediaState } from "@/lib/hooks";
 
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
@@ -27,6 +30,17 @@ export default function Home({
   totalPosts,
   allCategories,
 }: HomeProps): JSX.Element {
+  const { mediaStates, updateMediaState } = useGetMediaState();
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (mediaStates) {
+      console.log(mediaStates);
+      setIsLoading(false);
+    }
+  }, [mediaStates]);
+
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
     DEFAULT_NUMBER_OF_POSTS,
   );
@@ -39,7 +53,15 @@ export default function Home({
 
   const DEFAULT_MODAL: Modal = {
     isModalActive: false,
-    selectedItem: { title: "", date: "", src: "", id: 0 },
+    selectedItem: {
+      title: "",
+      date: "",
+      src: "",
+      id: 0,
+      playedSeconds: 0,
+      duration: 0,
+      isFavorite: false,
+    },
   };
 
   const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
@@ -116,28 +138,109 @@ export default function Home({
         />
 
         <div className="border border-gray-600 bg-gray-700 text-white">
-          {filteredPosts &&
+          {!isLoading &&
+            filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post) => {
               const { audioUrl, title, date, id, categories, link, imageUrl } =
                 post;
 
+              // Find the current item in the mediaStates array
+              const currentItem = mediaStates.filter((val) => val.id === id);
+
+              // Check if the current item is marked as a favorite
+              const isFavorite = mediaStates.some(
+                (val) => val.id === id && val.isFavorite,
+              );
+
+              // Initialize a default state for the current item
+              let currentItemState = {
+                id: 0,
+                playedSeconds: 0,
+                duration: 0,
+                isFavorite: false,
+              };
+
+              // Check if there's a matching item in the mediaStates array
+              if (currentItem.length) {
+                // If a match is found, update currentItemState with the item's data
+                currentItemState = {
+                  id: currentItem[0].id,
+                  playedSeconds: currentItem[0].playedSeconds,
+                  duration: currentItem[0].duration,
+                  isFavorite: !currentItem[0].isFavorite, // Note: This toggles the favorite status
+                };
+              }
+
+              // Define a function to handle modal activation
+              const modalFunction = () => {
+                // Log the selected item details for debugging
+                console.log("Modal @", {
+                  selectedItem: {
+                    title,
+                    date: date,
+                    src: imageUrl,
+                    id: id,
+                    playedSeconds: currentItemState.playedSeconds,
+                    duration: currentItemState.duration,
+                    isFavorite: currentItemState.isFavorite,
+                  },
+                });
+
+                // Set the modal state to active and populate it with the selected item's data
+                setModal({
+                  isModalActive: true,
+                  selectedItem: {
+                    title,
+                    date: date,
+                    // Construct the full audio URL
+                    src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`,
+                    id: id,
+                    playedSeconds: currentItemState.playedSeconds,
+                    duration: currentItemState.duration,
+                    isFavorite: currentItemState.isFavorite,
+                  },
+                });
+              };
               return (
                 <AudioListing
                   key={`item-${id}`}
                   title={title}
-                  src={`https://www.paullowe.org/wp-content/uploads/${audioUrl}`}
                   date={date}
-                  id={id}
                   favoriteCallback={updateFavoriteItemsFromStorage}
                   categories={categories}
                   link={link}
-                  imageSrc={imageUrl}
-                  setModalCallback={setModal}
-                />
+                  playedSeconds={currentItemState.playedSeconds}
+                  duration={currentItemState.duration}
+                  setModalCallback={modalFunction}
+                >
+                  <Button
+                    onClick={() =>
+                      updateMediaState(
+                        currentItemState.id,
+                        currentItemState.playedSeconds,
+                        currentItemState.duration,
+                        currentItemState.isFavorite,
+                      )
+                    }
+                    className="w-10"
+                  >
+                    <Icon
+                      className="me-2.5 size-3"
+                      name={SVGIconName.Favorite}
+                      size={"sm"}
+                      variation={isFavorite ? "active" : "default"}
+                    />
+                  </Button>
+                </AudioListing>
               );
             })}
         </div>
-        {modal.selectedItem && <MainPlayer mediaItem={modal.selectedItem} />}
+        {modal.selectedItem && (
+          <MainPlayer
+            mediaItem={modal.selectedItem}
+            setGlobalMediaState={updateMediaState}
+          />
+        )}
       </div>
     </>
   );

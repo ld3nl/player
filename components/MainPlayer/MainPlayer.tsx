@@ -13,11 +13,37 @@ import { Duration } from "./Duration";
 
 import img from "@/public/P1080841.jpg";
 
-const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
-  const { title, src, id, link, imageSrc } = mediaItem;
+const MainPlayer: FC<PlayerProps> = ({ mediaItem, setGlobalMediaState }) => {
+  const {
+    title,
+    src,
+    id,
+    link,
+    imageSrc,
+    playedSeconds,
+    duration,
+    isFavorite,
+  } = mediaItem;
 
-  // todo: refactor this type `any`
-  const audioRef = useRef<any>(null);
+  const [thisMediaState, setThisMediaState] = useState({
+    id: id,
+    playedSeconds: playedSeconds,
+    duration: duration,
+    isFavorite: isFavorite,
+  });
+
+  useEffect(() => {
+    console.log("thisMediaState", thisMediaState);
+    if (typeof setGlobalMediaState === "function" && id)
+      setGlobalMediaState(
+        id,
+        thisMediaState.playedSeconds,
+        thisMediaState.duration,
+        thisMediaState.isFavorite,
+      );
+  }, [id, thisMediaState]);
+
+  const audioRef = useRef<ReactPlayer>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
@@ -31,7 +57,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
   const [played, setPlayed] = useState(0);
 
   // const [loaded, setLoaded] = useState<number | boolean>(0);
-  const [duration, setDuration] = useState(0);
+  const [durationState, setDurationState] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [loop, setLoop] = useState(false);
   const [seeking, setSeeking] = useState(false);
@@ -43,24 +69,29 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
-  // const [audioIsLoading, setAudioIsLoading] = useState(true);
+
   const [favorite, setFavorite] = useState(false);
 
   useLockScroll(isOpen);
 
+  // TODO: refactor this
+  // to much complexity for this component
+  // can be hadled in a better way via parent component
   useEffect(() => {
-    // const storedProgress = localStorage.getItem(`${id}-progress`);
-    const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]",
-    );
+    // const favoriteItems = JSON.parse(
+    //   localStorage.getItem("favoriteItems") || "[]",
+    // );
 
-    setFavorite(favoriteItems.includes(id));
+    // console.log("favoriteItems", isFavorite);
+
+    setFavorite(isFavorite);
 
     handlePlay();
   }, [src, id]);
 
   // todo: refactor this
   useEffect(() => {
+    console.log("title", title), console.log("src", src);
     if (title && src) {
       handleOpen();
     }
@@ -83,7 +114,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
       setMuted(false);
       setPlayed(0);
       // setLoaded(0);
-      setDuration(0);
+      setDurationState(0);
       setPlaybackRate(1.0);
       setLoop(false);
       setSeeking(false);
@@ -108,30 +139,40 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
     }, 500); // Duration of the closing animation
   };
 
-  // todo: refactor this type `any`
-  const toggleFavorite = (id: any) => {
-    const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]",
-    );
+  // TODO: refactor this
+  // to much complexity for this component
+  // can be hadled in a better way via parent component
+  const toggleFavorite = () => {
+    // const favoriteItems = JSON.parse(
+    //   localStorage.getItem("favoriteItems") || "[]",
+    // );
 
-    const isFavorite = favoriteItems.includes(id);
+    // const isFavorite = favoriteItems.includes(id);
 
-    if (isFavorite) {
-      // todo: refactor this type `any`
-      const updatedItems = favoriteItems.filter((item: any) => item !== id);
-      localStorage.setItem("favoriteItems", JSON.stringify(updatedItems));
-    } else {
-      favoriteItems.push(id);
-      localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
-    }
+    // if (isFavorite) {
+    //   // todo: refactor this type `any`
+    //   const updatedItems = favoriteItems.filter((item: any) => item !== id);
+    //   localStorage.setItem("favoriteItems", JSON.stringify(updatedItems));
+    // } else {
+    //   favoriteItems.push(id);
+    //   localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
+    // }
+    // if (typeof setMediaState === "function") {
+    //   setMediaState(id, , duration);
+    // }
 
-    setFavorite(!isFavorite);
+    setThisMediaState({
+      ...thisMediaState,
+      isFavorite: !isFavorite,
+    });
+
+    // setFavorite(!isFavorite);
   };
 
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
     setSeeking(true);
 
-    const sec = (seconds * 1) / duration;
+    const sec = (seconds * 1) / durationState;
 
     let seekTo = 0;
 
@@ -144,7 +185,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
     }
 
     setPlayed(seekTo);
-    audioRef.current.seekTo(seekTo);
+    audioRef?.current?.seekTo(seekTo);
 
     setSeeking(false);
   };
@@ -190,23 +231,37 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
 
       setPlayed(played);
 
-      localStorage.setItem(
-        `${id}-progress`,
-        JSON.stringify({ playedSeconds, duration, favorite }),
-      );
+      setThisMediaState({
+        ...thisMediaState,
+        playedSeconds: playedSeconds,
+      });
+
+      // if (typeof setMediaState === "function") {
+      //   setMediaState(id, playedSeconds, duration);
+      // }
+
+      // localStorage.setItem(
+      //   `${id}-progress`,
+      //   JSON.stringify({ playedSeconds, durationState, favorite }),
+      // );
     }
   };
 
   // todo: refactor this type `any`
   const handleDuration = (duration: any) => {
-    setDuration(duration);
+    setThisMediaState({
+      ...thisMediaState,
+      duration: duration,
+    });
 
-    const storedProgress = localStorage.getItem(`${id}-progress`);
+    setDurationState(duration);
 
-    if (storedProgress) {
-      const { playedSeconds } = JSON.parse(storedProgress);
-      audioRef.current.seekTo(playedSeconds, "seconds");
-    }
+    // const storedProgress = localStorage.getItem(`${id}-progress`);
+
+    // if (storedProgress) {
+    // const { playedSeconds } = JSON.parse(storedProgress);
+    audioRef?.current?.seekTo(playedSeconds, "seconds");
+    // }
   };
 
   return (
@@ -245,7 +300,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
               fetchPriority="high"
             />
           </div>
-          {duration !== 0 && (
+          {durationState !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
               {title ? he.decode(title) : ""}
             </span>
@@ -270,7 +325,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
             />
           )}
 
-          {duration !== 0 && (
+          {durationState !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
                 <ReactSlider
@@ -285,13 +340,13 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
               </div>
 
               <div className="mx-10 flex justify-between text-xs text-gray-400">
-                <Duration seconds={duration * played} />
-                <Duration seconds={duration * (1 - played)} />
+                <Duration seconds={durationState * played} />
+                <Duration seconds={durationState * (1 - played)} />
               </div>
             </div>
           )}
 
-          {duration !== 0 && (
+          {durationState !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
                 <button
@@ -321,10 +376,10 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
             </div>
           )}
 
-          {duration !== 0 && (
+          {durationState !== 0 && (
             <div className="mt-2 flex items-center justify-center">
               <button
-                onClick={() => toggleFavorite(id)}
+                onClick={() => toggleFavorite()}
                 className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
@@ -355,7 +410,7 @@ const MainPlayer: FC<PlayerProps> = ({ mediaItem }) => {
             </div>
           )}
 
-          {duration === 0 && (
+          {durationState === 0 && (
             <div className="flex p-10">
               <Icon
                 name={SVGIconName.Spinner}
