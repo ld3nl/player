@@ -4,7 +4,7 @@ import Icon from "@/components/Icon/Icon";
 import he from "he";
 import debounce from "debounce";
 
-import { Category, HeaderProps, SVGIconName } from "@/lib/types";
+import { HeaderProps, SVGIconName } from "@/lib/types";
 
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 
@@ -162,16 +162,14 @@ const Header: React.FC<HeaderProps> = ({
           aria-label="Categories"
         >
           <option value="all">All</option>
-          {filteredCategoryList
-            .filter((category): category is Category => category != null)
-            .map((category, index) => {
-              const { name, id } = category;
-              return (
-                <option key={`category-${id}-${index}`} value={id}>
-                  {he.decode(name)}
-                </option>
-              );
-            })}
+          {filteredCategoryList.filter(Boolean).map((category, index) => {
+            const { name, id } = category;
+            return (
+              <option key={`category-${id}-${index}`} value={id}>
+                {he.decode(name)}
+              </option>
+            );
+          })}
         </select>
       </div>
 

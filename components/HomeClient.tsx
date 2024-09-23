@@ -1,7 +1,7 @@
+"use client"; // Ensures this is a client-side component
+
 import { useEffect, useState, lazy, Suspense, useCallback } from "react";
-import { GetStaticProps } from "next";
-import LRUCache from "lru-cache";
-import Head from "next/head";
+
 import { debounce } from "lodash";
 
 import AudioListing from "@/components/AudioListing/AudioListing";
@@ -15,19 +15,9 @@ import { SVGIconName } from "@/lib/types";
 
 import { HomeProps, Category, Modal, MediaState } from "@/lib/types";
 
-import {
-  getAllPostsFromServer,
-  getCategoryCount,
-  StaticCategoryData,
-} from "../lib/utils";
 import { useFilteredPosts, useGetMediaState } from "@/lib/hooks";
 
 import { DEFAULT_NUMBER_OF_POSTS, DEFAULT_MODAL } from "@/lib/constants";
-
-// Initializing LRUCache to store fetched data. This improves performance by reducing redundant requests.
-const cache = new LRUCache<string, HomeProps>({
-  max: 500, // maximum number of entries in the cache
-});
 
 /**
  * Home Component: The main entry point for the application.
@@ -135,19 +125,6 @@ export default function Home({
 
   return (
     <>
-      {/* Head Section: SEO and meta tags for the page */}
-      <Head>
-        <title>Paul Lowe Talks source https://www.paullowe.org</title>
-        <meta name="description" content="Paul Lowe Talks" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
-        />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       {/* Main layout wrapper */}
       <div className="flex h-full flex-col">
         {/* Header: Search, category filtering, and toggle favorites */}
@@ -250,137 +227,3 @@ export default function Home({
     </>
   );
 }
-
-/**
- * Calculates the dynamic Time To Live (TTL) for cache entries.
- * @return {number} The TTL value in seconds.
- */
-function calculateDynamicTTL() {
-  let ttl = 3600; // Default TTL set to 1 hour (3600 seconds).
-  return ttl;
-}
-
-/**
- * Dynamically calculates the revalidate time based on content update frequency or other criteria.
- * @return {number} The revalidate time in seconds.
- */
-function calculateRevalidateTime() {
-  const defaultRevalidateTime = 7000; // Default revalidate time set to 7000 seconds.
-  return defaultRevalidateTime;
-}
-
-// getStaticProps: Fetches data at build time, caching it for better performance.
-export const getStaticProps: GetStaticProps = async () => {
-  console.log("[getStaticProps] Function called"); // Debugging: Logs when function is called.
-
-  const key = "posts"; // Cache key to retrieve/store data.
-  console.log(`[getStaticProps] Cache key: ${key}`);
-
-  // Try to retrieve cached data using the key.
-  const cachedData = cache.get(key);
-  console.log(
-    `[getStaticProps] Cache get for key: ${key}, found: ${!!cachedData}`,
-  );
-
-  // Return cached data if available.
-  if (cachedData) {
-    console.log(`[getStaticProps] Cache hit for key: ${key}`);
-    return { props: cachedData };
-  }
-
-  // Fetch new data if not cached.
-  const categoriesCount = await getCategoryCount(80);
-  console.log(`[getStaticProps] Categories count: ${categoriesCount}`);
-
-  const totalPosts = categoriesCount;
-
-  // Number of requests required to fetch all posts (99 per request).
-  const numberOfRequests = Math.ceil(totalPosts / 99);
-  console.log(
-    `[getStaticProps] Number of requests to make: ${numberOfRequests}`,
-  );
-
-  const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {
-    const cleanedNames = name.replace(/\s*\/\s*/g, "/").split("/");
-    return cleanedNames.map((partName) => ({
-      name: partName,
-      id,
-      slug,
-    }));
-  });
-  const promises = [];
-
-  // Creating a series of promises to fetch posts in batches.
-  for (let i = 0; i < numberOfRequests; i++) {
-    const offset = i * 99;
-    promises.push(getAllPostsFromServer(80, 99, offset));
-    console.log(`[getStaticProps] Request added for batch: ${i + 1}`);
-  }
-
-  const postsFromServer = await Promise.all(promises).then((results) => {
-    console.log(`[getStaticProps] Received data from all batches`);
-    return results
-      .flat()
-      .map(({ excerpt, title, date, id, categories, link, content }) => {
-        const pattern = /src="([^"]*)/;
-        const match = excerpt.rendered.match(pattern);
-        const audioUrl = match
-          ? match[1].replace(
-              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-              "",
-            )
-          : "";
-
-        const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
-        const imageMatch = content.rendered.match(imagePattern);
-        const imageUrl = imageMatch
-          ? imageMatch[1].replace(
-              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-              "",
-            )
-          : "";
-
-        const categoryDetails = categories
-          ?.map((categoryId: number) => {
-            if (categoryId !== 80) {
-              return StaticCategoryData.find(
-                (category: Category) => category?.id === categoryId,
-              );
-            }
-            return null;
-          })
-          .filter((category): category is Category => !!category);
-
-        return {
-          id,
-          imageUrl,
-          audioUrl: audioUrl,
-          title: title.rendered,
-          date,
-          categories: categoryDetails,
-          link,
-        };
-      });
-  });
-
-  // Store the fetched data in cache for future use.
-  const data = {
-    posts: postsFromServer,
-    totalPosts,
-    allCategories,
-  };
-
-  // Cache the data for later use and set a TTL.
-  cache.set(key, { ...data }, { ttl: calculateDynamicTTL() });
-  console.log(
-    `[getStaticProps] Cache miss for key: ${key}, storing data in cache with TTL: ${calculateDynamicTTL()} seconds`,
-  );
-
-  const revalidateTime = calculateRevalidateTime();
-  console.log(
-    `[getStaticProps] Returning data with revalidate time: ${revalidateTime} seconds`,
-  );
-
-  // Return the fetched data as props and set the revalidation time.
-  return { props: data, revalidate: revalidateTime };
-};
