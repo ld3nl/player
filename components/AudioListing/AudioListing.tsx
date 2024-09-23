@@ -114,20 +114,22 @@ const AudioListing: React.FC<AudioListingProps> = ({
   const hasPlayed = playedSeconds > 0;
 
   return (
-    // Main container for the audio listing. Adds hover effects, focus styles, and handles click events.
+    // Main container for the audio listing. Adds hover effects, focus styles
     <div
       className={[
         "relative inline-flex w-full items-center border-b px-4 py-2 text-sm font-medium focus:z-10 focus:ring-2",
         "border-gray-600 hover:bg-gray-600 hover:text-white focus:text-white focus:ring-gray-500",
       ].join(" ")}
-      onClick={() => {
-        // Trigger the modal callback function if it exists
-        if (typeof setModalCallback === "function") setModalCallback();
-      }}
     >
       {children}{" "}
       {/* Any additional elements passed via children will be rendered here */}
-      <div className="w-full cursor-pointer">
+      <div
+        className="w-full cursor-pointer"
+        onClick={() => {
+          // Trigger the modal callback function if it exists
+          if (typeof setModalCallback === "function") setModalCallback();
+        }}
+      >
         {/* Render the title if it exists, using 'he.decode' to handle any encoded HTML entities */}
         {title && (
           <div>
