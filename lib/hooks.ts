@@ -52,9 +52,9 @@ export const useFilteredPosts = (
 
     if (categoryIds.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
-        post.categories.some(
-          (category) => category?.id && categoryIds.includes(category.id),
-        ),
+        post.categories
+          .filter(Boolean)
+          .some((category) => categoryIds.includes(category.id)),
       );
     }
 
@@ -79,9 +79,7 @@ export const useFilteredPosts = (
     const flattenedAndUniqueIds = Array.from(
       new Set(
         newFilteredPosts.flatMap((post: homePost) =>
-          post.categories
-            .filter(Boolean) // Ensure `cat` is not null or undefined
-            .map((cat) => cat.id),
+          post.categories.filter(Boolean).map((cat) => cat.id),
         ),
       ),
     );

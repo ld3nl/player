@@ -13,7 +13,7 @@ import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import { SVGIconName } from "@/lib/types";
 
-import { HomeProps, Category, Modal } from "@/lib/types";
+import { HomeProps, Category, Modal, Post, MediaState } from "@/lib/types";
 
 import {
   getAllPostsFromServer,
@@ -117,23 +117,26 @@ export default function Home({
   );
 
   // Function: Activates the modal and updates its state.
-  const modalFunction = useCallback((post: any, currentItemState: any) => {
-    const { title, date, id, audioUrl } = post;
+  const modalFunction = useCallback(
+    (post: any, currentItemState: MediaState) => {
+      const { title, date, id, audioUrl } = post;
 
-    // Set the modal state with the selected item's details.
-    setModal({
-      isModalActive: true,
-      selectedItem: {
-        title,
-        date: date,
-        src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL.
-        id: id,
-        playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Default to 0 if no state.
-        duration: currentItemState ? currentItemState.duration : 0, // Default to 0 if no state.
-        isFavorite: currentItemState ? currentItemState.isFavorite : false, // Default to false if no state.
-      },
-    });
-  }, []);
+      // Set the modal state with the selected item's details.
+      setModal({
+        isModalActive: true,
+        selectedItem: {
+          title,
+          date: date,
+          src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL.
+          id: id,
+          playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Default to 0 if no state.
+          duration: currentItemState ? currentItemState.duration : 0, // Default to 0 if no state.
+          isFavorite: currentItemState ? currentItemState.isFavorite : false, // Default to false if no state.
+        },
+      });
+    },
+    [],
+  );
 
   return (
     <>
@@ -180,31 +183,24 @@ export default function Home({
                 // imageUrl
               } = post;
 
-              // Find the current item in the mediaStates array based on ID.
-              const currentItem = mediaStates.filter((val) => val.id === id);
-
-              // Determine if the current item is marked as a favorite.
-              const isFavorite = mediaStates.some(
-                (val) => val.id === id && val.isFavorite,
-              );
-
-              // Default state for the current item (if no matching item found).
-              let currentItemState = {
-                id: id,
+              const currentItem = mediaStates.find((val) => val.id === id) || {
+                id,
                 playedSeconds: 0,
                 duration: 0,
                 isFavorite: false,
               };
 
-              // Update currentItemState if a match is found in mediaStates.
-              if (currentItem.length) {
-                currentItemState = {
-                  id: currentItem[0].id,
-                  playedSeconds: currentItem[0].playedSeconds,
-                  duration: currentItem[0].duration,
-                  isFavorite: currentItem[0].isFavorite, // Toggle favorite status.
-                };
-              }
+              const currentItemState = {
+                id: currentItem.id,
+                playedSeconds: currentItem.playedSeconds || 0,
+                duration: currentItem.duration || 0,
+                isFavorite: currentItem.isFavorite || false,
+              };
+
+              // Determine if the current item is marked as a favorite.
+              const isFavorite = mediaStates.some(
+                (val) => val.id === id && val.isFavorite,
+              );
 
               return (
                 <AudioListing
@@ -361,6 +357,7 @@ export const getStaticProps: GetStaticProps = async () => {
                 (category: Category) => category?.id === categoryId,
               );
             }
+            return null;
           })
           .filter((category): category is Category => !!category);
 
