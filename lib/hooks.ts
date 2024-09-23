@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { homePost, Category, MediaState } from "@/lib/types";
+import { homePost, MediaState } from "@/lib/types";
 
 export const useLockScroll = (isOpen: boolean): void => {
   useEffect(() => {
@@ -80,7 +80,7 @@ export const useFilteredPosts = (
       new Set(
         newFilteredPosts.flatMap((post: homePost) =>
           post.categories
-            .filter((cat): cat is Category => cat !== null && cat !== undefined) // Ensure `cat` is not null or undefined
+            .filter(Boolean) // Ensure `cat` is not null or undefined
             .map((cat) => cat.id),
         ),
       ),
