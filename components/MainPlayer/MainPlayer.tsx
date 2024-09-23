@@ -1,7 +1,8 @@
-import { FC, useEffect, useState, useRef } from "react";
+import { FC, useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
+import debounce from "lodash/debounce"; // Ensure correct lodash import
 
 import useLockScroll from "@/lib/hooks";
 import { PlayerProps, SVGIconName } from "@/lib/types";
@@ -39,12 +40,14 @@ const MainPlayer: FC<PlayerProps> = ({
   });
 
   useEffect(() => {
-    setThisMediaState({
-      id: mediaItem.id || 0,
-      playedSeconds: mediaItem.playedSeconds,
-      duration: mediaItem.duration,
-      isFavorite: mediaItem.isFavorite,
-    });
+    if (mediaItem) {
+      setThisMediaState({
+        id: mediaItem.id || 0,
+        playedSeconds: mediaItem.playedSeconds,
+        duration: mediaItem.duration,
+        isFavorite: mediaItem.isFavorite,
+      });
+    }
   }, [mediaItem]);
 
   const audioRef = useRef<ReactPlayer>(null);
@@ -124,17 +127,13 @@ const MainPlayer: FC<PlayerProps> = ({
     }, 500); // Duration of the closing animation
   };
 
-  const toggleFavorite = () => {
-    const newFavoriteState = !thisMediaState.isFavorite;
-    setThisMediaState((prevState) => ({
-      ...prevState,
-      isFavorite: newFavoriteState,
-    }));
-    stateCallback?.({
-      ...thisMediaState,
-      isFavorite: newFavoriteState,
+  const toggleFavorite = useCallback(() => {
+    setThisMediaState((prevState) => {
+      const newState = { ...prevState, isFavorite: !prevState.isFavorite };
+      // stateCallback?.(newState);
+      return newState;
     });
-  };
+  }, []);
 
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
     setSeeking(true);
@@ -182,45 +181,42 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   };
 
+  const debouncedUpdate = useCallback(
+    debounce((newState) => {
+      stateCallback?.(newState);
+    }, 300),
+    [stateCallback],
+  );
+
   const handleProgress = (updatedState: {
     loaded: number | boolean;
     loadedSeconds: number;
     played: number;
     playedSeconds: number;
   }) => {
-    // We only want to update time slider if we are not currently seeking
+    const { played, playedSeconds } = updatedState;
+
+    setPlayed(played);
+
     if (!seeking) {
-      const { played, playedSeconds } = updatedState;
-
-      setPlayed(played);
-
-      stateCallback &&
-        stateCallback({
-          ...thisMediaState,
+      setThisMediaState((prevState) => {
+        const newState = {
+          ...prevState,
           playedSeconds: playedSeconds,
-        });
-
-      setThisMediaState((prevState) => ({
-        ...prevState,
-        playedSeconds: playedSeconds,
-      }));
+        };
+        debouncedUpdate(newState);
+        return newState;
+      });
     }
   };
 
   const handleDuration = (duration: number) => {
-    stateCallback &&
-      stateCallback({
-        ...thisMediaState,
-        duration: duration,
-      });
-
-    setThisMediaState((prevState) => ({
-      ...prevState,
-      duration: duration,
-    }));
-
-    audioRef?.current?.seekTo(playedSeconds, "seconds");
-    //
+    setThisMediaState((prevState) => {
+      const newState = { ...prevState, duration };
+      // stateCallback?.({ ...newState });
+      return newState;
+    });
+    audioRef.current?.seekTo(playedSeconds, "seconds");
   };
 
   return (
