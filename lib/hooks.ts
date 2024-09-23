@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { homePost, Category, MediaState } from "@/lib/types";
 
 export const useLockScroll = (isOpen: boolean): void => {
@@ -100,11 +100,19 @@ export const useFilteredPosts = (
  * @returns {object} - An object containing media states, a function to set media states, and a function to update media state.
  */
 export const useGetMediaState = () => {
+  console.log("useGetMediaState", "isTriggered");
   const [mediaStates, setMediaStates] = useState<MediaState[]>(() => {
     // Initialize state from localStorage if available
-    const storedState =
-      typeof window !== "undefined" && localStorage.getItem("storedMediaState");
-    return storedState ? JSON.parse(storedState) : [];
+    if (typeof window !== "undefined") {
+      const storedState = localStorage.getItem("storedMediaState");
+      try {
+        return storedState ? JSON.parse(storedState) : [];
+      } catch (e) {
+        console.error("Error parsing stored media state", e);
+        return [];
+      }
+    }
+    return [];
   });
 
   /**
@@ -135,23 +143,37 @@ export const useGetMediaState = () => {
         return updatedState;
       } else {
         // Add new media state
-        return [
-          ...prevState,
-          { id, playedSeconds, duration, isFavorite: isFavorite },
-        ];
+        return [...prevState, { id, playedSeconds, duration, isFavorite }];
       }
     });
   };
 
-  // Persist media states to localStorage whenever they change
+  // Persist media states to localStorage, debounced to avoid too many writes
   useEffect(() => {
-    typeof window !== "undefined" &&
-      localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
+    const saveToLocalStorage = setTimeout(() => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
+      }
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(saveToLocalStorage); // Cleanup timeout
+  }, [mediaStates]);
+
+  // Memoize favorite IDs to avoid unnecessary recalculations
+  // todo: when item is liked favoriteIds only updated after 2dn click
+  const favoriteIds = useMemo(() => {
+    return mediaStates.reduce((acc: number[], val) => {
+      if (val.isFavorite) {
+        acc.push(val.id);
+      }
+      return acc;
+    }, []);
   }, [mediaStates]);
 
   return {
     mediaStates,
     setMediaStates,
     updateMediaState,
+    favoriteIds,
   };
 };
