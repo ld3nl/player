@@ -22,21 +22,7 @@ import {
 } from "../lib/utils";
 import { useFilteredPosts, useGetMediaState } from "@/lib/hooks";
 
-import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
-
-// Modal default state, used to reset modal when closing.
-const DEFAULT_MODAL: Modal = {
-  isModalActive: false,
-  selectedItem: {
-    title: "",
-    date: "",
-    src: "",
-    id: 0,
-    playedSeconds: 0,
-    duration: 0,
-    isFavorite: false,
-  },
-};
+import { DEFAULT_NUMBER_OF_POSTS, DEFAULT_MODAL } from "@/lib/constants";
 
 // Initializing LRUCache to store fetched data. This improves performance by reducing redundant requests.
 const cache = new LRUCache<string, HomeProps>({
@@ -130,6 +116,25 @@ export default function Home({
     [],
   );
 
+  // Function: Activates the modal and updates its state.
+  const modalFunction = useCallback((post: any, currentItemState: any) => {
+    const { title, date, id, audioUrl } = post;
+
+    // Set the modal state with the selected item's details.
+    setModal({
+      isModalActive: true,
+      selectedItem: {
+        title,
+        date: date,
+        src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL.
+        id: id,
+        playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Default to 0 if no state.
+        duration: currentItemState ? currentItemState.duration : 0, // Default to 0 if no state.
+        isFavorite: currentItemState ? currentItemState.isFavorite : false, // Default to false if no state.
+      },
+    });
+  }, []);
+
   return (
     <>
       {/* Head Section: SEO and meta tags for the page */}
@@ -165,8 +170,15 @@ export default function Home({
           {!isLoading &&
             filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post) => {
-              const { audioUrl, title, date, id, categories, link, imageUrl } =
-                post;
+              const {
+                // audioUrl,
+                title,
+                date,
+                id,
+                categories,
+                link,
+                // imageUrl
+              } = post;
 
               // Find the current item in the mediaStates array based on ID.
               const currentItem = mediaStates.filter((val) => val.id === id);
@@ -194,39 +206,6 @@ export default function Home({
                 };
               }
 
-              // Function: Activates the modal and updates its state.
-              const modalFunction = () => {
-                console.log("Modal @", {
-                  selectedItem: {
-                    title,
-                    date: date,
-                    src: imageUrl,
-                    id: id,
-                    playedSeconds: currentItemState.playedSeconds,
-                    duration: currentItemState.duration,
-                    isFavorite: currentItemState.isFavorite,
-                  },
-                });
-
-                // Set the modal state with the selected item's details.
-                setModal({
-                  isModalActive: true,
-                  selectedItem: {
-                    title,
-                    date: date,
-                    src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL.
-                    id: id,
-                    playedSeconds: currentItemState
-                      ? currentItemState.playedSeconds
-                      : 0, // Default to 0 if no state.
-                    duration: currentItemState ? currentItemState.duration : 0, // Default to 0 if no state.
-                    isFavorite: currentItemState
-                      ? currentItemState.isFavorite
-                      : false, // Default to false if no state.
-                  },
-                });
-              };
-
               return (
                 <AudioListing
                   key={`item-${id}`} // Unique key for each item
@@ -236,7 +215,7 @@ export default function Home({
                   link={link} // Post link
                   playedSeconds={currentItemState.playedSeconds} // Played seconds of the audio
                   duration={currentItemState.duration} // Duration of the audio
-                  setModalCallback={modalFunction} // Function to open modal
+                  setModalCallback={() => modalFunction(post, currentItemState)} // Function to open modal
                 >
                   <Button
                     onClick={() => {
