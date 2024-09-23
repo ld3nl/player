@@ -418,26 +418,3 @@ export const getStaticProps: GetStaticProps = async () => {
   // Return the fetched data as props and set the revalidation time.
   return { props: data, revalidate: revalidateTime };
 };
-
-/**
- * TODO: Refactoring Suggestions
- *
- * 1. **Extract Repetitive Logic into Helper Functions**:
- *    - The modal setup logic and favorite toggle logic are repeated in several places.
- *    - Create helper functions for these tasks to avoid redundancy and simplify the code.
- *
- * 2. **Debounce Search Input**:
- *    - The search state updates instantly on every keystroke, which may lead to performance issues.
- *    - Implement a debounce function for the search input to improve responsiveness.
- *
- * 3. **Use Custom Hooks for State Management**:
- *    - The state management logic for favorites and modal states can be refactored into custom hooks.
- *    - This makes the code more modular and reusable across other components.
- *
- * 4. **Memoization for Performance**:
- *    - Use `useMemo` or `useCallback` for optimizing the performance of expensive computations or functions (e.g., filtering categories and posts).
- *
- * 5. **Lazy Load Media Player**:
- *    - The `MainPlayer` can be lazy-loaded to reduce the initial load time of the page.
- *    - This ensures that the audio player is only loaded when necessary.
- */
