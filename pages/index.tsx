@@ -1,7 +1,8 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { GetStaticProps } from "next";
 import LRUCache from "lru-cache";
 import Head from "next/head";
+import { debounce } from "lodash";
 
 import AudioListing from "@/components/AudioListing/AudioListing";
 // import MainPlayer from "@/components/MainPlayer/MainPlayer";
@@ -119,14 +120,15 @@ export default function Home({
   }, [filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
 
   // Function: Toggles between all posts and favorite posts.
-  const toggleFavorites = () => {
-    setShowFav(!showFav); // Toggle the favorite view state.
-  };
+  const toggleFavorites = useCallback(() => setShowFav((prev) => !prev), []);
 
   // Function: Resets modal state when the modal is closed.
-  const closeModal = () => {
-    setModal(DEFAULT_MODAL); // Resets modal to its default state.
-  };
+  const closeModal = useCallback(() => setModal(DEFAULT_MODAL), []);
+
+  const handleSearchChange = useCallback(
+    debounce((search: string[]) => setSearchTerms(search), 300),
+    [],
+  );
 
   return (
     <>
@@ -150,7 +152,7 @@ export default function Home({
           totalPosts={totalPosts} // Total posts count for the header
           numberOfPosts={numberOfPosts} // Number of posts currently displayed
           setNumberOfPosts={setNumberOfPosts} // Function to set number of posts
-          handleSearchChange={setSearchTerms} // Callback for handling search input
+          handleSearchChange={handleSearchChange} // Callback for handling search input
           handleCategoryChange={setFilteredCategory} // Callback for category filtering
           toggleFavorites={toggleFavorites} // Function to toggle the favorites filter
           showFav={showFav} // State controlling whether to show favorites
