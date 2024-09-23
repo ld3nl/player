@@ -74,13 +74,16 @@ export default function Home({
     useState<Category[]>(allCategories);
 
   // Custom hook to filter posts based on the current search, category, and favorite filters.
-  const { filteredPosts, filteredPostsCategory, filterPosts } =
-    useFilteredPosts(
-      posts,
-      showFav ? favoriteIds : [],
-      searchTerms,
-      filteredCategory,
-    );
+  const {
+    filteredPosts,
+    // filteredPostsCategory,
+    filterPosts,
+  } = useFilteredPosts(
+    posts,
+    showFav ? favoriteIds : [],
+    searchTerms,
+    filteredCategory,
+  );
 
   // Effect: Updates filtered posts whenever the category, favorites, or search terms change.
   useEffect(() => {
@@ -89,10 +92,10 @@ export default function Home({
       setFilteredPostsCategory(allCategories);
     }
 
-    // Filter the categories based on user selections.
-    const filteredCategories: Category[] = allCategories.filter(
-      (category) => category?.id && filteredPostsCategory.includes(category.id),
-    );
+    // // Filter the categories based on user selections.
+    // const filteredCategories: Category[] = allCategories.filter(
+    //   (category) => category?.id && filteredPostsCategory.includes(category.id),
+    // );
 
     filterPosts(); // Triggers post filtering based on current state.
   }, [filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
