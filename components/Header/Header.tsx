@@ -152,12 +152,14 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Categories Select */}
       <div className="mx-3 mt-3 flex flex-col md:mt-0">
-        <label htmlFor="search" className="text-gray-700">
+        <label htmlFor="categories" className="text-gray-700">
           Categories:
         </label>
         <select
+          id="categories"
           className="form-input mt-1 block w-full"
           onChange={categoryChangeHandler}
+          aria-label="Categories"
         >
           <option value="all">All</option>
           {filteredCategoryList
@@ -180,6 +182,7 @@ const Header: React.FC<HeaderProps> = ({
           className="form-input relative mt-auto flex w-full items-center justify-center"
           onClick={toggleFavorites}
           aria-pressed={showFav}
+          ariaLabel={!showFav ? "Show Favorite Items" : "Show All Items"}
         >
           <Icon
             className="absolute left-0"

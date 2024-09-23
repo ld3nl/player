@@ -218,6 +218,7 @@ export default function Home({
                       );
                     }}
                     className="w-10"
+                    ariaLabel="Favorite"
                   >
                     <Icon
                       className="me-2.5 size-3"

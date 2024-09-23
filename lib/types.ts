@@ -65,6 +65,7 @@ export type Modal = {
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   children: React.ReactNode;
+  ariaLabel: string;
   onClick?: () => void;
 }
 

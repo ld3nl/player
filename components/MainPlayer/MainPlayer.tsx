@@ -8,9 +8,11 @@ import { PlayerProps, SVGIconName } from "@/lib/types";
 import ReactPlayer from "react-player";
 
 import Icon from "@/components/Icon/Icon";
+import Button from "@/components/Button/Button";
 
 import { Duration } from "./Duration";
 
+// React does not recognize the `fetchPriority` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `fetchpriority` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
 import img from "@/public/P1080841.jpg";
 
 const MainPlayer: FC<PlayerProps> = ({
@@ -239,12 +241,13 @@ const MainPlayer: FC<PlayerProps> = ({
           ].join(" ")}
         >
           <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
-            <button
+            <Button
               className="absolute right-0 top-0 w-12 p-3 text-white"
               onClick={handleClose}
+              ariaLabel="Close"
             >
               <Icon name={SVGIconName.Close} />
-            </button>
+            </Button>
           </div>
           <div className="mx-auto flex w-96">
             <Image
@@ -308,29 +311,32 @@ const MainPlayer: FC<PlayerProps> = ({
           {thisMediaState?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
-                <button
+                <Button
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel="Rewind 15 seconds"
                 >
                   <Icon name={SVGIconName.BackwardRewind} size="twoThirds" />
-                </button>
+                </Button>
 
-                <button
+                <Button
                   onClick={handlePlayPause}
                   className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel={playing ? "Pause" : "Play"}
                 >
                   <Icon
                     name={playing ? SVGIconName.Pause : SVGIconName.Play}
                     size={"md"}
                   />
-                </button>
+                </Button>
 
-                <button
+                <Button
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel="Fast forward 15 seconds"
                 >
                   <Icon name={SVGIconName.ForwardRewind} size="twoThirds" />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -356,6 +362,7 @@ const MainPlayer: FC<PlayerProps> = ({
                 href={link}
                 target="_blank"
                 className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                aria-label="Open link in new tab"
               >
                 <Icon
                   name={SVGIconName.Link}
