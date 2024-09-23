@@ -167,20 +167,16 @@ const MainPlayer: FC<PlayerProps> = ({
     setPlaying(!playing);
   };
 
-  // todo: refactor this type `any`
-  const handleSeekChange = (e: any) => {
-    const newValue = e.target?.value || e;
-    if (newValue) {
-      setPlayed(parseFloat(newValue));
+  const handleSeekChange = (value: number) => {
+    if (value) {
+      setPlayed(value);
     }
   };
 
-  // todo: refactor this type `any`
-  const handleSeekMouseUp = (e: any) => {
-    const newValue = e.target?.value || e;
+  const handleSeekMouseUp = (newValue: number) => {
     setSeeking(false);
-    if (newValue) {
-      audioRef.current?.seekTo(parseFloat(newValue));
+    if (audioRef.current) {
+      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure newValue is parsed correctly
     }
   };
 
@@ -209,8 +205,7 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   };
 
-  // todo: refactor this type `any`
-  const handleDuration = (duration: any) => {
+  const handleDuration = (duration: number) => {
     stateCallback &&
       stateCallback({
         ...thisMediaState,

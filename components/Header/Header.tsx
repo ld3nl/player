@@ -72,14 +72,6 @@ const Header: React.FC<HeaderProps> = ({
         setIsScrolled(currentScrollY > height);
       }
 
-      console.log(
-        "scrollingUp && currentScrollY > height * 5",
-        scrollingUp && currentScrollY > height * 5,
-        currentScrollY,
-        ">",
-        height * 5,
-      );
-
       lastScrollY = currentScrollY; // Update the last scroll position
     };
 
@@ -101,7 +93,6 @@ const Header: React.FC<HeaderProps> = ({
   const searchHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchString = e.target.value.trim();
     const searchTerms = searchString.split(" ").filter(Boolean);
-    console.log(searchTerms);
     debouncedSearch(searchTerms, () => {
       // Directly filter and set categories based on search terms
       handleSearchChange(searchTerms);

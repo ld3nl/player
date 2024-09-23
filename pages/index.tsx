@@ -13,7 +13,7 @@ import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import { SVGIconName } from "@/lib/types";
 
-import { HomeProps, Category, Modal, Post, MediaState } from "@/lib/types";
+import { HomeProps, Category, Modal, MediaState } from "@/lib/types";
 
 import {
   getAllPostsFromServer,
@@ -48,7 +48,6 @@ export default function Home({
   // Effect: Stops loading once mediaStates are ready.
   useEffect(() => {
     if (mediaStates) {
-      console.log(mediaStates); // Debugging: Logs current media states.
       setIsLoading(false); // Update loading state once media states are available.
     }
   }, [mediaStates]); // Dependency: Re-run this effect when mediaStates changes.
@@ -69,11 +68,6 @@ export default function Home({
 
   // State: Stores the modal state for displaying selected audio.
   const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
-
-  // Effect: Debugging modal state changes (could be removed in production).
-  useEffect(() => {
-    console.log(modal);
-  }, [modal]);
 
   // State: Stores the list of filtered categories.
   const [filteredCategoryList, setFilteredPostsCategory] =
@@ -99,8 +93,6 @@ export default function Home({
     const filteredCategories: Category[] = allCategories.filter(
       (category) => category?.id && filteredPostsCategory.includes(category.id),
     );
-
-    console.log(filteredCategories); // Debugging: Logs filtered categories.
 
     filterPosts(); // Triggers post filtering based on current state.
   }, [filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
@@ -215,12 +207,6 @@ export default function Home({
                 >
                   <Button
                     onClick={() => {
-                      console.log(
-                        "Play button clicked for item:",
-                        id,
-                        !currentItemState.isFavorite,
-                        currentItem.length,
-                      );
                       updateMediaState(
                         currentItemState.id,
                         currentItemState.playedSeconds,

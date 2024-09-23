@@ -98,7 +98,6 @@ export const useFilteredPosts = (
  * @returns {object} - An object containing media states, a function to set media states, and a function to update media state.
  */
 export const useGetMediaState = () => {
-  console.log("useGetMediaState", "isTriggered");
   const [mediaStates, setMediaStates] = useState<MediaState[]>(() => {
     // Initialize state from localStorage if available
     if (typeof window !== "undefined") {
