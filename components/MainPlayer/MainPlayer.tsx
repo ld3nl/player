@@ -123,15 +123,15 @@ const MainPlayer: FC<PlayerProps> = ({
   };
 
   const toggleFavorite = () => {
-    stateCallback &&
-      stateCallback({
-        ...thisMediaState,
-        isFavorite: !thisMediaState.isFavorite,
-      });
+    const newFavoriteState = !thisMediaState.isFavorite;
     setThisMediaState((prevState) => ({
       ...prevState,
-      isFavorite: !prevState.isFavorite,
+      isFavorite: newFavoriteState,
     }));
+    stateCallback?.({
+      ...thisMediaState,
+      isFavorite: newFavoriteState,
+    });
   };
 
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
@@ -257,7 +257,6 @@ const MainPlayer: FC<PlayerProps> = ({
               height={imageSrc ? 400 : undefined}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
-              fetchPriority="high"
             />
           </div>
           {thisMediaState?.duration !== 0 && (
