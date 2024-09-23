@@ -169,16 +169,16 @@ const Header: React.FC<HeaderProps> = ({
           onChange={categoryChangeHandler}
         >
           <option value="all">All</option>
-          {filteredCategoryList.map((category: Category, index: number) => {
-            if (!category) return null; // Check for null or undefined
-
-            const { name, id } = category;
-            return (
-              <option key={`category-${id}-${index}`} value={id}>
-                {he.decode(name)}
-              </option>
-            );
-          })}
+          {filteredCategoryList
+            .filter((category): category is Category => category != null)
+            .map((category, index) => {
+              const { name, id } = category;
+              return (
+                <option key={`category-${id}-${index}`} value={id}>
+                  {he.decode(name)}
+                </option>
+              );
+            })}
         </select>
       </div>
 
