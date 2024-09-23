@@ -36,6 +36,15 @@ const MainPlayer: FC<PlayerProps> = ({
     isFavorite: isFavorite,
   });
 
+  useEffect(() => {
+    setThisMediaState({
+      id: mediaItem.id || 0,
+      playedSeconds: mediaItem.playedSeconds,
+      duration: mediaItem.duration,
+      isFavorite: mediaItem.isFavorite,
+    });
+  }, [mediaItem]);
+
   const audioRef = useRef<ReactPlayer>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -118,17 +127,28 @@ const MainPlayer: FC<PlayerProps> = ({
   // TODO: refactor this
   // to much complexity for this component
   // can be hadled in a better way via parent component
+  // const toggleFavorite = () => {
+  //   stateCallback &&
+  //     stateCallback({
+  //       ...thisMediaState,
+  //       isFavorite: !thisMediaState.isFavorite,
+  //     });
+  //   setThisMediaState((prevState) => ({
+  //     ...prevState,
+  //     isFavorite: !prevState.isFavorite,
+  //   }));
+  // };
+
   const toggleFavorite = () => {
-    console.log("toggleFavorite", !isFavorite);
     stateCallback &&
       stateCallback({
         ...thisMediaState,
         isFavorite: !thisMediaState.isFavorite,
       });
-    setThisMediaState({
-      ...thisMediaState,
-      isFavorite: !thisMediaState.isFavorite,
-    });
+    setThisMediaState((prevState) => ({
+      ...prevState,
+      isFavorite: !prevState.isFavorite,
+    }));
   };
 
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
@@ -196,13 +216,13 @@ const MainPlayer: FC<PlayerProps> = ({
       stateCallback &&
         stateCallback({
           ...thisMediaState,
-          isFavorite: !thisMediaState.isFavorite,
+          playedSeconds: playedSeconds,
         });
 
-      setThisMediaState({
-        ...thisMediaState,
+      setThisMediaState((prevState) => ({
+        ...prevState,
         playedSeconds: playedSeconds,
-      });
+      }));
     }
   };
 
@@ -211,13 +231,13 @@ const MainPlayer: FC<PlayerProps> = ({
     stateCallback &&
       stateCallback({
         ...thisMediaState,
-        isFavorite: !thisMediaState.isFavorite,
+        duration: duration,
       });
 
-    setThisMediaState({
-      ...thisMediaState,
+    setThisMediaState((prevState) => ({
+      ...prevState,
       duration: duration,
-    });
+    }));
 
     audioRef?.current?.seekTo(playedSeconds, "seconds");
     //
