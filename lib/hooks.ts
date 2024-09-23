@@ -158,7 +158,6 @@ export const useGetMediaState = () => {
   }, [mediaStates]);
 
   // Memoize favorite IDs to avoid unnecessary recalculations
-  // todo: when item is liked favoriteIds only updated after 2dn click
   const favoriteIds = useMemo(() => {
     return mediaStates.reduce((acc: number[], val) => {
       if (val.isFavorite) {

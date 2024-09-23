@@ -74,9 +74,7 @@ const MainPlayer: FC<PlayerProps> = ({
 
   useLockScroll(isOpen);
 
-  // todo: refactor this
   useEffect(() => {
-    console.log("title", title), console.log("src", src);
     if (title && src) {
       handleOpen();
     }
@@ -123,21 +121,6 @@ const MainPlayer: FC<PlayerProps> = ({
       typeof closeModal === "function" && closeModal();
     }, 500); // Duration of the closing animation
   };
-
-  // TODO: refactor this
-  // to much complexity for this component
-  // can be hadled in a better way via parent component
-  // const toggleFavorite = () => {
-  //   stateCallback &&
-  //     stateCallback({
-  //       ...thisMediaState,
-  //       isFavorite: !thisMediaState.isFavorite,
-  //     });
-  //   setThisMediaState((prevState) => ({
-  //     ...prevState,
-  //     isFavorite: !prevState.isFavorite,
-  //   }));
-  // };
 
   const toggleFavorite = () => {
     stateCallback &&
