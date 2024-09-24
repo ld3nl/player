@@ -1,4 +1,4 @@
-"use client"; // Ensures this is a client-side component
+"use client"; // Ensures this is a client-side component in Next.js
 
 import {
   useEffect,
@@ -7,29 +7,28 @@ import {
   Suspense,
   useCallback,
   useMemo,
-} from "react";
+} from "react"; // React hooks for state and side effects
+import { debounce } from "lodash"; // Utility to throttle search input
+import AudioListing from "@/components/AudioListing/AudioListing"; // Component to display individual audio posts
+const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer")); // Lazy load the MainPlayer component for better performance
 
-import { debounce } from "lodash";
+import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
+import Button from "@/components/Button/Button"; // Button component for interactions
+import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
+import { SVGIconName } from "@/lib/types"; // SVG icon types
 
-import AudioListing from "@/components/AudioListing/AudioListing";
-// import MainPlayer from "@/components/MainPlayer/MainPlayer";
-const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer"));
+import { HomeProps, Modal, MediaState } from "@/lib/types"; // Type definitions for props and state
 
-import Header from "@/components/Header/Header";
-import Button from "@/components/Button/Button";
-import Icon from "@/components/Icon/Icon";
-import { SVGIconName } from "@/lib/types";
+import { useFilteredPosts, useGetMediaState } from "@/lib/hooks"; // Custom hooks for managing media state and filtering posts
 
-import { HomeProps, Modal, MediaState } from "@/lib/types";
-
-import { useFilteredPosts, useGetMediaState } from "@/lib/hooks";
-
-import { DEFAULT_NUMBER_OF_POSTS, DEFAULT_MODAL } from "@/lib/constants";
+import { DEFAULT_NUMBER_OF_POSTS, DEFAULT_MODAL } from "@/lib/constants"; // Default constants
 
 /**
- * Home Component: The main entry point for the application.
- * - Renders the list of audio posts
+ * Home Component: The main entry point for the homepage.
+ * - Renders the list of audio posts.
  * - Handles filtering, search, favorites, and playback.
+ * @param {HomeProps} props - The posts data, total number of posts, and categories.
+ * @returns {JSX.Element} - The rendered Home page.
  */
 export default function Home({
   posts,
@@ -45,9 +44,9 @@ export default function Home({
   // Effect: Stops loading once mediaStates are ready.
   useEffect(() => {
     if (mediaStates) {
-      setIsLoading(false); // Update loading state once media states are available.
+      setIsLoading(false); // Stop loading when mediaStates are available.
     }
-  }, [mediaStates]); // Dependency: Re-run this effect when mediaStates changes.
+  }, [mediaStates]); // Dependency: Re-run this effect when mediaStates change.
 
   // State: Controls the number of posts to display.
   const [numberOfPosts, setNumberOfPosts] = useState<number>(
@@ -66,16 +65,8 @@ export default function Home({
   // State: Stores the modal state for displaying selected audio.
   const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
 
-  // State: Stores the list of filtered categories.
-  // const [filteredCategoryList, setFilteredPostsCategory] =
-  //   useState<Category[]>(allCategories);
-
   // Custom hook to filter posts based on the current search, category, and favorite filters.
-  const {
-    filteredPosts,
-    // filteredPostsCategory,
-    filterPosts,
-  } = useFilteredPosts(
+  const { filteredPosts, filterPosts } = useFilteredPosts(
     posts,
     showFav ? favoriteIds : [],
     searchTerms,
@@ -84,12 +75,6 @@ export default function Home({
 
   // Effect: Updates filtered posts whenever the category, favorites, or search terms change.
   useEffect(() => {
-    // Reset to show all categories if no specific category is selected.
-    // nice to have: When Search input has some result filtered categories should only show the categories of the filtered posts
-    // if (filteredCategory.length === 0) {
-    //   setFilteredPostsCategory(allCategories);
-    // }
-
     filterPosts(); // Triggers post filtering based on current state.
   }, [filterPosts, filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
 
@@ -103,25 +88,27 @@ export default function Home({
   const debouncedSearch = useMemo(
     () =>
       debounce((search: string[]) => {
-        setSearchTerms(search);
-      }, 300),
+        setSearchTerms(search); // Update search terms after debounce
+      }, 300), // 300ms debounce delay
     [],
   );
 
+  // Clean up the debounced search on component unmount
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel(); // Clean up the debounced function when the component unmounts
+      debouncedSearch.cancel(); // Cancel debounced function when component unmounts
     };
   }, [debouncedSearch]);
 
+  // Handle search input changes with debounce
   const handleSearchChange = useCallback(
     (search: string[]) => {
-      debouncedSearch(search);
+      debouncedSearch(search); // Call the debounced search function
     },
-    [debouncedSearch], // Now debouncedSearch is a dependency
+    [debouncedSearch], // Add debouncedSearch as a dependency
   );
 
-  // Function: Activates the modal and updates its state.
+  // Function: Activates the modal and updates its state with selected post details.
   const modalFunction = useCallback(
     (post: any, currentItemState: MediaState) => {
       const { title, date, id, audioUrl } = post;
@@ -132,15 +119,15 @@ export default function Home({
         selectedItem: {
           title,
           date: date,
-          src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL.
+          src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL
           id: id,
-          playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Default to 0 if no state.
-          duration: currentItemState ? currentItemState.duration : 0, // Default to 0 if no state.
-          isFavorite: currentItemState ? currentItemState.isFavorite : false, // Default to false if no state.
+          playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Played seconds or default to 0
+          duration: currentItemState ? currentItemState.duration : 0, // Duration or default to 0
+          isFavorite: currentItemState ? currentItemState.isFavorite : false, // Favorite status or default to false
         },
       });
     },
-    [setModal], // Dependencies to ensure correct updates
+    [setModal], // Dependencies: setModal to ensure it updates correctly
   );
 
   return (
@@ -156,7 +143,7 @@ export default function Home({
           handleCategoryChange={setFilteredCategory} // Callback for category filtering
           toggleFavorites={toggleFavorites} // Function to toggle the favorites filter
           showFav={showFav} // State controlling whether to show favorites
-          filteredCategoryList={allCategories} // List of filtered categories
+          filteredCategoryList={allCategories} // List of all categories for filtering
         />
 
         {/* Posts List */}
@@ -165,16 +152,9 @@ export default function Home({
           {!isLoading &&
             filteredPosts &&
             filteredPosts.slice(0, numberOfPosts).map((post) => {
-              const {
-                // audioUrl,
-                title,
-                date,
-                id,
-                categories,
-                link,
-                // imageUrl
-              } = post;
+              const { title, date, id, categories, link } = post;
 
+              // Find the current media state for this post (or set defaults)
               const currentItem = mediaStates.find((val) => val.id === id) || {
                 id,
                 playedSeconds: 0,
@@ -191,7 +171,7 @@ export default function Home({
 
               return (
                 <AudioListing
-                  key={`item-${id}`} // Unique key for each item
+                  key={`item-${id}`} // Unique key for each post
                   title={title} // Post title
                   date={date} // Post date
                   categories={categories} // Post categories
@@ -218,7 +198,7 @@ export default function Home({
                       size={"sm"}
                       variation={
                         currentItemState.isFavorite ? "active" : "default"
-                      } // Changes icon based on favorite status
+                      } // Change icon based on favorite status
                     />
                   </Button>
                 </AudioListing>
@@ -231,7 +211,6 @@ export default function Home({
           {modal?.selectedItem && modal.selectedItem.id !== 0 && (
             <MainPlayer
               mediaItem={modal.selectedItem} // Pass the selected media item to the player
-              // setGlobalMediaState={updateMediaState} // Function to update global media state
               closeModal={closeModal} // Function to close the modal
               stateCallback={(object) => {
                 const { id, playedSeconds, duration, isFavorite } = object;
@@ -244,3 +223,11 @@ export default function Home({
     </>
   );
 }
+
+/**
+ * Possible Refactoring Ideas:
+ * 1. **Lazy Loading Components**: Lazy load additional components like `Header` and `AudioListing` to further optimize performance.
+ * 2. **Error Handling**: Implement better error handling for when posts fail to load, and show fallback content or error messages.
+ * 3. **React Query or SWR**: Replace custom hooks for filtering and search with React Query or SWR for more robust state and cache management.
+ * 4. **Accessibility**: Enhance accessibility by ensuring all interactive elements, such as buttons and icons, have appropriate ARIA labels.
+ */
