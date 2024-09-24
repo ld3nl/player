@@ -1,5 +1,5 @@
 import type { Metadata } from "next"; // Type for metadata that helps with SEO and defining page properties in Next.js
-import { getBaseUrl } from "@/lib/dynamic"; // Helper function to get the base URL based on the environment
+import { get_base_url } from "@/lib/dynamic"; // Helper function to get the base URL based on the environment
 // import { fetchPosts } from "@/lib/server/fetchPosts"; // Server-side data fetching function for posts
 
 import HomeClient from "../components/HomeClient"; // Import the client component to render data on the homepage
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // The main async function that represents the Home page component
 export default async function Home() {
   // Fetch data from the API route
-  const response = await fetch(`${getBaseUrl()}/api/posts`);
+  const response = await fetch(`${get_base_url()}/api/posts`);
 
   // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
 
