@@ -81,6 +81,10 @@ export async function fetchPosts(): Promise<HomeProps> {
     "WordPress API Base URL:",
     process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL,
   );
+  console.log(
+    "Fetching from API:",
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`,
+  );
 
   // Fetch static category details and clean up categories with multiple parts
   const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {

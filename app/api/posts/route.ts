@@ -20,6 +20,10 @@ export async function GET() {
     const postsData = await fetchPosts(); // Call the utility function to fetch posts
     return NextResponse.json(postsData); // Return the fetched data as JSON
   } catch (error) {
-    return NextResponse.json({ message: "Error fetching posts" });
+    console.error("Error fetching posts:", error); // Log error
+    return NextResponse.json(
+      { message: "Error fetching posts", error },
+      { status: 500 },
+    ); // Return error response
   }
 }
