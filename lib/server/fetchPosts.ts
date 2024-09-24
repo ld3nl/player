@@ -67,6 +67,16 @@ export async function fetchPosts(): Promise<HomeProps> {
     console.log(`[fetchPosts] Request added for batch: ${i + 1}`);
   });
 
+  // Log all Vercel environment variables for debugging
+  console.log("Environment variables:", {
+    VERCEL_URL: process.env.VERCEL_URL,
+    NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
+    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL: process.env,
+    // Add other environment variables here if necessary
+  });
+
   // Fetch static category details and clean up categories with multiple parts
   const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {
     const cleanedNames = name.replace(/\s*\/\s*/g, "/").split("/"); // Clean category names
