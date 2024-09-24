@@ -1,7 +1,5 @@
 import { useState } from "react";
-
-// eslint-disable-next-line no-unused-vars
-type ValueSetter<T> = T | ((value: T) => T);
+import { ValueSetter } from "@/lib/types";
 
 export function useLocalStorage<T>(
   key: string,

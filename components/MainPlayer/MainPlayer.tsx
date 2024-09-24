@@ -1,27 +1,65 @@
-import { FC, useEffect, useState, useRef, useContext } from "react";
+import {
+  FC,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  lazy,
+} from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
-import { GlobalContext } from "../../pages/_app";
-import useLockScroll from "../../lib/hooks";
-import Icon from "../Icon/Icon";
+import debounce from "lodash/debounce"; // Ensure correct lodash import
 
-import ReactPlayer from "react-player";
+import useLockScroll from "@/lib/hooks";
+import { PlayerProps, SVGIconName } from "@/lib/types";
+const ReactPlayer = lazy(() => import("react-player"));
+
+import Icon from "@/components/Icon/Icon";
+import Button from "@/components/Button/Button";
 
 import { Duration } from "./Duration";
 
+// React does not recognize the `fetchPriority` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `fetchpriority` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
 import img from "@/public/P1080841.jpg";
 
-interface Props {
-  imageSrc?: string;
-  title?: string;
-  src?: string;
-  id?: number;
-  link?: string;
-}
+const MainPlayer: FC<PlayerProps> = ({
+  mediaItem,
+  closeModal,
+  stateCallback,
+}) => {
+  const {
+    title,
+    src,
+    id,
+    link,
+    imageSrc,
+    playedSeconds,
+    duration,
+    isFavorite,
+  } = mediaItem;
 
-const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
+  const [thisMediaState, setThisMediaState] = useState({
+    id: id || 0,
+    playedSeconds: playedSeconds,
+    duration: duration,
+    isFavorite: isFavorite,
+  });
+
+  useEffect(() => {
+    if (mediaItem) {
+      setThisMediaState({
+        id: mediaItem.id || 0,
+        playedSeconds: mediaItem.playedSeconds,
+        duration: mediaItem.duration,
+        isFavorite: mediaItem.isFavorite,
+      });
+    }
+  }, [mediaItem]);
+
   const audioRef = useRef<any>(null);
+  // const audioRef = useRef<ReactPlayer>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
@@ -34,8 +72,6 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
   const [muted, setMuted] = useState(false);
   const [played, setPlayed] = useState(0);
 
-  // const [loaded, setLoaded] = useState<number | boolean>(0);
-  const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [loop, setLoop] = useState(false);
   const [seeking, setSeeking] = useState(false);
@@ -47,25 +83,11 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
-  // const [audioIsLoading, setAudioIsLoading] = useState(true);
-  const [favorite, setFavorite] = useState(false);
 
-  const { setGlobalContext } = useContext(GlobalContext);
+  // const [favorite, setFavorite] = useState(isFavorite);
 
   useLockScroll(isOpen);
 
-  useEffect(() => {
-    // const storedProgress = localStorage.getItem(`${id}-progress`);
-    const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]",
-    );
-
-    setFavorite(favoriteItems.includes(id));
-
-    handlePlay();
-  }, [src, id]);
-
-  //
   useEffect(() => {
     if (title && src) {
       handleOpen();
@@ -79,12 +101,6 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
         handleStop();
       }
 
-      setGlobalContext((prev) => ({
-        ...prev,
-        isModalActive: false,
-        selectedItem: { title: "", date: "", src: "", id: 0 },
-      }));
-
       // Reset other states
       // setUrl(null);
       setPip(false);
@@ -95,7 +111,6 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
       setMuted(false);
       setPlayed(0);
       // setLoaded(0);
-      setDuration(0);
       setPlaybackRate(1.0);
       setLoop(false);
       setSeeking(false);
@@ -109,7 +124,6 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     setTimeout(() => {
       setIsOpen(true);
       setIsDelayingOpen(false); // End delaying
-      setGlobalContext((prev) => ({ ...prev, isModalActive: true }));
     }, 10); // Short delay, just enough for the browser to render the initial state
   };
 
@@ -118,31 +132,22 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     setTimeout(() => {
       setIsOpen(false);
       setIsAnimatingOut(false);
+      typeof closeModal === "function" && closeModal();
     }, 500); // Duration of the closing animation
   };
 
-  const toggleFavorite = (id: any) => {
-    const favoriteItems = JSON.parse(
-      localStorage.getItem("favoriteItems") || "[]",
-    );
-
-    const isFavorite = favoriteItems.includes(id);
-
-    if (isFavorite) {
-      const updatedItems = favoriteItems.filter((item: any) => item !== id);
-      localStorage.setItem("favoriteItems", JSON.stringify(updatedItems));
-    } else {
-      favoriteItems.push(id);
-      localStorage.setItem("favoriteItems", JSON.stringify(favoriteItems));
-    }
-
-    setFavorite(!isFavorite);
-  };
+  const toggleFavorite = useCallback(() => {
+    setThisMediaState((prevState) => {
+      const newState = { ...prevState, isFavorite: !prevState.isFavorite };
+      // stateCallback?.(newState);
+      return newState;
+    });
+  }, []);
 
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
     setSeeking(true);
 
-    const sec = (seconds * 1) / duration;
+    const sec = (seconds * 1) / thisMediaState?.duration;
 
     let seekTo = 0;
 
@@ -155,7 +160,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     }
 
     setPlayed(seekTo);
-    audioRef.current.seekTo(seekTo);
+    audioRef?.current?.seekTo(seekTo);
 
     setSeeking(false);
   };
@@ -172,20 +177,26 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     setPlaying(!playing);
   };
 
-  const handleSeekChange = (e: any) => {
-    const newValue = e.target?.value || e;
-    if (newValue) {
-      setPlayed(parseFloat(newValue));
+  const handleSeekChange = (value: number) => {
+    if (value) {
+      setPlayed(value);
     }
   };
 
-  const handleSeekMouseUp = (e: any) => {
-    const newValue = e.target?.value || e;
+  const handleSeekMouseUp = (newValue: number) => {
     setSeeking(false);
-    if (newValue) {
-      audioRef.current?.seekTo(parseFloat(newValue));
+    if (audioRef.current) {
+      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure newValue is parsed correctly
     }
   };
+
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((newState) => {
+        stateCallback?.(newState);
+      }, 300),
+    [stateCallback],
+  );
 
   const handleProgress = (updatedState: {
     loaded: number | boolean;
@@ -193,33 +204,37 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
     played: number;
     playedSeconds: number;
   }) => {
-    // We only want to update time slider if we are not currently seeking
+    const { played, playedSeconds } = updatedState;
+
+    setPlayed(played);
+
     if (!seeking) {
-      const { played, playedSeconds } = updatedState;
-
-      setPlayed(played);
-
-      localStorage.setItem(
-        `${id}-progress`,
-        JSON.stringify({ playedSeconds, duration, favorite }),
-      );
+      setThisMediaState((prevState) => {
+        const newState = {
+          ...prevState,
+          playedSeconds: playedSeconds,
+        };
+        debouncedUpdate(newState);
+        return newState;
+      });
     }
   };
 
-  const handleDuration = (duration: any) => {
-    setDuration(duration);
-
-    const storedProgress = localStorage.getItem(`${id}-progress`);
-
-    if (storedProgress) {
-      const { playedSeconds } = JSON.parse(storedProgress);
-      audioRef.current.seekTo(playedSeconds, "seconds");
-    }
+  const handleDuration = (duration: number) => {
+    setThisMediaState((prevState) => {
+      const newState = { ...prevState, duration };
+      // stateCallback?.({ ...newState });
+      return newState;
+    });
+    audioRef.current?.seekTo(playedSeconds, "seconds");
   };
 
   return (
     <>
-      {(isOpen || isAnimatingOut || isDelayingOpen) && (
+      {(isOpen ||
+        isAnimatingOut ||
+        isDelayingOpen ||
+        thisMediaState?.id !== 0) && (
         <div
           className={[
             "flex flex-col items-center justify-center",
@@ -232,12 +247,13 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
           ].join(" ")}
         >
           <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
-            <button
+            <Button
               className="absolute right-0 top-0 w-12 p-3 text-white"
               onClick={handleClose}
+              ariaLabel="Close"
             >
-              <Icon name={"Close"} />
-            </button>
+              <Icon name={SVGIconName.Close} />
+            </Button>
           </div>
           <div className="mx-auto flex w-96">
             <Image
@@ -252,7 +268,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               className="h-auto w-full object-cover"
             />
           </div>
-          {duration !== 0 && (
+          {thisMediaState?.duration !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
               {title ? he.decode(title) : ""}
             </span>
@@ -277,7 +293,7 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
             />
           )}
 
-          {duration !== 0 && (
+          {thisMediaState?.duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
                 <ReactSlider
@@ -292,49 +308,55 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               </div>
 
               <div className="mx-10 flex justify-between text-xs text-gray-400">
-                <Duration seconds={duration * played} />
-                <Duration seconds={duration * (1 - played)} />
+                <Duration seconds={thisMediaState?.duration * played} />
+                <Duration seconds={thisMediaState?.duration * (1 - played)} />
               </div>
             </div>
           )}
 
-          {duration !== 0 && (
+          {thisMediaState?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
-                <button
+                <Button
                   onClick={() => handleSeekTo("backward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel="Rewind 15 seconds"
                 >
-                  <Icon name={"BackwardRewind"} size="twoThirds" />
-                </button>
+                  <Icon name={SVGIconName.BackwardRewind} size="twoThirds" />
+                </Button>
 
-                <button
+                <Button
                   onClick={handlePlayPause}
-                  className="mx-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel={playing ? "Pause" : "Play"}
                 >
-                  <Icon name={playing ? "Pause" : "Play"} size={"md"} />
-                </button>
+                  <Icon
+                    name={playing ? SVGIconName.Pause : SVGIconName.Play}
+                    size={"md"}
+                  />
+                </Button>
 
-                <button
+                <Button
                   onClick={() => handleSeekTo("forward", 15)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  ariaLabel="Fast forward 15 seconds"
                 >
-                  <Icon name={"ForwardRewind"} size="twoThirds" />
-                </button>
+                  <Icon name={SVGIconName.ForwardRewind} size="twoThirds" />
+                </Button>
               </div>
             </div>
           )}
 
-          {duration !== 0 && (
+          {thisMediaState?.duration !== 0 && (
             <div className="mt-2 flex items-center justify-center">
               <button
-                onClick={() => toggleFavorite(id)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                onClick={() => toggleFavorite()}
+                className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <Icon
-                  name={"Favorite"}
+                  name={SVGIconName.Favorite}
                   size={"sm"}
-                  variation={favorite ? "active" : "default"}
+                  variation={thisMediaState.isFavorite ? "active" : "default"}
                   customVariation={{
                     active: "fill-purple-600",
                     default: "fill-white stroke-purple-600 stroke-2",
@@ -345,10 +367,11 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
               <a
                 href={link}
                 target="_blank"
-                className="ms-8 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                aria-label="Open link in new tab"
               >
                 <Icon
-                  name={"Link"}
+                  name={SVGIconName.Link}
                   size="twoThirds"
                   customVariation={{
                     active: "fill-purple-600",
@@ -359,10 +382,10 @@ const MainPlayer: FC<Props> = ({ title, src, id, link, imageSrc }) => {
             </div>
           )}
 
-          {duration === 0 && (
+          {thisMediaState?.duration === 0 && (
             <div className="flex p-10">
               <Icon
-                name={"Spinner"}
+                name={SVGIconName.Spinner}
                 customVariation={{
                   active: "fill-purple-600",
                   default: "fill-purple-600",

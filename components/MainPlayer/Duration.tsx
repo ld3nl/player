@@ -1,9 +1,5 @@
 import React from "react";
-
-interface DurationProps {
-  className?: string;
-  seconds: number;
-}
+import { DurationProps } from "@/lib/types";
 
 export const Duration: React.FC<DurationProps> = ({ className, seconds }) => {
   const format = (time: number) => {

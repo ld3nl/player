@@ -5,34 +5,7 @@ import {
   MEDIA_API_URL,
   CATEGORY_API_URL,
 } from "./constants";
-
-interface Post {
-  // Define the shape of a Post object
-  id: number;
-  title: {
-    rendered: string;
-  };
-  excerpt: {
-    rendered: string;
-  };
-  content: {
-    rendered: string;
-  };
-  categories: number[];
-  featured_media: number;
-  author: number;
-  date: string;
-  link: string;
-}
-
-/**
- * Interface for Category object
- */
-interface Category {
-  id: number; // Unique identifier for the category
-  name: string; // Human-readable name of the category
-  slug: string; // URL-friendly string representing the category (usually used for routing)
-}
+import { Category, Post } from "./types";
 
 export const getAllPostsFromServer = async (
   term: number | null = null,
