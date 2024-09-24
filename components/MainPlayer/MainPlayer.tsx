@@ -128,10 +128,6 @@ const MainPlayer: FC<PlayerProps> = ({
       setSeeking(false);
     }
 
-    if (isOpen && playerRef.current) {
-      playerRef.current.focus();
-    }
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         handleClose(); // Close modal on Escape key press
