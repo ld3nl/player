@@ -12,10 +12,9 @@ This is a modern, scalable web application built using **Next.js** and **React 1
 6. [Environment Variables](#environment-variables)
 7. [Performance Optimizations](#performance-optimizations)
 8. [Testing](#testing)
-9. [Component Library and Storybook](#component-library-and-storybook)
-10. [Future Enhancements](#future-enhancements)
-11. [Deployment](#deployment)
-12. [Learn More](#learn-more)
+9. [Future Enhancements](#future-enhancements)
+10. [Deployment](#deployment)
+11. [Learn More](#learn-more)
 
 ## Getting Started
 
@@ -123,9 +122,9 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 
 ## Testing
 
-Currently, the project has no tests, but future enhancements will include **Cypress** for both **end-to-end (e2e)** and **component testing**, as well as **Storybook** for interactive component development and testing.
+In the future, the project will include **Cypress** for both **end-to-end (e2e)** and **component testing**, as well as **Storybook** for interactive component development and testing.
 
-### Adding Cypress
+### Cypress for Testing
 
 To install and set up **Cypress** for both e2e and component testing:
 
@@ -168,9 +167,9 @@ To install and set up **Cypress** for both e2e and component testing:
    npm run cypress:open
    ```
 
-### Adding Storybook
+### Storybook for Component Development
 
-**Storybook** is a great tool for developing and testing UI components in isolation.
+**Storybook** is an excellent tool for developing and testing UI components in isolation.
 
 1. Install Storybook:
 
@@ -184,33 +183,18 @@ To install and set up **Cypress** for both e2e and component testing:
    npm run storybook
    ```
 
-3. Configure Storybook for Next.js and React by installing the necessary addons.
+3. Configure Storybook for Next.js and React by installing the necessary addons, allowing you to develop and test your components interactively.
 
-4. You can write stories for each component in `*.stories.tsx` files.
-
-## Component Library and Storybook
-
-The app can be extended with **Storybook** for component-driven development. With **Storybook**, you can isolate each component for individual testing, allowing easy migration to **React 19** in the future.
-
-You can set up stories for all UI components like `Button`, `Icon`, and `AudioListing`, ensuring they are independently testable and compatible with future versions of React.
-
-To learn more about Storybook and how to write stories, visit the [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction).
+To learn more about writing stories, visit the [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction).
 
 ## Future Enhancements
 
-### Cypress for End-to-End (e2e) and Component Testing
-
-- **e2e Testing**: Simulate real user interactions by running end-to-end tests that navigate through the app, ensuring functionality works across different pages.
-- **Component Testing**: Test each component in isolation, ensuring each UI element works as expected before integrating into the full app.
-
-### Storybook for Component Development
-
-- **Isolated Component Testing**: Develop and test individual components in isolation using **Storybook**, ensuring they behave as expected before integrating them into the main app.
-- **UI Documentation**: Use Storybook as an interactive library for your UI components, enabling a smooth transition to **React 19**.
-
 ### React 19 Migration
 
-When migrating to **React 19**, having Cypress and Storybook in place will help ensure all components and pages are still working correctly. Components and hooks using React 18’s concurrent features like `useTransition` will benefit from any performance and feature improvements in React 19.
+The project is built with **React 18**, but it's structured with future-proof practices to support a smooth migration to **React 19**. Features like concurrent rendering and lazy loading are already implemented, and once Cypress e2e and component testing, along with Storybook, are in place, these tools will ensure that all components and interactions behave as expected after the migration.
+
+- **End-to-End Testing**: **Cypress** will help ensure the entire user flow remains intact.
+- **Component Testing**: **Storybook** will aid in isolating and testing each UI component to ensure compatibility with React 19.
 
 ## Deployment
 
