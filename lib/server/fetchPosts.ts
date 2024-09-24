@@ -76,8 +76,11 @@ export async function fetchPosts(): Promise<HomeProps> {
   //   VERCEL: process.env,
   //   // Add other environment variables here if necessary
   // });
-  console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
-  console.log("VERCEL_URL:", process.env.VERCEL_URL);
+  console.log("Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+  console.log(
+    "WordPress API Base URL:",
+    process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL,
+  );
 
   // Fetch static category details and clean up categories with multiple parts
   const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {

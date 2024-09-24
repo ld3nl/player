@@ -1,27 +1,24 @@
 // Function to get the base URL based on the environment
 // Function to get the base URL based on the environment
+// Function to get the base URL based on the environment
 export const get_base_url = () => {
   // Retrieve the environment variable
-  const env = process.env.NEXT_PUBLIC_VERCEL_ENV || "development"; // Fallback to 'development'
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV;
+  const vercelUrl =
+    process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL;
 
   // Determine the base URL based on the environment
   switch (env) {
     case "production": {
-      const url = process.env.NEXT_PUBLIC_VERCEL_URL;
-      if (!url)
-        throw new Error("NEXT_PUBLIC_VERCEL_URL is not defined in production");
-      return `https://${url}`;
+      if (!vercelUrl) throw new Error("NEXT_PUBLIC_VERCEL_URL is not defined");
+      return `https://${vercelUrl}`;
     }
     case "preview": {
-      const url = process.env.VERCEL_URL;
-      if (!url) throw new Error("VERCEL_URL is not defined in preview");
-      return `https://${url}`;
-    }
-    case "development": {
-      return "http://localhost:3000";
+      if (!vercelUrl) throw new Error("VERCEL_URL is not defined");
+      return `https://${vercelUrl}`;
     }
     default:
-      throw new Error(`Unknown environment: ${env}`);
+      return "http://localhost:3000";
   }
 };
 
