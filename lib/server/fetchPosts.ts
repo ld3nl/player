@@ -108,48 +108,27 @@ export async function fetchPosts(): Promise<HomeProps> {
  * @param {any} post Data for an individual post
  * @returns Processed post data
  */
-function processPost({
-  excerpt,
-  title,
-  date,
-  id,
-  categories,
-  link,
-  content,
-}: any) {
-  // Regular expression to extract the audio URL from the post's excerpt
-  const audioPattern = /src="([^"]*)"/;
-  const audioMatch = excerpt.rendered.match(audioPattern);
-  const audioUrl = audioMatch
-    ? audioMatch[1].replace(
-        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-        "",
-      )
-    : "";
 
-  // Regular expression to extract the image URL from the post's content
-  const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
-  const imageMatch = content.rendered.match(imagePattern);
-  const imageUrl = imageMatch
-    ? imageMatch[1].replace(
-        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-        "",
-      )
-    : "";
+/**
+ * Processes an individual post to extract relevant data.
+ * @param {any} post The raw post data from the server.
+ * @returns Processed post data.
+ */
+function processPost(post: any) {
+  const { excerpt, title, date, id, categories, link, content } = post;
 
-  // Process the categories for each post, filtering out the root category
+  const audioUrl = extractAudioUrl(excerpt.rendered);
+  const imageUrl = extractImageUrl(content.rendered);
+
   const categoryDetails = categories
-    ?.map((categoryId: number) => {
-      if (categoryId !== ROOT_CATEGORY_ID) {
-        return StaticCategoryData.find(
-          (category: Category) => category?.id === categoryId,
-        );
-      }
-      return null;
-    })
-    .filter(Boolean); // Remove any null values
+    .filter((categoryId: number) => categoryId !== ROOT_CATEGORY_ID)
+    .map((categoryId: number) =>
+      StaticCategoryData.find(
+        (category: Category) => category?.id === categoryId,
+      ),
+    )
+    .filter(Boolean);
 
-  // Return the processed post data
   return {
     id,
     imageUrl,
@@ -159,6 +138,34 @@ function processPost({
     categories: categoryDetails,
     link,
   };
+}
+
+/**
+ * Helper function to extract audio URL from post content.
+ */
+function extractAudioUrl(excerptRendered: string): string {
+  const audioPattern = /src="([^"]*)"/;
+  const match = excerptRendered.match(audioPattern);
+  return match
+    ? match[1].replace(
+        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+        "",
+      )
+    : "";
+}
+
+/**
+ * Helper function to extract image URL from post content.
+ */
+function extractImageUrl(contentRendered: string): string {
+  const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
+  const match = contentRendered.match(imagePattern);
+  return match
+    ? match[1].replace(
+        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+        "",
+      )
+    : "";
 }
 
 /**
