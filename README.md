@@ -12,8 +12,10 @@ This is a modern, scalable web application built using **Next.js** and **React 1
 6. [Environment Variables](#environment-variables)
 7. [Performance Optimizations](#performance-optimizations)
 8. [Testing](#testing)
-9. [Deployment](#deployment)
-10. [Learn More](#learn-more)
+9. [Component Library and Storybook](#component-library-and-storybook)
+10. [Future Enhancements](#future-enhancements)
+11. [Deployment](#deployment)
+12. [Learn More](#learn-more)
 
 ## Getting Started
 
@@ -121,15 +123,94 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 
 ## Testing
 
-- **Unit Testing**: The app is tested using Jest and React Testing Library to ensure that components behave as expected.
+Currently, the project has no tests, but future enhancements will include **Cypress** for both **end-to-end (e2e)** and **component testing**, as well as **Storybook** for interactive component development and testing.
 
-  To run tests:
+### Adding Cypress
 
-  ```bash
-  npm run test
-  ```
+To install and set up **Cypress** for both e2e and component testing:
 
-- **Integration Testing**: Tests ensure that components interact properly and the app functions as a whole.
+1. Install Cypress:
+
+   ```bash
+   npm install cypress --save-dev
+   ```
+
+2. Add Cypress scripts to `package.json`:
+
+   ```json
+   "scripts": {
+     "cypress:open": "cypress open",
+     "cypress:run": "cypress run"
+   }
+   ```
+
+3. Configure Cypress for both e2e and component tests in `cypress.config.ts`:
+
+   ```ts
+   import { defineConfig } from 'cypress';
+
+   export default defineConfig({
+     e2e: {
+       baseUrl: 'http://localhost:3000',
+     },
+     component: {
+       devServer: {
+         framework: 'next',
+         bundler: 'webpack',
+       },
+     },
+   });
+   ```
+
+4. You can then run the tests with:
+
+   ```bash
+   npm run cypress:open
+   ```
+
+### Adding Storybook
+
+**Storybook** is a great tool for developing and testing UI components in isolation.
+
+1. Install Storybook:
+
+   ```bash
+   npx sb init
+   ```
+
+2. Start Storybook:
+
+   ```bash
+   npm run storybook
+   ```
+
+3. Configure Storybook for Next.js and React by installing the necessary addons.
+
+4. You can write stories for each component in `*.stories.tsx` files.
+
+## Component Library and Storybook
+
+The app can be extended with **Storybook** for component-driven development. With **Storybook**, you can isolate each component for individual testing, allowing easy migration to **React 19** in the future.
+
+You can set up stories for all UI components like `Button`, `Icon`, and `AudioListing`, ensuring they are independently testable and compatible with future versions of React.
+
+To learn more about Storybook and how to write stories, visit the [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction).
+
+## Future Enhancements
+
+### Cypress for End-to-End (e2e) and Component Testing
+
+- **e2e Testing**: Simulate real user interactions by running end-to-end tests that navigate through the app, ensuring functionality works across different pages.
+- **Component Testing**: Test each component in isolation, ensuring each UI element works as expected before integrating into the full app.
+
+### Storybook for Component Development
+
+- **Isolated Component Testing**: Develop and test individual components in isolation using **Storybook**, ensuring they behave as expected before integrating them into the main app.
+- **UI Documentation**: Use Storybook as an interactive library for your UI components, enabling a smooth transition to **React 19**.
+
+### React 19 Migration
+
+When migrating to **React 19**, having Cypress and Storybook in place will help ensure all components and pages are still working correctly. Components and hooks using React 18’s concurrent features like `useTransition` will benefit from any performance and feature improvements in React 19.
 
 ## Deployment
 
@@ -150,5 +231,7 @@ To learn more about the tools and technologies used in this project:
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React 18 Documentation](https://reactjs.org/docs/18-upgrade-guide.html)
 - [TypeScript Documentation](https://www.typescriptlang.org/)
+- [Cypress Documentation](https://docs.cypress.io/)
+- [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction)
 - [ESLint Documentation](https://eslint.org/)
 - [Prettier Documentation](https://prettier.io/)
