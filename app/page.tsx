@@ -1,6 +1,6 @@
 import type { Metadata } from "next"; // Type for metadata that helps with SEO and defining page properties in Next.js
-// import { get_base_url } from "@/lib/dynamic"; // Helper function to get the base URL based on the environment
-// import { fetchPosts } from "@/lib/server/fetchPosts"; // Server-side data fetching function for posts
+
+import { fetchPosts } from "@/lib/server/fetchPosts"; // Server-side data fetching function for posts
 
 import HomeClient from "../components/HomeClient"; // Import the client component to render data on the homepage
 
@@ -12,37 +12,31 @@ export const metadata: Metadata = {
 
 // The main async function that represents the Home page component
 export default async function Home() {
-  // Fetch data from the API route
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  if (!baseUrl) {
-    throw new Error("Base URL is not defined");
-  }
+  // Fetch posts, total post count, and all categories data from the server-side function
+  const { posts, totalPosts, allCategories } = await fetchPosts();
+  // const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  // if (!baseUrl) {
+  //   throw new Error("Base URL is not defined");
+  // }
 
-  const response = await fetch(`${baseUrl}/api/posts`);
+  // const response = await fetch(`${baseUrl}/api/posts`);
 
-  // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
+  // // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
 
-  if (!response.ok) {
-    console.error(
-      "API responded with an error:",
-      response.status,
-      response.statusText,
-    );
+  // if (!response.ok) {
+  //   console.error(
+  //     "API responded with an error:",
+  //     response.status,
+  //     response.statusText,
+  //   );
 
-    const errorText = await response.text(); // Log error response body
-    console.log("Error body:", errorText);
+  //   const errorText = await response.text(); // Log error response body
+  //   console.log("Error body:", errorText);
 
-    throw new Error("Error fetching posts");
-  }
+  //   throw new Error("Error fetching posts");
+  // }
 
-  const { posts, totalPosts, allCategories } = await response.json();
-  // console.log(
-  //   "Fetching posts...",
-  //   `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`,
-  // );
-
-  // // Fetch posts, total post count, and all categories data from the server-side function
-  // const { posts, totalPosts, allCategories } = await fetchPosts();
+  // const { posts, totalPosts, allCategories } = await response.json();
 
   // Rendering the HomeClient component with fetched data as props
   return (
