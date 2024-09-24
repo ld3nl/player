@@ -99,10 +99,11 @@ const Header: React.FC<HeaderProps> = ({
    * Debounces the search input to limit how often the search function is called.
    */
   const debouncedSearch = debounce(
-    (searchTerms: string[], filterCallback: Function) => {
-      filterCallback(searchTerms); // Call the search handler after debounce delay
+    // eslint-disable-next-line no-unused-vars
+    (searchTerms: string[], filterCallback: (terms: string[]) => void) => {
+      filterCallback(searchTerms);
     },
-    500, // 500ms debounce delay
+    500,
   );
 
   const searchHandler = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -82,7 +82,8 @@ export function getSVG({ name }: SVGProps) {
       );
 
     default:
-      return <path />; // Return an empty path if no match is found
+      console.warn(`Unknown icon name: ${name}`);
+      return null; // or return a default icon
   }
 }
 

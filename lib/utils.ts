@@ -15,9 +15,9 @@ import { Category, Post } from "./types"; // Import necessary types
  * @returns {Promise<Post[]>} A promise that resolves with the posts.
  */
 export const getAllPostsFromServer = async (
-  term: number | null = null,
-  per_page: number | null = null,
-  offset: number | null = null,
+  term: number = 0,
+  per_page: number = 10,
+  offset: number = 0,
 ): Promise<Post[]> => {
   try {
     const response: AxiosResponse<Post[]> = await axios.get<Post[]>(
@@ -62,23 +62,16 @@ export const getCategoryCount = async (id: number): Promise<number> => {
  */
 export const getCategoryData = async (id: number): Promise<Category> => {
   try {
-    const response: AxiosResponse<Category[]> = await axios.get<Category[]>(
-      `${CATEGORY_API_URL}`, // API URL for fetching categories
+    const response: AxiosResponse<Category> = await axios.get<Category>(
+      `${CATEGORY_API_URL}/${id}`,
       {
         params: {
-          "categories[terms]": id, // Filter by category ID
-          _fields: "name,id,slug", // Fetch only specific fields
-          per_page: 99, // Limit results to 99
+          _fields: "name,id,slug",
         },
       },
     );
 
-    // Handle the case where the category is not found
-    if (response.data.length === 0) {
-      throw new Error("Category not found"); // Throw an error if the category is not found
-    }
-
-    return response.data[0]; // Return the first category found
+    return response.data; // Return the category data
   } catch (error) {
     console.error(error); // Log error in case of failure
     throw error; // Rethrow the error to be handled by the caller

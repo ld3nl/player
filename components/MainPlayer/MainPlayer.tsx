@@ -94,7 +94,16 @@ const MainPlayer: FC<PlayerProps> = ({
   // Lock the scroll when the modal is open
   useLockScroll(isOpen);
 
-  // Open modal when title and source are available
+  // Function: Handles opening the modal with a short delay
+  const handleOpen = () => {
+    setIsDelayingOpen(true);
+    setTimeout(() => {
+      setIsOpen(true);
+      setIsDelayingOpen(false); // Delay to allow for smooth rendering
+    }, 10);
+  };
+
+  // Effect: Handles opening the modal when title and src are available
   useEffect(() => {
     if (title && src) {
       handleOpen();
@@ -149,13 +158,6 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
-  const handleOpen = () => {
-    setIsDelayingOpen(true);
-    setTimeout(() => {
-      setIsOpen(true);
-      setIsDelayingOpen(false); // End the opening delay
-    }, 10); // Small delay to allow UI to render smoothly
-  };
 
   // Toggle favorite state of the media item
   const toggleFavorite = useCallback(() => {
@@ -167,8 +169,14 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Seek forward or backward by a specified number of seconds
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
+    // Check if duration is valid and non-zero
+    if (!thisMediaState?.duration) {
+      console.warn("Duration is not available.");
+      return;
+    }
+
     setSeeking(true);
-    const sec = (seconds * 1) / thisMediaState?.duration;
+    const sec = seconds / thisMediaState.duration;
     let seekTo = 0;
 
     if (action === "backward") {
@@ -200,8 +208,9 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Handle change in seek progress
   const handleSeekChange = (value: number) => {
-    if (value) {
-      setPlayed(value);
+    // Ensure value is not undefined or null
+    if (value !== undefined && value !== null) {
+      setPlayed(value); // Update played time based on slider value
     }
   };
 
