@@ -58,7 +58,8 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [mediaItem]);
 
-  const audioRef = useRef<ReactPlayer>(null);
+  const audioRef = useRef<any>(null);
+  // const audioRef = useRef<ReactPlayer>(null);
 
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
