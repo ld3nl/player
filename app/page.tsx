@@ -18,7 +18,26 @@ export default async function Home() {
   // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch posts");
+    console.error(
+      "API responded with an error:",
+      response.status,
+      response.statusText,
+    );
+
+    // Log all Vercel environment variables for debugging
+    console.log("Environment variables:", {
+      VERCEL_URL: process.env.VERCEL_URL,
+      NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
+      NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL: process.env,
+      // Add other environment variables here if necessary
+    });
+
+    const errorText = await response.text(); // Log error response body
+    console.log("Error body:", errorText);
+
+    throw new Error("Error fetching posts");
   }
 
   const { posts, totalPosts, allCategories } = await response.json();
