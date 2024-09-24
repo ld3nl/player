@@ -1,5 +1,14 @@
-import { SVGProps } from "@/lib/types";
+import { SVGProps } from "@/lib/types"; // Importing type definitions for SVGProps
 
+/**
+ * getSVG Function
+ *
+ * This function returns the appropriate SVG element based on the provided `name` prop.
+ * Each case represents a different SVG icon that can be used in the application.
+ *
+ * Props:
+ * - name: The name of the SVG to render (e.g., "Play", "Pause", "Close").
+ */
 export function getSVG({ name }: SVGProps) {
   switch (name) {
     case "Spinner":
@@ -72,9 +81,16 @@ export function getSVG({ name }: SVGProps) {
         </>
       );
 
-    // case "":
-    //   return <></>;
     default:
-      return <path />;
+      return <path />; // Return an empty path if no match is found
   }
 }
+
+/**
+ * Possible Refactoring Ideas:
+ * 1. **SVG Icons Management**: If the number of icons grows, consider refactoring the icons into a separate file for each, using dynamic imports to only load the necessary SVGs at runtime.
+ * 2. **Memoization**: Use `React.memo` or `useMemo` to prevent re-rendering of SVGs that do not change often. This can help optimize performance in components that use the same SVG multiple times.
+ * 3. **Default Case Handling**: Add logging in the default case to catch any undefined or missing icon names to improve debugging.
+ * 4. **Accessibility Improvements**: Consider adding `title` or `desc` tags inside the SVG for accessibility, making the icons more descriptive for screen readers.
+ * 5. **Error Handling**: Throw a custom error or warning if an unsupported `name` is provided, helping developers catch typos or incorrect usage early.
+ */
