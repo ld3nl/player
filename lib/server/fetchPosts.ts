@@ -56,7 +56,7 @@ export async function fetchPosts(): Promise<HomeProps> {
   const categoriesCount = await getCategoryCount(ROOT_CATEGORY_ID);
   const totalPosts = categoriesCount;
 
-  const ninetyNinePost = await getAllPostsFromServer(ROOT_CATEGORY_ID, 99, 0);
+  const ninetyNinePost = await getAllPostsFromServer(ROOT_CATEGORY_ID, 30, 0);
   // Calculate the number of API requests based on the total number of posts.
   const numberOfRequests = Math.ceil(totalPosts / 99);
 
