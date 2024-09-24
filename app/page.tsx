@@ -1,5 +1,5 @@
 import type { Metadata } from "next"; // Type for metadata that helps with SEO and defining page properties in Next.js
-import { get_base_url } from "@/lib/dynamic"; // Helper function to get the base URL based on the environment
+// import { get_base_url } from "@/lib/dynamic"; // Helper function to get the base URL based on the environment
 // import { fetchPosts } from "@/lib/server/fetchPosts"; // Server-side data fetching function for posts
 
 import HomeClient from "../components/HomeClient"; // Import the client component to render data on the homepage
@@ -26,16 +26,6 @@ export default async function Home() {
       response.status,
       response.statusText,
     );
-
-    // Log all Vercel environment variables for debugging
-    console.log("Environment variables:", {
-      VERCEL_URL: process.env.VERCEL_URL,
-      NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
-      NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
-      VERCEL_ENV: process.env.VERCEL_ENV,
-      VERCEL: process.env,
-      // Add other environment variables here if necessary
-    });
 
     const errorText = await response.text(); // Log error response body
     console.log("Error body:", errorText);
