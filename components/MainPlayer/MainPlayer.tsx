@@ -59,7 +59,7 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [mediaItem]);
 
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
 
   const audioRef = useRef<any>(null);
   // const audioRef = useRef<ReactPlayer>(null);
