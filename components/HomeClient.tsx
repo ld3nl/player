@@ -1,6 +1,13 @@
 "use client"; // Ensures this is a client-side component
 
-import { useEffect, useState, lazy, Suspense, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  lazy,
+  Suspense,
+  useCallback,
+  useMemo,
+} from "react";
 
 import { debounce } from "lodash";
 
@@ -13,7 +20,7 @@ import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import { SVGIconName } from "@/lib/types";
 
-import { HomeProps, Category, Modal, MediaState } from "@/lib/types";
+import { HomeProps, Modal, MediaState } from "@/lib/types";
 
 import { useFilteredPosts, useGetMediaState } from "@/lib/hooks";
 
@@ -60,8 +67,8 @@ export default function Home({
   const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
 
   // State: Stores the list of filtered categories.
-  const [filteredCategoryList, setFilteredPostsCategory] =
-    useState<Category[]>(allCategories);
+  // const [filteredCategoryList, setFilteredPostsCategory] =
+  //   useState<Category[]>(allCategories);
 
   // Custom hook to filter posts based on the current search, category, and favorite filters.
   const {
@@ -78,17 +85,13 @@ export default function Home({
   // Effect: Updates filtered posts whenever the category, favorites, or search terms change.
   useEffect(() => {
     // Reset to show all categories if no specific category is selected.
-    if (filteredCategory.length === 0) {
-      setFilteredPostsCategory(allCategories);
-    }
-
-    // // Filter the categories based on user selections.
-    // const filteredCategories: Category[] = allCategories.filter(
-    //   (category) => category?.id && filteredPostsCategory.includes(category.id),
-    // );
+    // nice to have: When Search input has some result filtered categories should only show the categories of the filtered posts
+    // if (filteredCategory.length === 0) {
+    //   setFilteredPostsCategory(allCategories);
+    // }
 
     filterPosts(); // Triggers post filtering based on current state.
-  }, [filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
+  }, [filterPosts, filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
 
   // Function: Toggles between all posts and favorite posts.
   const toggleFavorites = useCallback(() => setShowFav((prev) => !prev), []);
@@ -96,9 +99,26 @@ export default function Home({
   // Function: Resets modal state when the modal is closed.
   const closeModal = useCallback(() => setModal(DEFAULT_MODAL), []);
 
-  const handleSearchChange = useCallback(
-    debounce((search: string[]) => setSearchTerms(search), 300),
+  // Use useMemo to properly handle debounce function
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((search: string[]) => {
+        setSearchTerms(search);
+      }, 300),
     [],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel(); // Clean up the debounced function when the component unmounts
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback(
+    (search: string[]) => {
+      debouncedSearch(search);
+    },
+    [debouncedSearch], // Now debouncedSearch is a dependency
   );
 
   // Function: Activates the modal and updates its state.
@@ -120,7 +140,7 @@ export default function Home({
         },
       });
     },
-    [],
+    [setModal], // Dependencies to ensure correct updates
   );
 
   return (
@@ -136,7 +156,7 @@ export default function Home({
           handleCategoryChange={setFilteredCategory} // Callback for category filtering
           toggleFavorites={toggleFavorites} // Function to toggle the favorites filter
           showFav={showFav} // State controlling whether to show favorites
-          filteredCategoryList={filteredCategoryList} // List of filtered categories
+          filteredCategoryList={allCategories} // List of filtered categories
         />
 
         {/* Posts List */}
@@ -169,11 +189,6 @@ export default function Home({
                 isFavorite: currentItem.isFavorite || false,
               };
 
-              // Determine if the current item is marked as a favorite.
-              const isFavorite = mediaStates.some(
-                (val) => val.id === id && val.isFavorite,
-              );
-
               return (
                 <AudioListing
                   key={`item-${id}`} // Unique key for each item
@@ -201,7 +216,9 @@ export default function Home({
                       className="me-2.5 size-3"
                       name={SVGIconName.Favorite}
                       size={"sm"}
-                      variation={isFavorite ? "active" : "default"} // Changes icon based on favorite status
+                      variation={
+                        currentItemState.isFavorite ? "active" : "default"
+                      } // Changes icon based on favorite status
                     />
                   </Button>
                 </AudioListing>

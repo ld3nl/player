@@ -6,6 +6,8 @@ import {
 } from "../utils";
 import { HomeProps, Category } from "../types";
 
+import { ROOT_CATEGORY_ID } from "../constants";
+
 /**
  * Cache configuration:
  * - `max`: The maximum number of items to store in the cache.
@@ -23,7 +25,7 @@ const cache = new LRUCache<string, HomeProps>({
  * @returns {number} TTL in seconds.
  */
 function calculateDynamicTTL(): number {
-  return 3600; // Default TTL is 1 hour (3600 seconds).
+  return 3600 * 1000; // Default TTL is 1 hour (3600000 milliseconds).
 }
 
 /**
@@ -51,7 +53,7 @@ export async function fetchPosts(): Promise<HomeProps> {
   }
 
   // Fetch the total number of posts and categories count from server.
-  const categoriesCount = await getCategoryCount(80);
+  const categoriesCount = await getCategoryCount(ROOT_CATEGORY_ID);
   const totalPosts = categoriesCount;
 
   // Calculate the number of API requests based on the total number of posts.
@@ -61,7 +63,7 @@ export async function fetchPosts(): Promise<HomeProps> {
   const promises: Promise<any>[] = [];
   for (let i = 0; i < numberOfRequests; i++) {
     const offset = i * 99;
-    promises.push(getAllPostsFromServer(80, 99, offset));
+    promises.push(getAllPostsFromServer(ROOT_CATEGORY_ID, 99, offset));
     console.log(`[fetchPosts] Request added for batch: ${i + 1}`);
   }
 
@@ -82,7 +84,7 @@ export async function fetchPosts(): Promise<HomeProps> {
       .flat()
       .map(({ excerpt, title, date, id, categories, link, content }) => {
         // Regex pattern to extract audio URL from post's excerpt.
-        const audioPattern = /src="([^"]*)/;
+        const audioPattern = /src="([^"]*)"/;
         const audioMatch = excerpt.rendered.match(audioPattern);
         const audioUrl = audioMatch
           ? audioMatch[1].replace(
@@ -104,7 +106,7 @@ export async function fetchPosts(): Promise<HomeProps> {
         // Map the category IDs to category details.
         const categoryDetails = categories
           ?.map((categoryId: number) => {
-            if (categoryId !== 80) {
+            if (categoryId !== ROOT_CATEGORY_ID) {
               return StaticCategoryData.find(
                 (category: Category) => category?.id === categoryId,
               );

@@ -31,64 +31,83 @@ export const useLockScroll = (isOpen: boolean): void => {
 
 export default useLockScroll;
 
+// Custom hook to filter posts by favorites, categories, and search terms
 export const useFilteredPosts = (
-  posts: homePost[],
-  favoriteItems: number[],
-  searchArray: string[],
-  categoryIds: number[],
+  posts: homePost[], // List of all posts
+  favoriteItems: number[], // Array of favorite post IDs
+  searchArray: string[], // Array of search terms
+  categoryIds: number[], // Array of selected category IDs
 ) => {
+  // Store filtered posts and filtered category IDs
   const [filteredPosts, setFilteredPosts] = useState<homePost[]>(() => posts);
-  const [filteredPostsCategory, setFilteredPostsCategory] = useState<any>([]);
+  const [filteredPostsCategory, setFilteredPostsCategory] = useState<number[]>(
+    [],
+  );
 
-  // Helper function to perform the actual filtering
+  // Memoize filtering logic to prevent unnecessary re-renders
   const performFiltering = useCallback(() => {
-    let newFilteredPosts = posts;
+    let newFilteredPosts = [...posts]; // Make a copy to avoid mutating the original array
 
+    // 1. Filter by favorite items
     if (favoriteItems.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
         favoriteItems.includes(post.id),
       );
     }
 
+    // 2. Filter by selected categories
     if (categoryIds.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
-        post.categories
-          .filter(Boolean)
-          .some((category) => categoryIds.includes(category.id)),
+        post.categories.some((category) => categoryIds.includes(category.id)),
       );
     }
 
+    // 3. Filter by search terms (debounced for performance)
     if (searchArray.length > 0) {
-      newFilteredPosts = newFilteredPosts.filter((post) => {
-        const { title } = post;
-
-        return searchArray.some((word) =>
-          title?.toLowerCase().includes(word.toLowerCase()),
-        );
-      });
+      newFilteredPosts = newFilteredPosts.filter((post) =>
+        searchArray.some((term) =>
+          post.title?.toLowerCase().includes(term.toLowerCase()),
+        ),
+      );
     }
 
-    // Should return the filtered posts array
+    // Return the final filtered array
     return newFilteredPosts;
-  }, [posts, favoriteItems, categoryIds, searchArray]);
+  }, [posts, favoriteItems, categoryIds, searchArray]); // Only re-run when dependencies change
 
-  // Exposing a function that can be used to manually trigger filtering
-  const filterPosts = () => {
-    const newFilteredPosts = performFiltering();
-
-    const flattenedAndUniqueIds = Array.from(
+  // Memoize unique category IDs from filtered posts to optimize performance
+  const uniqueCategoryIds = useMemo(() => {
+    return Array.from(
       new Set(
-        newFilteredPosts.flatMap((post: homePost) =>
-          post.categories.filter(Boolean).map((cat) => cat.id),
+        filteredPosts.flatMap((post) =>
+          post.categories.map((category) => category.id),
         ),
       ),
     );
+  }, [filteredPosts]);
 
-    setFilteredPostsCategory(flattenedAndUniqueIds);
+  // Function to trigger the filtering process
+  const filterPosts = useCallback(() => {
+    const newFilteredPosts = performFiltering();
 
-    setFilteredPosts(newFilteredPosts);
-  };
+    // Only update state if filtered posts or categories have changed
+    if (JSON.stringify(newFilteredPosts) !== JSON.stringify(filteredPosts)) {
+      setFilteredPosts(newFilteredPosts);
+    }
+    if (
+      JSON.stringify(uniqueCategoryIds) !==
+      JSON.stringify(filteredPostsCategory)
+    ) {
+      setFilteredPostsCategory(uniqueCategoryIds);
+    }
+  }, [
+    performFiltering,
+    filteredPosts,
+    filteredPostsCategory,
+    uniqueCategoryIds,
+  ]);
 
+  // Return the filtered posts, filtering function, and categories
   return { filteredPosts, filterPosts, filteredPostsCategory };
 };
 

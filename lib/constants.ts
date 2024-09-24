@@ -21,3 +21,5 @@ export const DEFAULT_MODAL: Modal = {
     isFavorite: false,
   },
 };
+
+export const ROOT_CATEGORY_ID: number = 80;

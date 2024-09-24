@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useRef, useCallback } from "react";
+import { FC, useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
@@ -181,10 +181,11 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   };
 
-  const debouncedUpdate = useCallback(
-    debounce((newState) => {
-      stateCallback?.(newState);
-    }, 300),
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((newState) => {
+        stateCallback?.(newState);
+      }, 300),
     [stateCallback],
   );
 

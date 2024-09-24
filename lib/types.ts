@@ -129,7 +129,8 @@ export interface HeaderProps {
   totalPosts: number;
   numberOfPosts: number;
   setNumberOfPosts: React.Dispatch<React.SetStateAction<number>>;
-  handleSearchChange: React.Dispatch<React.SetStateAction<string[]>>;
+  // eslint-disable-next-line no-unused-vars
+  handleSearchChange: (search: string[]) => void;
   handleCategoryChange: React.Dispatch<React.SetStateAction<number[]>>;
   toggleFavorites: () => void;
   showFav: boolean;
