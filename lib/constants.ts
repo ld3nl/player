@@ -1,14 +1,15 @@
 // Importing necessary types from the types file
 import { Modal } from "./types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
+// Use a separate environment variable for WordPress API base URL
+const WORDPRESS_API_BASE_URL =
+  process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL ||
   "https://www.paullowe.org/wp-json/wp/v2";
 
-export const POSTS_API_URL = `${API_BASE_URL}/posts`; // API for fetching posts
-export const CATEGORY_API_URL = `${API_BASE_URL}/categories`; // API for fetching categories
-export const AUTHORS_API_URL = `${API_BASE_URL}/users`; // API for fetching authors
-export const MEDIA_API_URL = `${API_BASE_URL}/media`; // API for fetching media items
+export const POSTS_API_URL = `${WORDPRESS_API_BASE_URL}/posts`; // API for fetching posts
+export const CATEGORY_API_URL = `${WORDPRESS_API_BASE_URL}/categories`; // API for fetching categories
+export const AUTHORS_API_URL = `${WORDPRESS_API_BASE_URL}/users`; // API for fetching authors
+export const MEDIA_API_URL = `${WORDPRESS_API_BASE_URL}/media`; // API for fetching media items
 
 // Default number of posts to be fetched and displayed on the page
 export const DEFAULT_NUMBER_OF_POSTS = 30;
