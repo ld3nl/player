@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import he from "he";
-import debounce from "debounce";
+import debounce from "lodash/debounce";
 
 import { HeaderProps, SVGIconName } from "@/lib/types";
 

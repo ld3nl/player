@@ -1,4 +1,12 @@
-import { FC, useEffect, useState, useRef, useCallback, useMemo } from "react";
+import {
+  FC,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  lazy,
+} from "react";
 import Image from "next/image";
 import he from "he";
 import ReactSlider from "react-slider";
@@ -6,7 +14,7 @@ import debounce from "lodash/debounce"; // Ensure correct lodash import
 
 import useLockScroll from "@/lib/hooks";
 import { PlayerProps, SVGIconName } from "@/lib/types";
-import ReactPlayer from "react-player";
+const ReactPlayer = lazy(() => import("react-player"));
 
 import Icon from "@/components/Icon/Icon";
 import Button from "@/components/Button/Button";

@@ -56,16 +56,18 @@ export async function fetchPosts(): Promise<HomeProps> {
   const categoriesCount = await getCategoryCount(ROOT_CATEGORY_ID);
   const totalPosts = categoriesCount;
 
+  const onePost = await getAllPostsFromServer(ROOT_CATEGORY_ID, 1, 0);
   // Calculate the number of API requests based on the total number of posts.
   const numberOfRequests = Math.ceil(totalPosts / 99);
 
   // Prepare to make requests for all posts in parallel.
   const promises: Promise<any>[] = [];
-  for (let i = 0; i < numberOfRequests; i++) {
+  // Use map to create promises for fetching posts in batches
+  Array.from({ length: numberOfRequests }).map((_, i) => {
     const offset = i * 99;
     promises.push(getAllPostsFromServer(ROOT_CATEGORY_ID, 99, offset));
     console.log(`[fetchPosts] Request added for batch: ${i + 1}`);
-  }
+  });
 
   // Fetch category details from static category data.
   const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {
@@ -79,53 +81,12 @@ export async function fetchPosts(): Promise<HomeProps> {
   });
 
   // Await all promises to resolve and flatten the result array.
-  const postsFromServer = await Promise.all(promises).then((results) =>
+  const postsFromServer = await Promise.all(onePost).then((results) =>
     results
       .flat()
-      .map(({ excerpt, title, date, id, categories, link, content }) => {
-        // Regex pattern to extract audio URL from post's excerpt.
-        const audioPattern = /src="([^"]*)"/;
-        const audioMatch = excerpt.rendered.match(audioPattern);
-        const audioUrl = audioMatch
-          ? audioMatch[1].replace(
-              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-              "",
-            )
-          : "";
-
-        // Regex pattern to extract image URL from post's content.
-        const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
-        const imageMatch = content.rendered.match(imagePattern);
-        const imageUrl = imageMatch
-          ? imageMatch[1].replace(
-              /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-              "",
-            )
-          : "";
-
-        // Map the category IDs to category details.
-        const categoryDetails = categories
-          ?.map((categoryId: number) => {
-            if (categoryId !== ROOT_CATEGORY_ID) {
-              return StaticCategoryData.find(
-                (category: Category) => category?.id === categoryId,
-              );
-            }
-            return null;
-          })
-          .filter(Boolean); // Filters out `null` values.
-
-        // Return transformed post object with necessary data.
-        return {
-          id,
-          imageUrl,
-          audioUrl,
-          title: title.rendered,
-          date,
-          categories: categoryDetails,
-          link,
-        };
-      }),
+      .map(({ excerpt, title, date, id, categories, link, content }) =>
+        processPost({ excerpt, title, date, id, categories, link, content }),
+      ),
   );
 
   // Prepare data to be cached.
@@ -141,4 +102,56 @@ export async function fetchPosts(): Promise<HomeProps> {
 
   // Return the fetched data.
   return data;
+}
+
+/**
+ * Helper function to process individual posts. This can be expanded if necessary.
+ */
+function processPost({
+  excerpt,
+  title,
+  date,
+  id,
+  categories,
+  link,
+  content,
+}: any) {
+  const audioPattern = /src="([^"]*)"/;
+  const audioMatch = excerpt.rendered.match(audioPattern);
+  const audioUrl = audioMatch
+    ? audioMatch[1].replace(
+        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+        "",
+      )
+    : "";
+
+  const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
+  const imageMatch = content.rendered.match(imagePattern);
+  const imageUrl = imageMatch
+    ? imageMatch[1].replace(
+        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
+        "",
+      )
+    : "";
+
+  const categoryDetails = categories
+    ?.map((categoryId: number) => {
+      if (categoryId !== ROOT_CATEGORY_ID) {
+        return StaticCategoryData.find(
+          (category: Category) => category?.id === categoryId,
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  return {
+    id,
+    imageUrl,
+    audioUrl,
+    title: title.rendered,
+    date,
+    categories: categoryDetails,
+    link,
+  };
 }
