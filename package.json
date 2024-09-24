@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^1.7.7",
     "debounce": "^2.1.1",
+    "focus-trap-react": "^10.3.0",
     "he": "^1.2.0",
     "lodash": "^4.17.21",
     "lru-cache": "^8.0.5",

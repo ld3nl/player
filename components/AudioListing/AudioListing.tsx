@@ -123,12 +123,19 @@ const AudioListing: React.FC<AudioListingProps> = ({
     >
       {children}{" "}
       {/* Any additional elements passed via children will be rendered here */}
+      {/* This has to be accessed by tab */}
       <div
         className="w-full cursor-pointer"
         onClick={() => {
           // Trigger the modal callback function if it exists
           if (typeof setModalCallback === "function") setModalCallback();
         }}
+        onKeyDown={(event) =>
+          event.key === "Enter" &&
+          typeof setModalCallback === "function" &&
+          setModalCallback()
+        }
+        tabIndex={0}
       >
         {/* Render the title if it exists, using 'he.decode' to handle any encoded HTML entities */}
         {title && (

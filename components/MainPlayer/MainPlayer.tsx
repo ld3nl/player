@@ -15,6 +15,7 @@ import debounce from "lodash/debounce"; // Ensure correct lodash import
 import useLockScroll from "@/lib/hooks";
 import { PlayerProps, SVGIconName } from "@/lib/types";
 const ReactPlayer = lazy(() => import("react-player"));
+import FocusTrap from "focus-trap-react";
 
 import Icon from "@/components/Icon/Icon";
 import Button from "@/components/Button/Button";
@@ -58,6 +59,8 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [mediaItem]);
 
+  const playerRef = useRef<any>(null);
+
   const audioRef = useRef<any>(null);
   // const audioRef = useRef<ReactPlayer>(null);
 
@@ -94,6 +97,15 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [title, src]);
 
+  const handleClose = useCallback(() => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsAnimatingOut(false);
+      typeof closeModal === "function" && closeModal?.();
+    }, 500); // Duration of the closing animation
+  }, [closeModal]); // Add closeModal as a dependency if needed
+
   // useEffect for handling other state updates when the modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -115,7 +127,27 @@ const MainPlayer: FC<PlayerProps> = ({
       setLoop(false);
       setSeeking(false);
     }
-  }, [isOpen]); // Dependency array ensures this runs only when isOpen changes
+
+    if (isOpen && playerRef.current) {
+      playerRef.current.focus();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose(); // Close modal on Escape key press
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      playerRef.current?.focus(); // Focus the modal
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+    // Warning: React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.
+  }, [isOpen, handleClose]); // Dependency array ensures this runs only when isOpen changes
 
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
 
@@ -125,15 +157,6 @@ const MainPlayer: FC<PlayerProps> = ({
       setIsOpen(true);
       setIsDelayingOpen(false); // End delaying
     }, 10); // Short delay, just enough for the browser to render the initial state
-  };
-
-  const handleClose = () => {
-    setIsAnimatingOut(true);
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsAnimatingOut(false);
-      typeof closeModal === "function" && closeModal();
-    }, 500); // Duration of the closing animation
   };
 
   const toggleFavorite = useCallback(() => {
@@ -230,7 +253,7 @@ const MainPlayer: FC<PlayerProps> = ({
   };
 
   return (
-    <>
+    <FocusTrap active={isOpen}>
       {(isOpen ||
         isAnimatingOut ||
         isDelayingOpen ||
@@ -245,6 +268,10 @@ const MainPlayer: FC<PlayerProps> = ({
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0",
           ].join(" ")}
+          ref={playerRef}
+          tabIndex={0}
+          role="dialog"
+          aria-modal="true"
         >
           <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
             <Button
@@ -395,7 +422,7 @@ const MainPlayer: FC<PlayerProps> = ({
           )}
         </div>
       )}
-    </>
+    </FocusTrap>
   );
 };
 
