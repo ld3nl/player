@@ -13,7 +13,10 @@ export const metadata: Metadata = {
 // The main async function that represents the Home page component
 export default async function Home() {
   // Fetch data from the API route
-  const response = await fetch(`${get_base_url()}/api/posts`);
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  const response = await fetch(`${API_BASE_URL}/api/posts`);
 
   // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
 
