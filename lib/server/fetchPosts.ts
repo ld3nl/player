@@ -109,8 +109,15 @@ export async function fetchPosts(): Promise<HomeProps> {
   // Data to be cached
   const data = {
     posts: postsFromServer,
+    postNewStructure: postsFromServer.map((post) => post.newStructure),
     totalPosts,
     allCategories,
+    pagination: {
+      current_page: 1,
+      total_pages: 1,
+      per_page: 1,
+      total_posts: totalPosts,
+    },
   };
 
   // Cache the fetched data for future use
@@ -156,6 +163,15 @@ function processPost(post: any) {
     date,
     categories: categoryDetails,
     link,
+    newStructure: {
+      id: id,
+      title: title.rendered,
+      audio_url: audioUrl,
+      image_url: imageUrl,
+      published_at: date,
+      categories: categoryDetails,
+      link: link,
+    },
   };
 }
 

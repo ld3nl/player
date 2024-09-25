@@ -13,22 +13,54 @@ export const metadata: Metadata = {
 // The main async function that represents the Home page component
 export default async function Home() {
   // Fetch posts, total post count, and all categories data from the server-side function
-  const { posts, totalPosts, allCategories } = await fetchPosts();
+  // const { posts, totalPosts, allCategories } = await fetchPosts();
+
   // const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   // if (!baseUrl) {
   //   throw new Error("Base URL is not defined");
   // }
 
-  // const response = await fetch(`${baseUrl}/api/posts`);
+  async function fetchData() {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`,
+      );
 
-  // // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`);
+      if (!response.ok) {
+        console.error(
+          "API responded with an error:",
+          response.status,
+          response.statusText,
+        );
+        // Fallback data if the fetch fails
+        return {
+          posts: [],
+          totalPosts: 0,
+          allCategories: [],
+        };
+      }
 
-  // if (!response.ok) {
-  //   console.error(
-  //     "API responded with an error:",
-  //     response.status,
-  //     response.statusText,
-  //   );
+      // Destructure the response after the fetch call succeeds
+      const { posts, totalPosts, allCategories } = await response.json();
+
+      return {
+        posts,
+        totalPosts,
+        allCategories,
+      };
+    } catch (error) {
+      // Catch block for handling fetch failures
+      console.error("Error fetching posts:", error);
+      return {
+        posts: [],
+        totalPosts: 0,
+        allCategories: [],
+      };
+    }
+  }
+
+  // Usage
+  const { posts, totalPosts, allCategories } = await fetchData();
 
   //   const errorText = await response.text(); // Log error response body
   //   console.log("Error body:", errorText);
