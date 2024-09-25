@@ -157,6 +157,7 @@ export type homePost = {
   date: string;
   categories: Category[]; // Updated for better type safety
   link: string;
+  newStructure?: any;
 };
 
 // Consistent usage of `Category[]` is the best approach here
@@ -164,6 +165,9 @@ export type HomeProps = {
   posts: homePost[];
   totalPosts: number;
   allCategories: Category[]; // Updated for better type safety
+  // Refactoring
+  postNewStructure?: any;
+  pagination?: any;
 };
 
 // Using utility types like `Pick` or `Omit` for deeply nested fields

@@ -12,24 +12,26 @@ import he from "he";
 import ReactSlider from "react-slider";
 import debounce from "lodash/debounce"; // Ensure correct lodash import
 
-import useLockScroll from "@/lib/hooks";
-import { PlayerProps, SVGIconName } from "@/lib/types";
-const ReactPlayer = lazy(() => import("react-player"));
-import FocusTrap from "focus-trap-react";
+import useLockScroll from "@/lib/hooks"; // Custom hook for locking scroll when modal is active
+import { PlayerProps, SVGIconName } from "@/lib/types"; // Types for props and SVG icon names
+const ReactPlayer = lazy(() => import("react-player")); // Lazy load the ReactPlayer component
+import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard focus inside the modal
 
-import Icon from "@/components/Icon/Icon";
-import Button from "@/components/Button/Button";
+import Icon from "@/components/Icon/Icon"; // Reusable Icon component
+import Button from "@/components/Button/Button"; // Reusable Button component
 
-import { Duration } from "./Duration";
+import { Duration } from "./Duration"; // Custom component to display audio duration
 
-// React does not recognize the `fetchPriority` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `fetchpriority` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
-import img from "@/public/P1080841.jpg";
+// React does not recognize the `fetchPriority` prop on a DOM element.
+// If you want it in the DOM, spell it as lowercase `fetchpriority`.
+import img from "@/public/P1080841.jpg"; // Fallback image if no image source is provided
 
 const MainPlayer: FC<PlayerProps> = ({
   mediaItem,
   closeModal,
   stateCallback,
 }) => {
+  // Destructure media item properties for easier access
   const {
     title,
     src,
@@ -41,6 +43,7 @@ const MainPlayer: FC<PlayerProps> = ({
     isFavorite,
   } = mediaItem;
 
+  // State to track the current media item's playback state
   const [thisMediaState, setThisMediaState] = useState({
     id: id || 0,
     playedSeconds: playedSeconds,
@@ -48,6 +51,7 @@ const MainPlayer: FC<PlayerProps> = ({
     isFavorite: isFavorite,
   });
 
+  // Sync media state when mediaItem prop changes
   useEffect(() => {
     if (mediaItem) {
       setThisMediaState({
@@ -59,62 +63,71 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [mediaItem]);
 
+  // Refs to handle the player and audio state
   const playerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<any>(null); // audioRef to interact with ReactPlayer
 
-  const audioRef = useRef<any>(null);
-  // const audioRef = useRef<ReactPlayer>(null);
-
+  // State to control animations and modal behavior
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
-  // const [url, setUrl] = useState(null);
-  const [pip, setPip] = useState(false);
-  const [playing, setPlaying] = useState(true);
-  const [controls, setControls] = useState(false);
-  const [light, setLight] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [muted, setMuted] = useState(false);
-  const [played, setPlayed] = useState(0);
+  const [pip, setPip] = useState(false); // Picture-in-picture mode
+  const [playing, setPlaying] = useState(true); // Control play/pause state
+  const [controls, setControls] = useState(false); // Whether player controls are visible
+  const [light, setLight] = useState(false); // Light mode for ReactPlayer
+  const [volume, setVolume] = useState(0.8); // Volume state
+  const [muted, setMuted] = useState(false); // Muted state
+  const [played, setPlayed] = useState(0); // Played percentage (0-1)
 
-  const [playbackRate, setPlaybackRate] = useState(1.0);
-  const [loop, setLoop] = useState(false);
-  const [seeking, setSeeking] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.0); // Playback rate state
+  const [loop, setLoop] = useState(false); // Whether playback loops
+  const [seeking, setSeeking] = useState(false); // Whether user is seeking
 
-  const [isSSR, setIsSSR] = useState(true);
+  const [isSSR, setIsSSR] = useState(true); // Server-side rendering state
 
+  // Disable SSR (required for ReactPlayer to function correctly)
   useEffect(() => {
     setIsSSR(false);
   }, []);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Whether the modal is open
 
-  // const [favorite, setFavorite] = useState(isFavorite);
-
+  // Lock the scroll when the modal is open
   useLockScroll(isOpen);
 
+  // Function: Handles opening the modal with a short delay
+  const handleOpen = () => {
+    setIsDelayingOpen(true);
+    setTimeout(() => {
+      setIsOpen(true);
+      setIsDelayingOpen(false); // Delay to allow for smooth rendering
+    }, 10);
+  };
+
+  // Effect: Handles opening the modal when title and src are available
   useEffect(() => {
     if (title && src) {
       handleOpen();
     }
   }, [title, src]);
 
+  // Handle modal close with animation
   const handleClose = useCallback(() => {
     setIsAnimatingOut(true);
     setTimeout(() => {
       setIsOpen(false);
       setIsAnimatingOut(false);
       typeof closeModal === "function" && closeModal?.();
-    }, 500); // Duration of the closing animation
+    }, 500); // Animation duration for closing
   }, [closeModal]); // Add closeModal as a dependency if needed
 
-  // useEffect for handling other state updates when the modal closes
+  // Close modal on Escape key press
   useEffect(() => {
     if (!isOpen) {
       if (audioRef.current) {
-        handleStop();
+        handleStop(); // Stop playback if modal closes
       }
 
-      // Reset other states
-      // setUrl(null);
+      // Reset all states to their default values
       setPip(false);
       setPlaying(true);
       setControls(false);
@@ -122,7 +135,6 @@ const MainPlayer: FC<PlayerProps> = ({
       setVolume(0.8);
       setMuted(false);
       setPlayed(0);
-      // setLoaded(0);
       setPlaybackRate(1.0);
       setLoop(false);
       setSeeking(false);
@@ -130,44 +142,41 @@ const MainPlayer: FC<PlayerProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        handleClose(); // Close modal on Escape key press
+        handleClose(); // Close modal when Escape is pressed
       }
     };
 
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      playerRef.current?.focus(); // Focus the modal
+      playerRef.current?.focus(); // Set focus on the player for accessibility
     }
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown); // Cleanup event listener
     };
-    // Warning: React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.
-  }, [isOpen, handleClose]); // Dependency array ensures this runs only when isOpen changes
+  }, [isOpen, handleClose]); // Dependencies ensure proper execution
 
+  // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
 
-  const handleOpen = () => {
-    setIsDelayingOpen(true); // Start delaying
-    setTimeout(() => {
-      setIsOpen(true);
-      setIsDelayingOpen(false); // End delaying
-    }, 10); // Short delay, just enough for the browser to render the initial state
-  };
-
+  // Toggle favorite state of the media item
   const toggleFavorite = useCallback(() => {
-    setThisMediaState((prevState) => {
-      const newState = { ...prevState, isFavorite: !prevState.isFavorite };
-      // stateCallback?.(newState);
-      return newState;
-    });
+    setThisMediaState((prevState) => ({
+      ...prevState,
+      isFavorite: !prevState.isFavorite,
+    }));
   }, []);
 
+  // Seek forward or backward by a specified number of seconds
   const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
+    // Check if duration is valid and non-zero
+    if (!thisMediaState?.duration) {
+      console.warn("Duration is not available.");
+      return;
+    }
+
     setSeeking(true);
-
-    const sec = (seconds * 1) / thisMediaState?.duration;
-
+    const sec = seconds / thisMediaState.duration;
     let seekTo = 0;
 
     if (action === "backward") {
@@ -180,14 +189,15 @@ const MainPlayer: FC<PlayerProps> = ({
 
     setPlayed(seekTo);
     audioRef?.current?.seekTo(seekTo);
-
     setSeeking(false);
   };
 
+  // Handle playback stop
   const handleStop = () => {
     setPlaying(false);
   };
 
+  // Handle playback toggle between play/pause
   const handlePlay = () => {
     setPlaying(true);
   };
@@ -196,27 +206,32 @@ const MainPlayer: FC<PlayerProps> = ({
     setPlaying(!playing);
   };
 
+  // Handle change in seek progress
   const handleSeekChange = (value: number) => {
-    if (value) {
-      setPlayed(value);
+    // Ensure value is not undefined or null
+    if (value !== undefined && value !== null) {
+      setPlayed(value); // Update played time based on slider value
     }
   };
 
+  // Handle when the user stops seeking
   const handleSeekMouseUp = (newValue: number) => {
     setSeeking(false);
     if (audioRef.current) {
-      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure newValue is parsed correctly
+      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
     }
   };
 
+  // Debounce state update to avoid frequent calls
   const debouncedUpdate = useMemo(
     () =>
       debounce((newState) => {
-        stateCallback?.(newState);
+        stateCallback?.(newState); // Call state update callback
       }, 300),
     [stateCallback],
   );
 
+  // Handle playback progress updates
   const handleProgress = (updatedState: {
     loaded: number | boolean;
     loadedSeconds: number;
@@ -224,7 +239,6 @@ const MainPlayer: FC<PlayerProps> = ({
     playedSeconds: number;
   }) => {
     const { played, playedSeconds } = updatedState;
-
     setPlayed(played);
 
     if (!seeking) {
@@ -239,12 +253,12 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   };
 
+  // Handle when the media's total duration is available
   const handleDuration = (duration: number) => {
-    setThisMediaState((prevState) => {
-      const newState = { ...prevState, duration };
-      // stateCallback?.({ ...newState });
-      return newState;
-    });
+    setThisMediaState((prevState) => ({
+      ...prevState,
+      duration,
+    }));
     audioRef.current?.seekTo(playedSeconds, "seconds");
   };
 
@@ -269,6 +283,7 @@ const MainPlayer: FC<PlayerProps> = ({
           role="dialog"
           aria-modal="true"
         >
+          {/* Close button */}
           <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
             <Button
               className="absolute right-0 top-0 w-12 p-3 text-white"
@@ -278,6 +293,8 @@ const MainPlayer: FC<PlayerProps> = ({
               <Icon name={SVGIconName.Close} />
             </Button>
           </div>
+
+          {/* Media Image */}
           <div className="mx-auto flex w-96">
             <Image
               src={
@@ -291,12 +308,15 @@ const MainPlayer: FC<PlayerProps> = ({
               className="h-auto w-full object-cover"
             />
           </div>
+
+          {/* Media Title */}
           {thisMediaState?.duration !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
               {title ? he.decode(title) : ""}
             </span>
           )}
 
+          {/* Media Player */}
           {isSSR ? null : (
             <ReactPlayer
               ref={audioRef}
@@ -316,6 +336,7 @@ const MainPlayer: FC<PlayerProps> = ({
             />
           )}
 
+          {/* Slider for seeking */}
           {thisMediaState?.duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
@@ -337,6 +358,7 @@ const MainPlayer: FC<PlayerProps> = ({
             </div>
           )}
 
+          {/* Play/Pause and Seek buttons */}
           {thisMediaState?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
@@ -370,6 +392,7 @@ const MainPlayer: FC<PlayerProps> = ({
             </div>
           )}
 
+          {/* Favorite and Link buttons */}
           {thisMediaState?.duration !== 0 && (
             <div className="mt-2 flex items-center justify-center">
               <button
@@ -405,6 +428,7 @@ const MainPlayer: FC<PlayerProps> = ({
             </div>
           )}
 
+          {/* Spinner icon when loading */}
           {thisMediaState?.duration === 0 && (
             <div className="flex p-10">
               <Icon
@@ -423,3 +447,12 @@ const MainPlayer: FC<PlayerProps> = ({
 };
 
 export default MainPlayer;
+
+/**
+ * Possible Refactoring Ideas:
+ * 1. **Performance Optimization**: Consider using `useTransition` or `Suspense` for smoother UI transitions during state changes or lazy loading.
+ * 2. **Lazy Load More Components**: Lazy load components like `FocusTrap`, `ReactSlider` for further performance improvement.
+ * 3. **Debounced Volume/Seek Updates**: Enhance the debouncing of state updates like volume, seeking, and playback rate to prevent performance hits from frequent updates.
+ * 4. **Accessibility Improvements**: Ensure full keyboard navigation, aria-labels, and modal focus handling are properly tested and optimized.
+ * 5. **TypeScript Enhancements**: Strengthen type safety by defining clearer types for state management and callback functions.
+ */

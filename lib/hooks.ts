@@ -1,28 +1,36 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { homePost, MediaState } from "@/lib/types";
 
+/**
+ * Custom Hook: useLockScroll
+ *
+ * This hook locks the scroll when a modal or any other element that needs to disable scrolling is active.
+ * It listens for touch and arrow key events to prevent scrolling when `isOpen` is true.
+ *
+ * @param {boolean} isOpen - Boolean value indicating whether scrolling should be locked.
+ */
 export const useLockScroll = (isOpen: boolean): void => {
   useEffect(() => {
     if (typeof document === "undefined") return;
 
     const originalStyle = document.body.style.overflow;
-    const handleTouchMove = (e: TouchEvent) => isOpen && e.preventDefault();
+    const handleTouchMove = (e: TouchEvent) => isOpen && e.preventDefault(); // Prevent touch scrolling
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isOpen && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent scrolling with arrow keys
       }
     };
 
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden"; // Disable scroll by hiding overflow
       document.addEventListener("touchmove", handleTouchMove, {
         passive: false,
-      });
-      document.addEventListener("keydown", handleKeyDown);
+      }); // Disable touch scrolling
+      document.addEventListener("keydown", handleKeyDown); // Disable arrow key scrolling
     }
 
     return () => {
-      document.body.style.overflow = originalStyle;
+      document.body.style.overflow = originalStyle; // Restore scroll on cleanup
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("keydown", handleKeyDown);
     };
@@ -31,38 +39,48 @@ export const useLockScroll = (isOpen: boolean): void => {
 
 export default useLockScroll;
 
-// Custom hook to filter posts by favorites, categories, and search terms
+/**
+ * Custom Hook: useFilteredPosts
+ *
+ * This hook filters posts by favorites, selected categories, and search terms.
+ * The filtering logic is memoized to optimize performance.
+ *
+ * @param {homePost[]} posts - Array of all posts.
+ * @param {number[]} favoriteItems - Array of favorite post IDs.
+ * @param {string[]} searchArray - Array of search terms to filter posts by title.
+ * @param {number[]} categoryIds - Array of selected category IDs.
+ * @returns {object} - Returns filtered posts, a function to trigger filtering, and filtered category IDs.
+ */
 export const useFilteredPosts = (
-  posts: homePost[], // List of all posts
-  favoriteItems: number[], // Array of favorite post IDs
-  searchArray: string[], // Array of search terms
-  categoryIds: number[], // Array of selected category IDs
+  posts: homePost[],
+  favoriteItems: number[],
+  searchArray: string[],
+  categoryIds: number[],
 ) => {
-  // Store filtered posts and filtered category IDs
-  const [filteredPosts, setFilteredPosts] = useState<homePost[]>(() => posts);
+  const [filteredPosts, setFilteredPosts] = useState<homePost[]>(() => posts); // Initialize state with posts
   const [filteredPostsCategory, setFilteredPostsCategory] = useState<number[]>(
     [],
-  );
+  ); // Store filtered categories
 
-  // Memoize filtering logic to prevent unnecessary re-renders
+  // Filter logic wrapped in useCallback to ensure it only recalculates when dependencies change
   const performFiltering = useCallback(() => {
-    let newFilteredPosts = [...posts]; // Make a copy to avoid mutating the original array
+    let newFilteredPosts = [...posts]; // Copy posts to avoid mutation
 
-    // 1. Filter by favorite items
+    // Filter by favorites if any favorite items are selected
     if (favoriteItems.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
         favoriteItems.includes(post.id),
       );
     }
 
-    // 2. Filter by selected categories
+    // Filter by selected categories
     if (categoryIds.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
         post.categories.some((category) => categoryIds.includes(category.id)),
       );
     }
 
-    // 3. Filter by search terms (debounced for performance)
+    // Filter by search terms (debounced for performance)
     if (searchArray.length > 0) {
       newFilteredPosts = newFilteredPosts.filter((post) =>
         searchArray.some((term) =>
@@ -71,11 +89,10 @@ export const useFilteredPosts = (
       );
     }
 
-    // Return the final filtered array
-    return newFilteredPosts;
-  }, [posts, favoriteItems, categoryIds, searchArray]); // Only re-run when dependencies change
+    return newFilteredPosts; // Return the final filtered list
+  }, [posts, favoriteItems, categoryIds, searchArray]);
 
-  // Memoize unique category IDs from filtered posts to optimize performance
+  // Memoize unique category IDs from filtered posts
   const uniqueCategoryIds = useMemo(() => {
     return Array.from(
       new Set(
@@ -86,19 +103,18 @@ export const useFilteredPosts = (
     );
   }, [filteredPosts]);
 
-  // Function to trigger the filtering process
+  // Trigger filtering and update state if necessary
   const filterPosts = useCallback(() => {
     const newFilteredPosts = performFiltering();
 
-    // Only update state if filtered posts or categories have changed
     if (JSON.stringify(newFilteredPosts) !== JSON.stringify(filteredPosts)) {
-      setFilteredPosts(newFilteredPosts);
+      setFilteredPosts(newFilteredPosts); // Update posts if they've changed
     }
     if (
       JSON.stringify(uniqueCategoryIds) !==
       JSON.stringify(filteredPostsCategory)
     ) {
-      setFilteredPostsCategory(uniqueCategoryIds);
+      setFilteredPostsCategory(uniqueCategoryIds); // Update categories if they've changed
     }
   }, [
     performFiltering,
@@ -107,24 +123,24 @@ export const useFilteredPosts = (
     uniqueCategoryIds,
   ]);
 
-  // Return the filtered posts, filtering function, and categories
   return { filteredPosts, filterPosts, filteredPostsCategory };
 };
 
 /**
- * Custom hook to manage media state.
+ * Custom Hook: useGetMediaState
  *
- * @returns {object} - An object containing media states, a function to set media states, and a function to update media state.
+ * Manages the media state (e.g., played time, duration, and favorite status) and persists the state to localStorage.
+ *
+ * @returns {object} - Returns the media states, a function to update media state, and a list of favorite media IDs.
  */
 export const useGetMediaState = () => {
   const [mediaStates, setMediaStates] = useState<MediaState[]>(() => {
-    // Initialize state from localStorage if available
     if (typeof window !== "undefined") {
       const storedState = localStorage.getItem("storedMediaState");
       try {
-        return storedState ? JSON.parse(storedState) : [];
+        return storedState ? JSON.parse(storedState) : []; // Parse state from localStorage or default to an empty array
       } catch (e) {
-        console.error("Error parsing stored media state", e);
+        console.error("Error parsing stored media state", e); // Handle JSON parse errors
         return [];
       }
     }
@@ -132,11 +148,12 @@ export const useGetMediaState = () => {
   });
 
   /**
-   * Updates the media state for a given media item.
+   * Updates the media state for a specific media item.
    *
    * @param {number} id - The ID of the media item.
    * @param {number} playedSeconds - The number of seconds the media has been played.
    * @param {number} duration - The total duration of the media.
+   * @param {boolean} isFavorite - Whether the media item is marked as a favorite.
    */
   const updateMediaState = (
     id: number,
@@ -148,7 +165,6 @@ export const useGetMediaState = () => {
       const existingItemIndex = prevState.findIndex((item) => item.id === id);
 
       if (existingItemIndex !== -1) {
-        // Update existing media state
         const updatedState = [...prevState];
         updatedState[existingItemIndex] = {
           ...updatedState[existingItemIndex],
@@ -158,28 +174,27 @@ export const useGetMediaState = () => {
         };
         return updatedState;
       } else {
-        // Add new media state
         return [...prevState, { id, playedSeconds, duration, isFavorite }];
       }
     });
   };
 
-  // Persist media states to localStorage, debounced to avoid too many writes
+  // Save media state to localStorage, debounced to avoid frequent updates
   useEffect(() => {
     const saveToLocalStorage = setTimeout(() => {
       if (typeof window !== "undefined") {
         localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
       }
-    }, 500); // Debounce 500ms
+    }, 500); // Save state after 500ms delay
 
-    return () => clearTimeout(saveToLocalStorage); // Cleanup timeout
+    return () => clearTimeout(saveToLocalStorage); // Cleanup the timeout on unmount
   }, [mediaStates]);
 
-  // Memoize favorite IDs to avoid unnecessary recalculations
+  // Memoize favorite IDs to prevent unnecessary recalculations
   const favoriteIds = useMemo(() => {
     return mediaStates.reduce((acc: number[], val) => {
       if (val.isFavorite) {
-        acc.push(val.id);
+        acc.push(val.id); // Add favorite item ID
       }
       return acc;
     }, []);
@@ -192,3 +207,12 @@ export const useGetMediaState = () => {
     favoriteIds,
   };
 };
+
+/**
+ * Possible Refactoring Ideas:
+ * 1. **Memoization**: Enhance performance by memoizing complex computations such as filtering and media state updates.
+ * 2. **TypeScript Enhancements**: Use stricter types for props like `homePost[]`, `favoriteItems`, etc., to prevent invalid data from being passed.
+ * 3. **Error Handling**: Add error handling for unexpected values in media state or API responses.
+ * 4. **Debounce**: The debouncing logic in `useGetMediaState` can be made more flexible by allowing customizable debounce delay.
+ * 5. **Performance Optimization**: Use `useTransition` from React 18 for smoother transitions when dealing with filtering large datasets.
+ */
