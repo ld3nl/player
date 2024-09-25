@@ -68,39 +68,39 @@ function filterPosts(posts: any, { category, startDate, endDate }: any) {
 export async function GET(request: NextRequest) {
   try {
     // Fetch all posts at once
-    // const { postNewStructure, pagination } = await fetchPosts();
-    const { posts, totalPosts, allCategories } = await fetchPosts();
-
+    const { postNewStructure, pagination } = await fetchPosts();
     // console.log("Fetched posts:", postNewStructure);
 
-    // // Extract query parameters from the URL
+    // Extract query parameters from the URL
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
-    console.log("Query parameters:", { category, startDate, endDate });
+    // console.log("Query parameters:", { category, startDate, endDate });
 
-    // // Filter posts based on the query parameters
-    // const filteredPosts = filterPosts(postNewStructure, {
-    //   category,
-    //   startDate,
-    //   endDate,
-    // });
-
-    const fivePosts = posts.slice(0, 5);
-    // console.log("Filtered posts:", filteredPosts);
+    // Filter posts based on the query parameters
+    const filteredPosts = filterPosts(postNewStructure, {
+      category,
+      startDate,
+      endDate,
+    });
 
     // Return the filtered posts along with pagination data (if applicable)
-    // only show 5 posts
-    // return NextResponse.json({ posts
-    //   // filteredPosts,
-    return NextResponse.json({ posts: fivePosts, totalPosts, allCategories });
+    return NextResponse.json({ posts: filteredPosts, pagination });
   } catch (error) {
     console.error("Error fetching posts:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch posts" },
-      { status: 500 },
-    );
+
+    if (error instanceof TypeError) {
+      return NextResponse.json(
+        { error: "Invalid data format received" },
+        { status: 422 },
+      );
+    } else {
+      return NextResponse.json(
+        { error: "An unexpected error occurred" },
+        { status: 500 },
+      );
+    }
   }
 }
