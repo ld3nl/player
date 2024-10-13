@@ -6,6 +6,8 @@ import {
   useCallback,
   useMemo,
   lazy,
+  useReducer,
+  startTransition,
 } from "react";
 import Image from "next/image";
 import he from "he";
@@ -13,7 +15,15 @@ import ReactSlider from "react-slider";
 import debounce from "lodash/debounce"; // Ensure correct lodash import
 
 import useLockScroll from "@/lib/hooks"; // Custom hook for locking scroll when modal is active
-import { PlayerProps, SVGIconName } from "@/lib/types"; // Types for props and SVG icon names
+import {
+  PlayerProps,
+  SVGIconName,
+  PlayerState,
+  PlayerAction,
+} from "@/lib/types"; // Types for props and SVG icon names
+
+import { INITIAL_STATE } from "@/lib/constants"; // Initial state for the player
+
 const ReactPlayer = lazy(() => import("react-player")); // Lazy load the ReactPlayer component
 import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard focus inside the modal
 
@@ -25,6 +35,32 @@ import { Duration } from "./Duration"; // Custom component to display audio dura
 // React does not recognize the `fetchPriority` prop on a DOM element.
 // If you want it in the DOM, spell it as lowercase `fetchpriority`.
 import img from "@/public/P1080841.jpg"; // Fallback image if no image source is provided
+
+// Reducer function to handle state transitions
+function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
+  switch (action.type) {
+    case "SET_PLAYING":
+      return { ...state, playing: action.payload };
+    case "SET_PLAYED_SECONDS":
+      return { ...state, playedSeconds: action.payload };
+    case "SET_VOLUME":
+      return { ...state, volume: action.payload };
+    case "TOGGLE_FAVORITE":
+      return { ...state, isFavorite: !state.isFavorite };
+    case "SEEK":
+      return { ...state, played: action.payload };
+    case "SET_DURATION":
+      return { ...state, duration: action.payload };
+    case "TOGGLE_MODAL":
+      return { ...state, isOpen: action.payload };
+    case "CLOSE_MODAL":
+      return { ...state, isOpen: false, isAnimatingOut: true };
+    case "ANIMATE_OUT":
+      return { ...state, isAnimatingOut: action.payload };
+    default:
+      return state;
+  }
+}
 
 const MainPlayer: FC<PlayerProps> = ({
   mediaItem,
@@ -43,101 +79,63 @@ const MainPlayer: FC<PlayerProps> = ({
     isFavorite,
   } = mediaItem;
 
-  // State to track the current media item's playback state
-  const [thisMediaState, setThisMediaState] = useState({
+  const [state, dispatch] = useReducer(playerReducer, {
+    ...INITIAL_STATE,
     id: id || 0,
-    playedSeconds: playedSeconds,
-    duration: duration,
-    isFavorite: isFavorite,
+    playedSeconds: playedSeconds || 0,
+    duration: duration || 0,
+    isFavorite: isFavorite || false,
   });
-
-  // Sync media state when mediaItem prop changes
-  useEffect(() => {
-    if (mediaItem) {
-      setThisMediaState({
-        id: mediaItem.id || 0,
-        playedSeconds: mediaItem.playedSeconds,
-        duration: mediaItem.duration,
-        isFavorite: mediaItem.isFavorite,
-      });
-    }
-  }, [mediaItem]);
 
   // Refs to handle the player and audio state
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<any>(null); // audioRef to interact with ReactPlayer
 
-  // State to control animations and modal behavior
-  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
-
-  const [pip, setPip] = useState(false); // Picture-in-picture mode
-  const [playing, setPlaying] = useState(true); // Control play/pause state
-  const [controls, setControls] = useState(false); // Whether player controls are visible
-  const [light, setLight] = useState(false); // Light mode for ReactPlayer
-  const [volume, setVolume] = useState(0.8); // Volume state
-  const [muted, setMuted] = useState(false); // Muted state
-  const [played, setPlayed] = useState(0); // Played percentage (0-1)
-
-  const [playbackRate, setPlaybackRate] = useState(1.0); // Playback rate state
-  const [loop, setLoop] = useState(false); // Whether playback loops
-  const [seeking, setSeeking] = useState(false); // Whether user is seeking
-
-  const [isSSR, setIsSSR] = useState(true); // Server-side rendering state
-
-  // Disable SSR (required for ReactPlayer to function correctly)
-  useEffect(() => {
-    setIsSSR(false);
-  }, []);
-
-  const [isOpen, setIsOpen] = useState(false); // Whether the modal is open
+  // Manage server-side rendering (SSR) issues
+  const [isSSR, setIsSSR] = useState(true);
+  useEffect(() => setIsSSR(false), []);
 
   // Lock the scroll when the modal is open
-  useLockScroll(isOpen);
+  useLockScroll(state.isOpen);
 
   // Function: Handles opening the modal with a short delay
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     setIsDelayingOpen(true);
     setTimeout(() => {
-      setIsOpen(true);
       setIsDelayingOpen(false); // Delay to allow for smooth rendering
     }, 10);
-  };
+  }, []);
 
   // Effect: Handles opening the modal when title and src are available
   useEffect(() => {
     if (title && src) {
+      dispatch({ type: "TOGGLE_MODAL", payload: true });
       handleOpen();
     }
-  }, [title, src]);
+  }, [title, src, handleOpen]);
+
+  useEffect(() => {
+    console.log("isOpen:", state.isOpen);
+    console.log("isAnimatingOut:", state.isAnimatingOut);
+  }, [state.isOpen, state.isAnimatingOut]);
 
   // Handle modal close with animation
   const handleClose = useCallback(() => {
-    setIsAnimatingOut(true);
+    dispatch({ type: "ANIMATE_OUT", payload: true });
+
     setTimeout(() => {
-      setIsOpen(false);
-      setIsAnimatingOut(false);
+      dispatch({ type: "TOGGLE_MODAL", payload: false });
+      dispatch({ type: "ANIMATE_OUT", payload: false }); // Reset animation state
       typeof closeModal === "function" && closeModal?.();
     }, 500); // Animation duration for closing
   }, [closeModal]); // Add closeModal as a dependency if needed
 
   // Close modal on Escape key press
   useEffect(() => {
-    if (!isOpen) {
+    if (!state.isOpen) {
       if (audioRef.current) {
         handleStop(); // Stop playback if modal closes
       }
-
-      // Reset all states to their default values
-      setPip(false);
-      setPlaying(true);
-      setControls(false);
-      setLight(false);
-      setVolume(0.8);
-      setMuted(false);
-      setPlayed(0);
-      setPlaybackRate(1.0);
-      setLoop(false);
-      setSeeking(false);
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -146,7 +144,7 @@ const MainPlayer: FC<PlayerProps> = ({
       }
     };
 
-    if (isOpen) {
+    if (state.isOpen) {
       window.addEventListener("keydown", handleKeyDown);
       playerRef.current?.focus(); // Set focus on the player for accessibility
     }
@@ -154,69 +152,50 @@ const MainPlayer: FC<PlayerProps> = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown); // Cleanup event listener
     };
-  }, [isOpen, handleClose]); // Dependencies ensure proper execution
+  }, [state.isOpen, handleClose]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
 
-  // Toggle favorite state of the media item
-  const toggleFavorite = useCallback(() => {
-    setThisMediaState((prevState) => ({
-      ...prevState,
-      isFavorite: !prevState.isFavorite,
-    }));
-  }, []);
-
   // Seek forward or backward by a specified number of seconds
-  const handleSeekTo = (action: "backward" | "forward", seconds: number) => {
-    // Check if duration is valid and non-zero
-    if (!thisMediaState?.duration) {
-      console.warn("Duration is not available.");
-      return;
-    }
-
-    setSeeking(true);
-    const sec = seconds / thisMediaState.duration;
-    let seekTo = 0;
-
-    if (action === "backward") {
-      seekTo = Math.max(played - sec, 0);
-    }
-
-    if (action === "forward") {
-      seekTo = played + sec;
-    }
-
-    setPlayed(seekTo);
-    audioRef?.current?.seekTo(seekTo);
-    setSeeking(false);
-  };
+  const handleSeekTo = useCallback(
+    (action: "backward" | "forward", seconds: number) => {
+      if (!state.duration) return;
+      const sec = seconds / state.duration;
+      const seekTo =
+        action === "backward"
+          ? Math.max(state.played - sec, 0)
+          : state.played + sec;
+      dispatch({ type: "SEEK", payload: seekTo });
+      audioRef?.current?.seekTo(seekTo);
+    },
+    [state.duration, state.played],
+  );
 
   // Handle playback stop
   const handleStop = () => {
-    setPlaying(false);
+    dispatch({ type: "SET_PLAYING", payload: false });
   };
 
   // Handle playback toggle between play/pause
   const handlePlay = () => {
-    setPlaying(true);
+    dispatch({ type: "SET_PLAYING", payload: true });
   };
 
   const handlePlayPause = () => {
-    setPlaying(!playing);
+    dispatch({ type: "SET_PLAYING", payload: !state.playing });
   };
 
   // Handle change in seek progress
-  const handleSeekChange = (value: number) => {
-    // Ensure value is not undefined or null
-    if (value !== undefined && value !== null) {
-      setPlayed(value); // Update played time based on slider value
-    }
-  };
+  const handleSeekChange = debounce((value: number) => {
+    dispatch({ type: "SEEK", payload: value });
+    audioRef.current?.seekTo(parseFloat(value.toString()));
+  }, 300);
 
   // Handle when the user stops seeking
   const handleSeekMouseUp = (newValue: number) => {
-    setSeeking(false);
+    dispatch({ type: "SEEK", payload: newValue });
+
     if (audioRef.current) {
       audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
     }
@@ -231,50 +210,61 @@ const MainPlayer: FC<PlayerProps> = ({
     [stateCallback],
   );
 
-  // Handle playback progress updates
-  const handleProgress = (updatedState: {
-    loaded: number | boolean;
-    loadedSeconds: number;
-    played: number;
-    playedSeconds: number;
-  }) => {
-    const { played, playedSeconds } = updatedState;
-    setPlayed(played);
+  // Toggle favorite state of the media item
+  const toggleFavorite = useCallback(() => {
+    dispatch({ type: "TOGGLE_FAVORITE" });
 
-    if (!seeking) {
-      setThisMediaState((prevState) => {
-        const newState = {
-          ...prevState,
-          playedSeconds: playedSeconds,
-        };
-        debouncedUpdate(newState);
-        return newState;
-      });
-    }
-  };
+    debouncedUpdate({
+      ...{
+        id: state.id,
+        playedSeconds: state.playedSeconds,
+        duration: state.duration,
+      },
+      isFavorite: !state.isFavorite,
+    });
+  }, [state, debouncedUpdate]);
+
+  const handleProgress = useCallback(
+    (updatedState: { played: number; playedSeconds: number }) => {
+      const { played, playedSeconds } = updatedState;
+      dispatch({ type: "SEEK", payload: played });
+      dispatch({ type: "SET_PLAYED_SECONDS", payload: playedSeconds });
+
+      if (!state.seeking) {
+        startTransition(() => {
+          debouncedUpdate({
+            ...state,
+            playedSeconds: playedSeconds,
+          });
+        });
+      }
+    },
+    [state, debouncedUpdate],
+  );
 
   // Handle when the media's total duration is available
-  const handleDuration = (duration: number) => {
-    setThisMediaState((prevState) => ({
-      ...prevState,
-      duration,
-    }));
-    audioRef.current?.seekTo(playedSeconds, "seconds");
-  };
+  const handleDuration = useCallback(
+    (duration: number) => {
+      console.log("Duration: ", duration);
+      dispatch({ type: "SET_DURATION", payload: duration });
+      audioRef.current?.seekTo(state.playedSeconds, "seconds");
+    },
+    [state.playedSeconds],
+  );
 
   return (
-    <FocusTrap active={isOpen}>
-      {(isOpen ||
-        isAnimatingOut ||
+    <FocusTrap active={state.isOpen}>
+      {(state.isOpen ||
+        state.isAnimatingOut ||
         isDelayingOpen ||
-        thisMediaState?.id !== 0) && (
+        state?.id !== 0) && (
         <div
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
             "fixed left-0 top-0 h-full w-full",
             "transition-all duration-500 ease-in-out",
-            isOpen && !isAnimatingOut
+            state.isOpen && !state.isAnimatingOut
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0",
           ].join(" ")}
@@ -293,7 +283,6 @@ const MainPlayer: FC<PlayerProps> = ({
               <Icon name={SVGIconName.Close} />
             </Button>
           </div>
-
           {/* Media Image */}
           <div className="mx-auto flex w-96">
             <Image
@@ -310,7 +299,7 @@ const MainPlayer: FC<PlayerProps> = ({
           </div>
 
           {/* Media Title */}
-          {thisMediaState?.duration !== 0 && (
+          {state?.duration !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
               {title ? he.decode(title) : ""}
             </span>
@@ -322,14 +311,14 @@ const MainPlayer: FC<PlayerProps> = ({
               ref={audioRef}
               style={{ display: "none" }}
               url={src}
-              pip={pip}
-              playing={playing}
-              controls={controls}
-              light={light}
-              loop={loop}
-              playbackRate={playbackRate}
-              volume={volume}
-              muted={muted}
+              pip={state.pip}
+              playing={state.playing}
+              controls={state.controls}
+              light={state.light}
+              loop={state.loop}
+              playbackRate={state.playbackRate}
+              volume={state.volume}
+              muted={state.muted}
               onPlay={handlePlay}
               onProgress={handleProgress}
               onDuration={handleDuration}
@@ -337,11 +326,11 @@ const MainPlayer: FC<PlayerProps> = ({
           )}
 
           {/* Slider for seeking */}
-          {thisMediaState?.duration !== 0 && (
+          {state?.duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="w-full">
                 <ReactSlider
-                  value={played * 100}
+                  value={state.played * 100}
                   step={0.000001}
                   onChange={(e) => handleSeekChange(e / 100)}
                   onAfterChange={(e) => handleSeekMouseUp(e / 100)}
@@ -352,14 +341,14 @@ const MainPlayer: FC<PlayerProps> = ({
               </div>
 
               <div className="mx-10 flex justify-between text-xs text-gray-400">
-                <Duration seconds={thisMediaState?.duration * played} />
-                <Duration seconds={thisMediaState?.duration * (1 - played)} />
+                <Duration seconds={state?.duration * state.played} />
+                <Duration seconds={state?.duration * (1 - state.played)} />
               </div>
             </div>
           )}
 
           {/* Play/Pause and Seek buttons */}
-          {thisMediaState?.duration !== 0 && (
+          {state?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
                 <Button
@@ -373,10 +362,10 @@ const MainPlayer: FC<PlayerProps> = ({
                 <Button
                   onClick={handlePlayPause}
                   className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel={playing ? "Pause" : "Play"}
+                  ariaLabel={state.playing ? "Pause" : "Play"}
                 >
                   <Icon
-                    name={playing ? SVGIconName.Pause : SVGIconName.Play}
+                    name={state.playing ? SVGIconName.Pause : SVGIconName.Play}
                     size={"md"}
                   />
                 </Button>
@@ -393,7 +382,7 @@ const MainPlayer: FC<PlayerProps> = ({
           )}
 
           {/* Favorite and Link buttons */}
-          {thisMediaState?.duration !== 0 && (
+          {state?.duration !== 0 && (
             <div className="mt-2 flex items-center justify-center">
               <button
                 onClick={() => toggleFavorite()}
@@ -402,7 +391,7 @@ const MainPlayer: FC<PlayerProps> = ({
                 <Icon
                   name={SVGIconName.Favorite}
                   size={"sm"}
-                  variation={thisMediaState.isFavorite ? "active" : "default"}
+                  variation={state.isFavorite ? "active" : "default"}
                   customVariation={{
                     active: "fill-purple-600",
                     default: "fill-white stroke-purple-600 stroke-2",
@@ -429,7 +418,7 @@ const MainPlayer: FC<PlayerProps> = ({
           )}
 
           {/* Spinner icon when loading */}
-          {thisMediaState?.duration === 0 && (
+          {state?.duration === 0 && (
             <div className="flex p-10">
               <Icon
                 name={SVGIconName.Spinner}
