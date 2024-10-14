@@ -178,7 +178,7 @@ function processPost(post: any) {
 /**
  * Helper function to extract audio URL from post content.
  */
-function extractAudioUrl(excerptRendered: string): string {
+export function extractAudioUrl(excerptRendered: string): string {
   const audioPattern = /src="([^"]*)"/;
   const match = excerptRendered.match(audioPattern);
   return match
@@ -192,7 +192,7 @@ function extractAudioUrl(excerptRendered: string): string {
 /**
  * Helper function to extract image URL from post content.
  */
-function extractImageUrl(contentRendered: string): string {
+export function extractImageUrl(contentRendered: string): string {
   const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
   const match = contentRendered.match(imagePattern);
   return match

@@ -1,5 +1,5 @@
 // Importing necessary types from the types file
-import { Modal } from "./types";
+import { Modal, PlayerState } from "./types";
 
 // Use a separate environment variable for WordPress API base URL
 const WORDPRESS_API_BASE_URL =
@@ -31,6 +31,25 @@ export const DEFAULT_MODAL: Modal = {
 // Root category ID to fetch posts related to a specific category.
 // In this case, it's 80 which is hardcoded for the given use case.
 export const ROOT_CATEGORY_ID: number = 80;
+
+export const INITIAL_STATE: PlayerState = {
+  id: 0,
+  playedSeconds: 0,
+  duration: 0,
+  isFavorite: false,
+  playing: true,
+  volume: 0.8,
+  muted: false,
+  pip: false,
+  controls: false,
+  light: false,
+  playbackRate: 1.0,
+  loop: false,
+  played: 0,
+  seeking: false,
+  isOpen: false,
+  isAnimatingOut: false,
+};
 
 /**
  * Possible Refactoring Ideas:

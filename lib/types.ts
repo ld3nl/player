@@ -192,3 +192,35 @@ export type MediaState = {
   duration: number;
   isFavorite: boolean;
 };
+
+// TypeScript: Define the player state
+export interface PlayerState {
+  id: number;
+  playedSeconds: number;
+  duration: number;
+  isFavorite: boolean;
+  playing: boolean;
+  volume: number;
+  muted: boolean;
+  pip: boolean;
+  controls: boolean;
+  light: boolean;
+  playbackRate: number;
+  loop: boolean;
+  played: number;
+  seeking: boolean;
+  isOpen: boolean;
+  isAnimatingOut: boolean;
+}
+
+// TypeScript: Define action types
+export type PlayerAction =
+  | { type: "SET_PLAYING"; payload: boolean }
+  | { type: "SET_PLAYED_SECONDS"; payload: number }
+  | { type: "SET_VOLUME"; payload: number }
+  | { type: "TOGGLE_FAVORITE" }
+  | { type: "SEEK"; payload: number }
+  | { type: "SET_DURATION"; payload: number }
+  | { type: "TOGGLE_MODAL"; payload: boolean }
+  | { type: "CLOSE_MODAL" }
+  | { type: "ANIMATE_OUT"; payload: boolean };

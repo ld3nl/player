@@ -111,7 +111,7 @@ export default function Home({
   // Function: Activates the modal and updates its state with selected post details.
   const modalFunction = useCallback(
     (post: any, currentItemState: MediaState) => {
-      const { title, date, id, audioUrl } = post;
+      const { title, date, id, audioUrl, link } = post;
 
       // Set the modal state with the selected item's details.
       setModal({
@@ -119,6 +119,7 @@ export default function Home({
         selectedItem: {
           title,
           date: date,
+          link,
           src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL
           id: id,
           playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Played seconds or default to 0
