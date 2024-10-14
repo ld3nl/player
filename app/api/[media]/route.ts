@@ -51,8 +51,10 @@ export async function GET(request: NextRequest) {
   const cmsResponse = await fetch(
     `${process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL}/posts${identifierParam}_fields[]=title&_fields[]=slug&_fields[]=link&_fields[]=date&_fields[]=excerpt`,
   );
+  if (!cmsResponse.ok) {
+    return NextResponse.json({ error: "Failed to fetch data from CMS" }, { status: cmsResponse.status });
+  }
   let data = await cmsResponse.json();
-
   if (!data) {
     return NextResponse.json({ error: "Data not found" }, { status: 404 });
   }
