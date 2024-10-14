@@ -27,7 +27,7 @@ export interface PlayerProps {
     isFavorite: boolean,
   ) => void;
 
-  closeModal: () => void;
+  closeModal?: () => void;
   // eslint-disable-next-line no-unused-vars
   stateCallback?: (item: {
     // eslint-disable-next-line no-unused-vars
