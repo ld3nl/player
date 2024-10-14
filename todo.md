@@ -23,7 +23,10 @@ To maintain consistency and maximize optimization across the entire codebase, I 
 
     ```ts
     class ApiError extends Error {
-      constructor(message: string, public statusCode: number) {
+      constructor(
+        message: string,
+        public statusCode: number,
+      ) {
         super(message);
       }
     }
@@ -33,9 +36,9 @@ To maintain consistency and maximize optimization across the entire codebase, I 
         // API call
       } catch (error) {
         if (error.response) {
-          throw new ApiError('Server error', error.response.status);
+          throw new ApiError("Server error", error.response.status);
         } else {
-          throw new Error('Network error');
+          throw new Error("Network error");
         }
       }
     };
@@ -53,12 +56,12 @@ To maintain consistency and maximize optimization across the entire codebase, I 
   - Example using `SWR`:
 
     ```ts
-    import useSWR from 'swr';
+    import useSWR from "swr";
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
     export const usePosts = () => {
-      const { data, error } = useSWR('/api/posts', fetcher);
+      const { data, error } = useSWR("/api/posts", fetcher);
       return { data, error };
     };
     ```
@@ -74,7 +77,7 @@ To maintain consistency and maximize optimization across the entire codebase, I 
   - Example:
     ```ts
     const filteredPosts = useMemo(() => {
-      return posts.filter(post => post.isFavorite);
+      return posts.filter((post) => post.isFavorite);
     }, [posts]);
     ```
 
@@ -126,7 +129,7 @@ To maintain consistency and maximize optimization across the entire codebase, I 
   - Example:
 
     ```tsx
-    import Head from 'next/head';
+    import Head from "next/head";
 
     const PostPage = ({ post }) => {
       return (
@@ -151,11 +154,11 @@ To maintain consistency and maximize optimization across the entire codebase, I 
   - Example:
 
     ```tsx
-    const MediaPlayer = React.lazy(() => import('./MediaPlayer'));
+    const MediaPlayer = React.lazy(() => import("./MediaPlayer"));
 
     <Suspense fallback={<div>Loading...</div>}>
       <MediaPlayer />
-    </Suspense>
+    </Suspense>;
     ```
 
 ### **9. Centralized Configuration for Constants**
@@ -179,9 +182,7 @@ To maintain consistency and maximize optimization across the entire codebase, I 
   - Example:
     ```tsx
     <div className="flex justify-center p-4">
-      <button className="bg-purple-600 text-white p-2 rounded">
-        Click Me
-      </button>
+      <button className="rounded bg-purple-600 p-2 text-white">Click Me</button>
     </div>
     ```
 

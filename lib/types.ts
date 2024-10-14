@@ -14,7 +14,7 @@ export interface PlayerProps {
     duration: number;
     isFavorite: boolean;
   };
-  // eslint-disable-next-line no-unused-vars
+
   // setModalCallback: (modal: Modal) => void;
   setGlobalMediaState?: (
     // eslint-disable-next-line no-unused-vars
@@ -30,13 +30,12 @@ export interface PlayerProps {
   closeModal?: () => void;
   // eslint-disable-next-line no-unused-vars
   stateCallback?: (item: {
-    // eslint-disable-next-line no-unused-vars
     id: number;
-    // eslint-disable-next-line no-unused-vars
+
     playedSeconds: number;
-    // eslint-disable-next-line no-unused-vars
+
     duration: number;
-    // eslint-disable-next-line no-unused-vars
+
     isFavorite: boolean;
   }) => void;
 }
@@ -107,11 +106,11 @@ export type Category = {
 export type AudioListingProps = {
   title: string;
   date: string;
-  // eslint-disable-next-line no-unused-vars
+
   // favoriteCallback?: (id?: number) => void; // Ensure consistency: id is a number
   categories?: Category[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
-  // eslint-disable-next-line no-unused-vars
+
   setModalCallback?: any;
   playedSeconds: number; // Explicitly typed, good for clarity.
   duration: number; // Explicitly typed, no issues here.
