@@ -56,7 +56,9 @@ export async function GET(request: NextRequest) {
   if (!data) {
     return NextResponse.json({ error: "Data not found" }, { status: 404 });
   }
-
+  if (slug && (!Array.isArray(data) || data.length === 0)) {
+    return NextResponse.json({ error: "Data not found" }, { status: 404 });
+  }
   if (slug) {
     data = data[0];
   }
