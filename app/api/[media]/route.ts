@@ -1,28 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-// import { extractAudioUrl } from "../../../lib/server/fetchPosts";
-// import extractImageUrl from "../../../lib/server/fetchPosts";
-
-function extractAudioUrl(excerptRendered: string): string {
-  const audioPattern = /src="([^"]*)"/;
-  const match = excerptRendered.match(audioPattern);
-  return match
-    ? match[1].replace(
-        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-        "",
-      )
-    : "";
-}
-
-function extractImageUrl(contentRendered: string): string {
-  const imagePattern = /src="([^"]+\.(jpg|jpeg|png|gif))"/;
-  const match = contentRendered.match(imagePattern);
-  return match
-    ? match[1].replace(
-        /^(https?:\/\/)?(www\.)?paullowe\.org\/wp-content\/uploads\//,
-        "",
-      )
-    : "";
-}
+import {
+  extractAudioUrl,
+  extractImageUrl,
+} from "../../../lib/server/fetchPosts";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
