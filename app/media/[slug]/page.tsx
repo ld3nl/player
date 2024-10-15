@@ -15,7 +15,7 @@ const fetchData = async (prop: string | string[] | number | undefined) => {
   // Determine the URL based on the type and value of prop
   if (typeof prop === "string") {
     // Check if it's a valid number string
-    if (!isNaN(Number(prop))) {
+    if (!Number.isNaN(Number(prop))) {
       urlString = `${process.env.NEXT_PUBLIC_BASE_URL}/api/media?id=${prop}`;
     } else {
       urlString = `${process.env.NEXT_PUBLIC_BASE_URL}/api/media?slug=${prop}`;
