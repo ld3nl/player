@@ -79,6 +79,8 @@ export enum SVGIconName {
   Favorite = "Favorite",
   Spinner = "Spinner",
   Link = "Link",
+  LinkSimple = "LinkSimple",
+  ArrowLeft = "ArrowLeft",
 }
 /* eslint-enable no-unused-vars */
 

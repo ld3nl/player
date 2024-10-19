@@ -80,7 +80,55 @@ export function getSVG({ name }: SVGProps) {
           <path d="M137.54,186.36a8,8,0,0,1,0,11.31l-9.94,10A56,56,0,0,1,48.38,128.4L72.5,104.28A56,56,0,0,1,149.31,102a8,8,0,1,1-10.64,12,40,40,0,0,0-54.85,1.63L59.7,139.72a40,40,0,0,0,56.58,56.58l9.94-9.94A8,8,0,0,1,137.54,186.36Zm70.08-138a56.08,56.08,0,0,0-79.22,0l-9.94,9.95a8,8,0,0,0,11.32,11.31l9.94-9.94a40,40,0,0,1,56.58,56.58L172.18,140.4A40,40,0,0,1,117.33,142,8,8,0,1,0,106.69,154a56,56,0,0,0,76.81-2.26l24.12-24.12A56.08,56.08,0,0,0,207.62,48.38Z"></path>
         </>
       );
+    case "LinkSimple":
+      return (
+        <>
+          {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="96" y1="160" x2="160" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>      */}
+          <path
+            d="M112,76.11l30.06-30a48,48,0,0,1,67.88,67.88L179.88,144"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+          <path
+            d="M76.11,112l-30,30.06a48,48,0,0,0,67.88,67.88L144,179.88"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+        </>
+      );
 
+    case "ArrowLeft":
+      return (
+        <>
+          {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"></svg> */}
+          <rect width="256" height="256" fill="none" />
+          <line
+            x1="216"
+            y1="128"
+            x2="40"
+            y2="128"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+          <polyline
+            points="112 56 40 128 112 200"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+        </>
+      );
     default:
       console.warn(`Unknown icon name: ${name}`);
       return null; // or return a default icon

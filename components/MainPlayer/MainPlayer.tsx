@@ -284,7 +284,7 @@ const MainPlayer: FC<PlayerProps> = ({
                   className="absolute left-0 top-0 w-12 p-3 text-white"
                   ariaLabel="Go Back"
                 >
-                  <Icon name={SVGIconName.Close} />
+                  <Icon name={SVGIconName.ArrowLeft} />
                 </Button>
               </Link>
             </div>
@@ -438,7 +438,7 @@ const MainPlayer: FC<PlayerProps> = ({
                   className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
                 >
                   <Icon
-                    name={SVGIconName.Link}
+                    name={SVGIconName.LinkSimple}
                     size="twoThirds"
                     customVariation={{
                       active: "fill-purple-600",

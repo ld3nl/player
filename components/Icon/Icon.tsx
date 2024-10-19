@@ -30,7 +30,13 @@ const Icon: React.FunctionComponent<IconProps> = ({
 
   // Adjust viewBox based on the specific icon name
   if (name === "Close") viewBox = "0 0 16 16";
-  if (name === "ForwardRewind" || name === "BackwardRewind" || name === "Link")
+  if (
+    name === "ForwardRewind" ||
+    name === "BackwardRewind" ||
+    name === "Link" ||
+    name === "LinkSimple" ||
+    name === "ArrowLeft"
+  )
     viewBox = "0 0 256 256";
 
   if (name === "Spinner") {
