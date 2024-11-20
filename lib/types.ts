@@ -81,6 +81,8 @@ export enum SVGIconName {
   Link = "Link",
   LinkSimple = "LinkSimple",
   ArrowLeft = "ArrowLeft",
+  Headphones = "Headphones",
+  CheckedCircle = "CheckedCircle",
 }
 /* eslint-enable no-unused-vars */
 

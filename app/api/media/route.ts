@@ -3,20 +3,16 @@ import {
   extractAudioUrl,
   extractImageUrl,
 } from "../../../lib/server/fetchPosts";
+import { getParamsIdOrSlug } from "../../../lib/routerHelper";
 
+/**
+ * Fetches detailed information for a specific media item.
+ * @param {NextRequest} request - The incoming request object.
+ * @returns {Promise<NextResponse>} A promise that resolves with the response.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  const slug = searchParams.get("slug");
-
-  console.log(id || slug);
-  // Check if either 'id' or 'slug' is provided in the query parameters
-  if (!(id || slug)) {
-    return NextResponse.json(
-      { error: "ID or SLUG is required" },
-      { status: 400 },
-    );
-  }
+  const { id, slug } = await getParamsIdOrSlug(searchParams);
 
   let identifierParam = "";
 
@@ -28,11 +24,15 @@ export async function GET(request: NextRequest) {
 
   // ?slug=post-slug
   // Fetch data from the CMS
+
   const cmsResponse = await fetch(
     `${process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL}/posts${identifierParam}_fields[]=title&_fields[]=slug&_fields[]=link&_fields[]=date&_fields[]=excerpt`,
   );
   if (!cmsResponse.ok) {
-    return NextResponse.json({ error: "Failed to fetch data from CMS" }, { status: cmsResponse.status });
+    return NextResponse.json(
+      { error: "Failed to fetch data from CMS" },
+      { status: cmsResponse.status },
+    );
   }
   let data = await cmsResponse.json();
   if (!data) {

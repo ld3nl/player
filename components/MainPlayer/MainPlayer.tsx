@@ -117,11 +117,6 @@ const MainPlayer: FC<PlayerProps> = ({
     }
   }, [title, src, handleOpen]);
 
-  useEffect(() => {
-    console.log("isOpen:", state.isOpen);
-    console.log("isAnimatingOut:", state.isAnimatingOut);
-  }, [state.isOpen, state.isAnimatingOut]);
-
   // Handle modal close with animation
   const handleClose = useCallback(() => {
     dispatch({ type: "ANIMATE_OUT", payload: true });
@@ -248,7 +243,6 @@ const MainPlayer: FC<PlayerProps> = ({
   // Handle when the media's total duration is available
   const handleDuration = useCallback(
     (duration: number) => {
-      console.log("Duration: ", duration);
       dispatch({ type: "SET_DURATION", payload: duration });
       audioRef.current?.seekTo(state.playedSeconds, "seconds");
     },

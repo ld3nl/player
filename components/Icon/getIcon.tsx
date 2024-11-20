@@ -83,7 +83,7 @@ export function getSVG({ name }: SVGProps) {
     case "LinkSimple":
       return (
         <>
-          {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="96" y1="160" x2="160" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>      */}
+          {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="96" y1="160" x2="160" y2="96" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" stroke-width="16"/></svg>      */}
           <path
             d="M112,76.11l30.06-30a48,48,0,0,1,67.88,67.88L179.88,144"
             fill="none"
@@ -121,6 +121,44 @@ export function getSVG({ name }: SVGProps) {
           />
           <polyline
             points="112 56 40 128 112 200"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+        </>
+      );
+    case "Headphones":
+      return (
+        <>
+          <rect width="256" height="256" fill="none" />
+          <path
+            d="M224,128H192a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16h16a16,16,0,0,0,16-16V128a96,96,0,1,0-192,0v56a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V144a16,16,0,0,0-16-16H32"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+        </>
+      );
+    case "CheckedCircle":
+      return (
+        <>
+          <rect width="256" height="256" fill="none" />
+          <polyline
+            points="88 136 112 160 168 104"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="16"
+          />
+          <circle
+            cx="128"
+            cy="128"
+            r="96"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
