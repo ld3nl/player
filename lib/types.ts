@@ -191,6 +191,7 @@ export type ValueSetter<T> = T | ((value: T) => T);
 
 export type MediaState = {
   id: number;
+  slug?: string;
   playedSeconds?: number;
   duration?: number;
   isFavorite?: boolean;

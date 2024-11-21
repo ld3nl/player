@@ -98,12 +98,10 @@ const CategoryAudioListing = ({
   }, [moreOptions]);
 
   const handleClick = (val: { slug: string; title: any; id: number }) => {
-    console.log(val);
     dispatch({ type: "SET_ID", payload: val?.id });
     dispatch({ type: "SET_SlUG", payload: val?.slug });
     dispatch({ type: "SET_TITLE", payload: val?.title.rendered });
     if (typeof callback === "function") {
-      console.log(val);
       callback(val);
     }
   };
@@ -148,9 +146,12 @@ const CategoryAudioListing = ({
 
                 {mediaStates.some(
                   // Compare val.id with post.id to avoid type mismatch
-                  (val) => val.id === post.id && val.isFavorite,
+                  (val) =>
+                    (val.id === post.id || val.slug === post.slug) &&
+                    val.isFavorite,
                 ) ||
-                (state.slug === post.slug && state.isFavorite) ? (
+                ((state.slug === post.slug || state.id === post.id) &&
+                  state.isFavorite) ? (
                   <Heart
                     size={24}
                     className="flex"

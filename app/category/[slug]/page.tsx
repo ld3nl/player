@@ -50,8 +50,6 @@ export default async function CategoryPage({
     searchParams?.id || searchParams?.slug || params?.slug,
   );
 
-  console.log(posts);
-
   return (
     <div className="min-h-screen bg-cyan-950 px-5">
       {/* <h1>{category.name}</h1> */}

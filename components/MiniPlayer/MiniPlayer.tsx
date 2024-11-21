@@ -85,8 +85,6 @@ export default function MiniPlayer({
           dispatch({ type: "ANIMATE_OUT", payload: true });
           dispatch({ type: "SET_PLAYING", payload: true });
         }, 300);
-
-        console.log(fetchedAudio);
       } catch (error) {
         console.error("Error fetching audio:", error);
       }

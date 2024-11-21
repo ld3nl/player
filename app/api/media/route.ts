@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   const audioUrl = extractAudioUrl(data?.excerpt?.rendered);
   const imageUrl = extractImageUrl(data?.excerpt?.rendered);
 
-  console.log(audioUrl);
+  // console.log(audioUrl);
 
   return NextResponse.json({
     title: data.title.rendered,

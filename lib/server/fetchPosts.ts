@@ -48,7 +48,6 @@ export async function fetchPosts(): Promise<HomeProps> {
 
   // If cached data exists, return it
   if (cachedData) {
-    console.log(`[fetchPosts] Cache hit for key: ${key}`);
     return cachedData;
   }
 
@@ -64,7 +63,6 @@ export async function fetchPosts(): Promise<HomeProps> {
   Array.from({ length: numberOfRequests }).map((_, i) => {
     const offset = i * 99; // Offset to request batches of posts
     promises.push(getAllPostsFromServer(ROOT_CATEGORY_ID, 99, offset)); // Add promise to fetch each batch
-    console.log(`[fetchPosts] Request added for batch: ${i + 1}`);
   });
 
   // Log all Vercel environment variables for debugging
@@ -76,15 +74,15 @@ export async function fetchPosts(): Promise<HomeProps> {
   //   VERCEL: process.env,
   //   // Add other environment variables here if necessary
   // });
-  console.log("Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
-  console.log(
-    "WordPress API Base URL:",
-    process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL,
-  );
-  console.log(
-    "Fetching from API:",
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`,
-  );
+  // console.log("Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+  // console.log(
+  //   "WordPress API Base URL:",
+  //   process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL,
+  // );
+  // console.log(
+  //   "Fetching from API:",
+  //   `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`,
+  // );
 
   // Fetch static category details and clean up categories with multiple parts
   const allCategories = StaticCategoryData.flatMap(({ name, id, slug }) => {
@@ -122,7 +120,7 @@ export async function fetchPosts(): Promise<HomeProps> {
 
   // Cache the fetched data for future use
   cache.set(key, data, { ttl: calculateDynamicTTL() });
-  console.log(`[fetchPosts] Cache miss for key: ${key}. Data cached.`);
+  // console.log(`[fetchPosts] Cache miss for key: ${key}. Data cached.`);
 
   // Return the fetched data
   return data;
