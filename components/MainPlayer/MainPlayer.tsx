@@ -91,9 +91,27 @@ const MainPlayer: FC<PlayerProps> = ({
     isFavorite: isFavorite || false,
   });
 
-  // Refs to handle the player and audio state
-  const playerRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<React.ElementRef<typeof ReactPlayer> | null>(null);
+  // Update ref handling
+  const [playerElement, setPlayerElement] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const [audioElement, setAudioElement] = useState<ReactPlayerType | null>(
+    null,
+  );
+
+  // Ref callback functions with cleanup
+  const playerRefCallback = useCallback((element: HTMLDivElement | null) => {
+    setPlayerElement(element);
+    return () => setPlayerElement(null);
+  }, []);
+
+  const audioRefCallback = useCallback((element: ReactPlayerType | null) => {
+    setAudioElement(element);
+    return () => setAudioElement(null);
+  }, []);
+
+  // Replace player ref usage
+  const player = audioElement;
 
   // Optional: Add type guard for safer ref usage
   const isReactPlayer = (ref: any): ref is ReactPlayerType => {
@@ -134,10 +152,15 @@ const MainPlayer: FC<PlayerProps> = ({
     }, 500); // Animation duration for closing
   }, [closeModal]); // Add closeModal as a dependency if needed
 
+  // Memoize handleStop to use in useEffect
+  const handleStop = useCallback(() => {
+    dispatch({ type: "SET_PLAYING", payload: false });
+  }, []);
+
   // Close modal on Escape key press
   useEffect(() => {
     if (!state.isOpen) {
-      if (audioRef.current) {
+      if (isReactPlayer(player)) {
         handleStop(); // Stop playback if modal closes
       }
     }
@@ -150,7 +173,7 @@ const MainPlayer: FC<PlayerProps> = ({
 
     if (state.isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      playerRef.current?.focus(); // Set focus on the player for accessibility
+      playerElement?.focus(); // Set focus on the player for accessibility
     }
 
     return () => {
@@ -158,11 +181,17 @@ const MainPlayer: FC<PlayerProps> = ({
         window.removeEventListener("keydown", handleKeyDown);
       }
     };
-  }, [state.isOpen, handleClose]); // Dependencies ensure proper execution
+  }, [
+    state.isOpen,
+    handleClose,
+    handleStop,
+    player,
+    playerElement,
+    isReactPlayer,
+  ]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
-  const player = audioRef.current;
 
   // Seek forward or backward by a specified number of seconds
   const handleSeekTo = useCallback(
@@ -185,9 +214,9 @@ const MainPlayer: FC<PlayerProps> = ({
   );
 
   // Handle playback stop
-  const handleStop = () => {
-    dispatch({ type: "SET_PLAYING", payload: false });
-  };
+  // const handleStop = () => {
+  //   dispatch({ type: "SET_PLAYING", payload: false });
+  // };
 
   // Handle playback toggle between play/pause
   const handlePlay = () => {
@@ -274,7 +303,7 @@ const MainPlayer: FC<PlayerProps> = ({
         isDelayingOpen ||
         state?.id !== 0) && (
         <div
-          ref={playerRef}
+          ref={playerRefCallback}
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
@@ -337,7 +366,7 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Media Player */}
           {isSSR ? null : (
             <ReactPlayer
-              ref={audioRef}
+              ref={audioRefCallback}
               style={{ display: "none" }}
               url={src}
               pip={state.pip}

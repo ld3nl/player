@@ -1,5 +1,4 @@
-// import { useEffect, useState } from "react";
-
+import { Suspense } from "react";
 import MainPlayer from "@/components/MainPlayer/MainPlayer";
 
 const fetchData = async (prop: string | string[] | number | undefined) => {
@@ -41,15 +40,20 @@ const fetchData = async (prop: string | string[] | number | undefined) => {
   }
 };
 
-export default async function Page({
-  searchParams,
-  params,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-  params: { slug: string };
-}) {
+interface PageProps {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function Page({ params, searchParams }: PageProps) {
+  // Await both params and searchParams
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const slug = resolvedParams.slug;
+
   const { title, link, date, audioUrl } = await fetchData(
-    searchParams?.id || searchParams?.slug || params?.slug,
+    resolvedSearchParams?.id || resolvedSearchParams?.slug || slug,
   );
 
   const dummyProp = {
@@ -60,14 +64,16 @@ export default async function Page({
   };
 
   return (
-    <MainPlayer
-      mediaItem={{
-        ...dummyProp,
-        title,
-        link,
-        date,
-        src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`,
-      }}
-    />
+    <Suspense fallback={<div>Loading posts...</div>}>
+      <MainPlayer
+        mediaItem={{
+          ...dummyProp,
+          title,
+          link,
+          date,
+          src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`,
+        }}
+      />
+    </Suspense>
   );
 }

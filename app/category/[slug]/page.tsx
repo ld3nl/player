@@ -1,4 +1,17 @@
+import { Suspense } from "react";
 import CategoryAudioListing from "@/components/CategoryAudioListing/CategoryAudioListing";
+
+// Force dynamic rendering for real-time data
+export const dynamic = "force-dynamic";
+
+// Define proper types for params and searchParams
+// type Params = Promise<{ slug: string }>;
+// type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
 const fetchData = async (prop: string | string[] | number | undefined) => {
   // Check if prop is provided, log a warning and return early if not
@@ -40,30 +53,36 @@ const fetchData = async (prop: string | string[] | number | undefined) => {
 };
 
 export default async function CategoryPage({
-  searchParams,
   params,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-  params: { slug: string };
-}) {
-  const { category, posts } = await fetchData(
-    searchParams?.id || searchParams?.slug || params?.slug,
+  searchParams,
+}: PageProps) {
+  // Await both params and searchParams
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const slug = resolvedParams.slug;
+
+  // Use resolved search params
+  const data = await fetchData(
+    resolvedSearchParams?.id || resolvedSearchParams?.slug || slug,
   );
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-cyan-950 px-5">
+        <h1 className="text-red-400">Error loading category data</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cyan-950 px-5">
-      {/* <h1>{category.name}</h1> */}
       <h1 className="mb-1 text-base font-bold capitalize text-gray-400">
-        {category.name}
+        {data.category?.name}
       </h1>
-      {/* <p className="font-sans text-gray-400">
-        In these live recorded sessions, Loch shares advanced techniques for
-        supporting awakening as the next natural stage of human development.
-        You’ll learn how to shift out of your chattering mind and into embodied,
-        awake awareness, as well as how to sustain, create, and relate from that
-        open-hearted awareness in the midst of everyday life.
-      </p> */}
-      <CategoryAudioListing posts={posts} />
+      <Suspense fallback={<div>Loading posts...</div>}>
+        <CategoryAudioListing posts={data.posts} />
+      </Suspense>
     </div>
   );
 }

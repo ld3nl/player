@@ -129,26 +129,6 @@ const CategoryAudioListing = ({
         {state?.slug}
         <h1>{state?.title}</h1>
         {posts.map((post: PostData, index) => {
-          // console.log(
-          //   mediaStates.some(
-          //     // Compare val.id with post.id to avoid type mismatch
-          //     (val) =>
-          //       (val.id === post.id || val.slug === post.slug) &&
-          //       val.isFavorite,
-          //   ) && (post.id, "||", post.slug, mediaStates),
-          // );
-
-          console.log(
-            // !(state?.id || state?.slug) && "No ID no SLUG",
-            mediaStates.some(
-              // Compare val.id with post.id to avoid type mismatch
-              (val) =>
-                (val.id === post.id || val.slug === post.slug) &&
-                val.isFavorite,
-            ),
-            // (state.slug === post.slug || (state.id === post.id && "true")) &&
-            //   "true HELLO",
-          );
           return (
             // Each list item needs a unique key prop
             <li

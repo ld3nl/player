@@ -1,10 +1,11 @@
-import type { NextRequest } from "next/server";
 import { getParamsIdOrSlug } from "../../../lib/routerHelper";
 import { StaticCategoryData } from "../../../lib/utils";
+import { type NextRequest } from "next/server";
+
 import { NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const searchParams = request.nextUrl.searchParams;
   const { id, slug } = await getParamsIdOrSlug(searchParams);
 
   // Get name from static data depending on the id or slug
