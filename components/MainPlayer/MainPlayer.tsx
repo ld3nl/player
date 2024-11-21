@@ -4,7 +4,6 @@ import {
   FC,
   useEffect,
   useState,
-  useRef,
   useCallback,
   useMemo,
   lazy,
@@ -92,18 +91,9 @@ const MainPlayer: FC<PlayerProps> = ({
   });
 
   // Update ref handling
-  const [playerElement, setPlayerElement] = useState<HTMLDivElement | null>(
-    null,
-  );
   const [audioElement, setAudioElement] = useState<ReactPlayerType | null>(
     null,
   );
-
-  // Ref callback functions with cleanup
-  const playerRefCallback = useCallback((element: HTMLDivElement | null) => {
-    setPlayerElement(element);
-    return () => setPlayerElement(null);
-  }, []);
 
   const audioRefCallback = useCallback((element: ReactPlayerType | null) => {
     setAudioElement(element);
@@ -173,7 +163,6 @@ const MainPlayer: FC<PlayerProps> = ({
 
     if (state.isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      playerElement?.focus(); // Set focus on the player for accessibility
     }
 
     return () => {
@@ -181,14 +170,7 @@ const MainPlayer: FC<PlayerProps> = ({
         window.removeEventListener("keydown", handleKeyDown);
       }
     };
-  }, [
-    state.isOpen,
-    handleClose,
-    handleStop,
-    player,
-    playerElement,
-    isReactPlayer,
-  ]); // Dependencies ensure proper execution
+  }, [state.isOpen, handleClose, handleStop, player, isReactPlayer]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
@@ -303,7 +285,6 @@ const MainPlayer: FC<PlayerProps> = ({
         isDelayingOpen ||
         state?.id !== 0) && (
         <div
-          ref={playerRefCallback}
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
