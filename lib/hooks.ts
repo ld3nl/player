@@ -155,12 +155,17 @@ export const useGetMediaState = () => {
    * @param {number} duration - The total duration of the media.
    * @param {boolean} isFavorite - Whether the media item is marked as a favorite.
    */
-  const updateMediaState = (
-    id: number,
-    playedSeconds: number,
-    duration: number,
-    isFavorite: boolean,
-  ) => {
+  /**
+   * Updates the media state for a specific media item.
+   *
+   * @param {MediaState} mediaState - The media state object containing id, playedSeconds, duration, and isFavorite.
+   */
+  const updateMediaState = ({
+    id,
+    playedSeconds,
+    duration,
+    isFavorite,
+  }: MediaState) => {
     setMediaStates((prevState) => {
       const existingItemIndex = prevState.findIndex((item) => item.id === id);
 

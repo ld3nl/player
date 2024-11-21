@@ -28,6 +28,7 @@ type Excerpt = {
 // Type for the main data structure
 // Interface for the main data structure
 interface PostData {
+  id: number;
   date: string;
   slug: string;
   link: string;
@@ -42,8 +43,26 @@ const INITIAL_STATE_CATEGORY = {
   isFavorite: false,
 };
 
-function categoryReducer(state, action) {
+interface CategoryState {
+  id: number;
+  title: string;
+  slug: string;
+  isFavorite: boolean;
+}
+
+type CategoryAction =
+  | { type: "SET_ID"; payload: number }
+  | { type: "SET_SlUG"; payload: string }
+  | { type: "SET_TITLE"; payload: string }
+  | { type: "TOGGLE_FAVORITE" };
+
+function categoryReducer(
+  state: CategoryState,
+  action: CategoryAction,
+): CategoryState {
   switch (action.type) {
+    case "SET_ID":
+      return { ...state, id: action.payload };
     case "SET_SlUG":
       return { ...state, slug: action.payload };
     case "SET_TITLE":
@@ -61,8 +80,8 @@ const CategoryAudioListing = ({
   callback,
 }: {
   posts: PostData[];
-  // eslint-disable-next-line
-  callback?: (val) => void;
+  // eslint-disable-next-line no-unused-vars
+  callback?: (val: any) => void;
 }) => {
   const { mediaStates, updateMediaState } = useGetMediaState();
 
@@ -78,7 +97,9 @@ const CategoryAudioListing = ({
     }, 300);
   }, [moreOptions]);
 
-  const handleClick = (val: { slug: string; title: any }) => {
+  const handleClick = (val: { slug: string; title: any; id: number }) => {
+    console.log(val);
+    dispatch({ type: "SET_ID", payload: val?.id });
     dispatch({ type: "SET_SlUG", payload: val?.slug });
     dispatch({ type: "SET_TITLE", payload: val?.title.rendered });
     if (typeof callback === "function") {
@@ -92,12 +113,10 @@ const CategoryAudioListing = ({
     {
       // console.log("toggleFavorite", slug, state.slug);
       dispatch({ type: "TOGGLE_FAVORITE" });
-      updateMediaState(
-        state.slug,
-        state.playedSeconds,
-        state.duration,
-        !state.isFavorite,
-      );
+      updateMediaState({
+        id: state.id,
+        isFavorite: !state.isFavorite,
+      });
     };
 
   return (
@@ -113,7 +132,7 @@ const CategoryAudioListing = ({
           >
             <Button
               onClick={() =>
-                handleClick({ slug: post.slug, title: post.title })
+                handleClick({ slug: post.slug, title: post.title, id: post.id })
               }
               className="flex flex-col gap-0"
               ariaLabel="Toggle audio player"
@@ -128,7 +147,8 @@ const CategoryAudioListing = ({
                 <CheckCircle size={24} className="flex size-6" />
 
                 {mediaStates.some(
-                  (val) => val.id === post.slug && val.isFavorite,
+                  // Compare val.id with post.id to avoid type mismatch
+                  (val) => val.id === post.id && val.isFavorite,
                 ) ||
                 (state.slug === post.slug && state.isFavorite) ? (
                   <Heart

@@ -15,11 +15,12 @@ export async function GET(request: NextRequest) {
   // Check if category is found
   if (!category) {
     console.error("Category not found");
-    return Response.json({ error: "Category not found" }, { status: 404 });
+    // Use NextResponse.json to return a JSON response
+    return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
   // Category 80 is hardcoded to be the audio category
-  const requestUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL}/posts?categories=80,${category.id}&_fields[]=title&_fields[]=slug&offset=0&per_page=99`;
+  const requestUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_BASE_URL}/posts?categories=80,${category.id}&_fields[]=id&_fields[]=title&_fields[]=slug&offset=0&per_page=99`;
 
   // Fetch data from the CMS and handle the response
   const cmsResponse = await fetch(requestUrl);
@@ -30,14 +31,22 @@ export async function GET(request: NextRequest) {
     if (!cmsResponse.ok) {
       // If we got a 404 Not Found or similar error
       console.error("Failed to fetch CMS data");
-      return null; // Maybe user is logged out; return null profile
+      // Return a JSON response with an error message
+      return NextResponse.json(
+        { error: "Failed to fetch CMS data" },
+        { status: cmsResponse.status },
+      );
     }
 
     // Parse the response as JSON
     jsonResponse = await cmsResponse.json();
   } catch (error) {
     console.error("Error parsing CMS response", error);
-    return null;
+    // Return a JSON response with an error message
+    return NextResponse.json(
+      { error: "Error parsing CMS response" },
+      { status: 500 },
+    );
   }
 
   // Return the JSON response with the appropriate status

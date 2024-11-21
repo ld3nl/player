@@ -10,9 +10,9 @@ export interface PlayerProps {
     link?: string;
     date?: string;
     id?: number;
-    playedSeconds: number;
-    duration: number;
-    isFavorite: boolean;
+    playedSeconds?: number;
+    duration?: number;
+    isFavorite?: boolean;
   };
 
   // setModalCallback: (modal: Modal) => void;
@@ -54,9 +54,9 @@ export type Modal = {
     id?: number;
     link?: string;
     date?: string;
-    playedSeconds: number;
-    duration: number;
-    isFavorite: boolean;
+    playedSeconds?: number;
+    duration?: number;
+    isFavorite?: boolean;
   };
 };
 
@@ -191,9 +191,9 @@ export type ValueSetter<T> = T | ((value: T) => T);
 
 export type MediaState = {
   id: number;
-  playedSeconds: number;
-  duration: number;
-  isFavorite: boolean;
+  playedSeconds?: number;
+  duration?: number;
+  isFavorite?: boolean;
 };
 
 // TypeScript: Define the player state

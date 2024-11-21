@@ -183,12 +183,12 @@ export default function Home({
                 >
                   <Button
                     onClick={() => {
-                      updateMediaState(
-                        currentItemState.id,
-                        currentItemState.playedSeconds,
-                        currentItemState.duration,
-                        !currentItemState.isFavorite,
-                      );
+                      updateMediaState({
+                        id: currentItemState.id,
+                        playedSeconds: currentItemState.playedSeconds,
+                        duration: currentItemState.duration,
+                        isFavorite: !currentItemState.isFavorite,
+                      });
                     }}
                     className="w-10"
                     ariaLabel="Favorite"
@@ -215,7 +215,7 @@ export default function Home({
               closeModal={closeModal} // Function to close the modal
               stateCallback={(object) => {
                 const { id, playedSeconds, duration, isFavorite } = object;
-                updateMediaState(id, playedSeconds, duration, isFavorite);
+                updateMediaState({ id, playedSeconds, duration, isFavorite });
               }} // Callback for state changes
             />
           )}
