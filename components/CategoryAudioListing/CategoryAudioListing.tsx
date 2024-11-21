@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useReducer, useState } from "react";
 import he from "he";
 // import Link from "next/link";
@@ -52,7 +53,7 @@ interface CategoryState {
 
 type CategoryAction =
   | { type: "SET_ID"; payload: number }
-  | { type: "SET_SlUG"; payload: string }
+  | { type: "SET_SLUG"; payload: string }
   | { type: "SET_TITLE"; payload: string }
   | { type: "TOGGLE_FAVORITE" };
 
@@ -63,7 +64,7 @@ function categoryReducer(
   switch (action.type) {
     case "SET_ID":
       return { ...state, id: action.payload };
-    case "SET_SlUG":
+    case "SET_SLUG":
       return { ...state, slug: action.payload };
     case "SET_TITLE":
       return { ...state, title: action.payload };
@@ -86,6 +87,7 @@ const CategoryAudioListing = ({
   const { mediaStates, updateMediaState } = useGetMediaState();
 
   const [state, dispatch] = useReducer(categoryReducer, INITIAL_STATE_CATEGORY);
+  const [hasMounted, setHasMounted] = useState(false);
 
   // use state for now
   const [moreOptions, setMoreOptions] = useState(false);
@@ -97,9 +99,13 @@ const CategoryAudioListing = ({
     }, 300);
   }, [moreOptions]);
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const handleClick = (val: { slug: string; title: any; id: number }) => {
     dispatch({ type: "SET_ID", payload: val?.id });
-    dispatch({ type: "SET_SlUG", payload: val?.slug });
+    dispatch({ type: "SET_SLUG", payload: val?.slug });
     dispatch({ type: "SET_TITLE", payload: val?.title.rendered });
     if (typeof callback === "function") {
       callback(val);
@@ -122,63 +128,81 @@ const CategoryAudioListing = ({
       <ul>
         {state?.slug}
         <h1>{state?.title}</h1>
-        {posts.map((post: PostData, index) => (
-          // Each list item needs a unique key prop
-          <li
-            key={`${post.slug}${index}`}
-            className="flex border-b-2 border-gray-400 p-3 font-sans text-gray-400"
-          >
-            <Button
-              onClick={() =>
-                handleClick({ slug: post.slug, title: post.title, id: post.id })
-              }
-              className="flex flex-col gap-0"
-              ariaLabel="Toggle audio player"
-            >
-              <span className="text-sm font-bold">
-                {he.decode(post.title.rendered)}
-              </span>
-              {/* Displaying icons and duration using @phosphor-icons/react */}
-              <div className="flex items-center gap-1">
-                <Headphones size={24} className="flex size-6" />
-                <span className="text-xs">01:20:22</span>
-                <CheckCircle size={24} className="flex size-6" />
+        {posts.map((post: PostData, index) => {
+          // console.log(
+          //   mediaStates.some(
+          //     // Compare val.id with post.id to avoid type mismatch
+          //     (val) =>
+          //       (val.id === post.id || val.slug === post.slug) &&
+          //       val.isFavorite,
+          //   ) && (post.id, "||", post.slug, mediaStates),
+          // );
 
-                {mediaStates.some(
-                  // Compare val.id with post.id to avoid type mismatch
-                  (val) =>
-                    (val.id === post.id || val.slug === post.slug) &&
-                    val.isFavorite,
-                ) ||
-                ((state.slug === post.slug || state.id === post.id) &&
-                  state.isFavorite) ? (
-                  <Heart
-                    size={24}
-                    className="flex"
-                    color="hotpink"
-                    weight="fill"
-                  />
-                ) : (
-                  <Heart
-                    size={24}
-                    className="flex"
-                    color="hotpink"
-                    weight={"thin"}
-                  />
-                )}
-                {/* <Heart size={24} className="flex size-7" /> */}
-              </div>
-            </Button>
-            <Button
-              className="my-auto ms-auto"
-              ariaLabel="More options"
-              onClick={() => setMoreOptions(true)}
+          console.log(
+            // !(state?.id || state?.slug) && "No ID no SLUG",
+            mediaStates.some(
+              // Compare val.id with post.id to avoid type mismatch
+              (val) =>
+                (val.id === post.id || val.slug === post.slug) &&
+                val.isFavorite,
+            ),
+            // (state.slug === post.slug || (state.id === post.id && "true")) &&
+            //   "true HELLO",
+          );
+          return (
+            // Each list item needs a unique key prop
+            <li
+              key={`${post.slug}${index}`}
+              className="flex border-b-2 border-gray-400 p-3 font-sans text-gray-400"
             >
-              {" "}
-              <DotsThreeVertical size={24} className="flex size-6" />
-            </Button>
-          </li>
-        ))}
+              <Button
+                onClick={() =>
+                  handleClick({
+                    slug: post.slug,
+                    title: post.title,
+                    id: post.id,
+                  })
+                }
+                className="flex flex-col gap-0"
+                ariaLabel="Toggle audio player"
+              >
+                <span className="text-sm font-bold">
+                  {he.decode(post.title.rendered)}
+                </span>
+                {/* Displaying icons and duration using @phosphor-icons/react */}
+                <div className="flex items-center gap-1">
+                  <Headphones size={24} className="flex size-6" />
+                  <span className="text-xs">01:20:22</span>
+                  <CheckCircle size={24} className="flex size-6" />
+                  {hasMounted && (
+                    <Heart
+                      size={24}
+                      className="flex"
+                      color="hotpink"
+                      weight={
+                        mediaStates.some(
+                          (val) =>
+                            (val.id === post.id || val.slug === post.slug) &&
+                            val.isFavorite,
+                        )
+                          ? "fill"
+                          : "thin"
+                      }
+                    />
+                  )}
+                </div>
+              </Button>
+              <Button
+                className="my-auto ms-auto"
+                ariaLabel="More options"
+                onClick={() => setMoreOptions(true)}
+              >
+                {" "}
+                <DotsThreeVertical size={24} className="flex size-6" />
+              </Button>
+            </li>
+          );
+        })}
       </ul>
 
       <MiniPlayer slug={state.slug} title={state.title}>
@@ -204,7 +228,9 @@ const CategoryAudioListing = ({
           onClick={() => setMoreOptions(false)}
         >
           <div
-            className={`mt-auto h-40 w-full ${moreOptionsAnimation ? "translate-y-0" : "translate-y-full"} rounded-t-xl bg-black text-white transition-transform delay-300 `}
+            className={`mt-auto h-40 w-full ${
+              moreOptionsAnimation ? "translate-y-0" : "translate-y-full"
+            } rounded-t-xl bg-black text-white transition-transform delay-300 `}
           >
             <ul>
               <li>option 1</li>

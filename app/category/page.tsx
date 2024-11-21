@@ -27,8 +27,11 @@ export default async function CategoryAudioListing() {
         <Image
           src="https://utfs.io/f/vfxFGWyJBql98bOaD80nHjbIJz5GeU14RsNMFW69lKCouTmc"
           alt="Beautiful Byron Bay landscape with a mountain in the background"
-          layout="fill"
-          objectFit="cover"
+          fill
+          priority={true}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 725px"
+          style={{ objectFit: "cover" }}
+          quality={85}
         />
       </div>
       <h1 className="mb-5 font-sans text-xl text-gray-400"> All Categories</h1>

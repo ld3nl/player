@@ -26,6 +26,7 @@ import {
 
 import { INITIAL_STATE } from "@/lib/constants"; // Initial state for the player
 
+import type { default as ReactPlayerType } from "react-player"; // Add type import
 const ReactPlayer = lazy(() => import("react-player")); // Lazy load the ReactPlayer component
 import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard focus inside the modal
 
@@ -92,7 +93,12 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Refs to handle the player and audio state
   const playerRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<any>(null); // audioRef to interact with ReactPlayer
+  const audioRef = useRef<React.ElementRef<typeof ReactPlayer> | null>(null);
+
+  // Optional: Add type guard for safer ref usage
+  const isReactPlayer = (ref: any): ref is ReactPlayerType => {
+    return ref && typeof ref.seekTo === "function";
+  };
 
   // Manage server-side rendering (SSR) issues
   const [isSSR, setIsSSR] = useState(true);
@@ -148,12 +154,15 @@ const MainPlayer: FC<PlayerProps> = ({
     }
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown); // Cleanup event listener
+      if (state.isOpen) {
+        window.removeEventListener("keydown", handleKeyDown);
+      }
     };
   }, [state.isOpen, handleClose]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
+  const player = audioRef.current;
 
   // Seek forward or backward by a specified number of seconds
   const handleSeekTo = useCallback(
@@ -165,7 +174,12 @@ const MainPlayer: FC<PlayerProps> = ({
           ? Math.max(state.played - sec, 0)
           : state.played + sec;
       dispatch({ type: "SEEK", payload: seekTo });
-      audioRef?.current?.seekTo(seekTo);
+
+      // Safer ref usage with type guard
+
+      if (isReactPlayer(player)) {
+        player.seekTo(seekTo);
+      }
     },
     [state.duration, state.played],
   );
@@ -187,15 +201,17 @@ const MainPlayer: FC<PlayerProps> = ({
   // Handle change in seek progress
   const handleSeekChange = debounce((value: number) => {
     dispatch({ type: "SEEK", payload: value });
-    audioRef.current?.seekTo(parseFloat(value.toString()));
+    if (isReactPlayer(player)) {
+      player?.seekTo(parseFloat(value.toString()));
+    }
   }, 300);
 
   // Handle when the user stops seeking
   const handleSeekMouseUp = (newValue: number) => {
     dispatch({ type: "SEEK", payload: newValue });
 
-    if (audioRef.current) {
-      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
+    if (isReactPlayer(player)) {
+      player.seekTo(parseFloat(newValue.toString())); // Ensure valid number
     }
   };
 
@@ -244,7 +260,9 @@ const MainPlayer: FC<PlayerProps> = ({
   const handleDuration = useCallback(
     (duration: number) => {
       dispatch({ type: "SET_DURATION", payload: duration });
-      audioRef.current?.seekTo(state.playedSeconds, "seconds");
+      if (isReactPlayer(player)) {
+        player?.seekTo(state.playedSeconds, "seconds");
+      }
     },
     [state.playedSeconds],
   );
@@ -256,6 +274,7 @@ const MainPlayer: FC<PlayerProps> = ({
         isDelayingOpen ||
         state?.id !== 0) && (
         <div
+          ref={playerRef}
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
@@ -265,7 +284,6 @@ const MainPlayer: FC<PlayerProps> = ({
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0",
           ].join(" ")}
-          ref={playerRef}
           tabIndex={0}
           role="dialog"
           aria-modal="true"
