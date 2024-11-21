@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@phosphor-icons/react':
         specifier: ^2.1.7
-        version: 2.1.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 2.1.7(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
       axios:
         specifier: ^1.7.7
         version: 1.7.7
@@ -19,7 +19,7 @@ importers:
         version: 2.2.0
       focus-trap-react:
         specifier: ^10.3.1
-        version: 10.3.1(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 10.3.1(prop-types@15.8.1)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
       he:
         specifier: ^1.2.0
         version: 1.2.0
@@ -34,22 +34,22 @@ importers:
         version: 10.6.0
       next:
         specifier: ^15.0.3
-        version: 15.0.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 15.0.3(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
       normalize.css:
         specifier: ^8.0.1
         version: 8.0.1
       react:
-        specifier: ^18.3.1
-        version: 18.3.1
+        specifier: 19.0.0-rc-fb9a90fa48-20240614
+        version: 19.0.0-rc-fb9a90fa48-20240614
       react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
+        specifier: 19.0.0-rc-fb9a90fa48-20240614
+        version: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
       react-player:
         specifier: ^2.16.0
-        version: 2.16.0(react@18.3.1)
+        version: 2.16.0(react@19.0.0-rc-fb9a90fa48-20240614)
       react-slider:
         specifier: ^2.0.6
-        version: 2.0.6(react@18.3.1)
+        version: 2.0.6(react@19.0.0-rc-fb9a90fa48-20240614)
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
@@ -78,12 +78,6 @@ importers:
       '@types/node':
         specifier: 18.15.10
         version: 18.15.10
-      '@types/react':
-        specifier: ^18.3.12
-        version: 18.3.12
-      '@types/react-dom':
-        specifier: ^18.3.1
-        version: 18.3.1
       '@types/react-slider':
         specifier: ^1.3.6
         version: 1.3.6
@@ -450,9 +444,6 @@ packages:
   '@types/prop-types@15.7.13':
     resolution: {integrity: sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==}
 
-  '@types/react-dom@18.3.1':
-    resolution: {integrity: sha512-qW1Mfv8taImTthu4KoXgDfLuk4bydU6Q/TkADnDWWHwi4NX4BR+LWfTp2sVmTqRrsHvyDDTelgelxJ+SsejKKQ==}
-
   '@types/react-slider@1.3.6':
     resolution: {integrity: sha512-RS8XN5O159YQ6tu3tGZIQz1/9StMLTg/FCIPxwqh2gwVixJnlfIodtVx+fpXVMZHe7A58lAX1Q4XTgAGOQaCQg==}
 
@@ -638,8 +629,8 @@ packages:
     resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
     engines: {node: '>= 6'}
 
-  caniuse-lite@1.0.30001680:
-    resolution: {integrity: sha512-rPQy70G6AGUMnbwS1z6Xg+RkHYPAi18ihs47GH0jcxIG7wArmPgY3XbS2sRdBbxJljp3thdT8BIqv9ccCypiPA==}
+  caniuse-lite@1.0.30001682:
+    resolution: {integrity: sha512-rJFwz3yRO6NU6Y8aEJKPzS4fngOE8j05pd33FW5Uk9v9b5StWNhGFeVpogwS2FFl78wNDGW5NsVvlwySPEDU5w==}
 
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
@@ -1691,10 +1682,10 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+  react-dom@19.0.0-rc-fb9a90fa48-20240614:
+    resolution: {integrity: sha512-PoEsPe32F7KPLYOBvZfjylEI1B67N44PwY3lyvpmBkhlluLnLz0jH8q2Wg9YidAi6z0k3iUnNRm5x10wurzt9Q==}
     peerDependencies:
-      react: ^18.3.1
+      react: 19.0.0-rc-fb9a90fa48-20240614
 
   react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
@@ -1712,8 +1703,8 @@ packages:
     peerDependencies:
       react: ^16 || ^17 || ^18
 
-  react@18.3.1:
-    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+  react@19.0.0-rc-fb9a90fa48-20240614:
+    resolution: {integrity: sha512-nvE3Gy+IOIfH/DXhkyxFVQSrITarFcQz4+shzC/McxQXEUSonpw2oDy/Wi9hdDtV3hlP12VYuDL95iiBREedNQ==}
     engines: {node: '>=0.10.0'}
 
   read-cache@1.0.0:
@@ -1764,8 +1755,8 @@ packages:
     resolution: {integrity: sha512-CdASjNJPvRa7roO6Ra/gLYBTzYzzPyyBXxIMdGW3USQLyjWEls2RgW5UBTXaQVp+OrpeCK3bLem8smtmheoRuw==}
     engines: {node: '>= 0.4'}
 
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+  scheduler@0.25.0-rc-fb9a90fa48-20240614:
+    resolution: {integrity: sha512-HHqQ/SqbeiDfXXVKgNxTpbQTD4n7IUb4hZATvHjp03jr3TF7igehCyHdOjeYTrzIseLO93cTTfSb5f4qWcirMQ==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -2246,10 +2237,10 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@phosphor-icons/react@2.1.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@phosphor-icons/react@2.1.7(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)':
     dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      react-dom: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -2288,10 +2279,6 @@ snapshots:
   '@types/node@18.15.10': {}
 
   '@types/prop-types@15.7.13': {}
-
-  '@types/react-dom@18.3.1':
-    dependencies:
-      '@types/react': 18.3.12
 
   '@types/react-slider@1.3.6':
     dependencies:
@@ -2450,7 +2437,7 @@ snapshots:
   autoprefixer@10.4.20(postcss@8.4.49):
     dependencies:
       browserslist: 4.24.2
-      caniuse-lite: 1.0.30001680
+      caniuse-lite: 1.0.30001682
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
@@ -2492,7 +2479,7 @@ snapshots:
 
   browserslist@4.24.2:
     dependencies:
-      caniuse-lite: 1.0.30001680
+      caniuse-lite: 1.0.30001682
       electron-to-chromium: 1.5.63
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.2)
@@ -2513,7 +2500,7 @@ snapshots:
 
   camelcase-css@2.0.1: {}
 
-  caniuse-lite@1.0.30001680: {}
+  caniuse-lite@1.0.30001682: {}
 
   chalk@4.1.2:
     dependencies:
@@ -3015,12 +3002,12 @@ snapshots:
 
   flatted@3.3.2: {}
 
-  focus-trap-react@10.3.1(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  focus-trap-react@10.3.1(prop-types@15.8.1)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
       focus-trap: 7.6.2
       prop-types: 15.8.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      react-dom: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
       tabbable: 6.2.0
 
   focus-trap@7.6.2:
@@ -3421,17 +3408,17 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@15.0.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@15.0.3(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
       '@next/env': 15.0.3
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.13
       busboy: 1.6.0
-      caniuse-lite: 1.0.30001680
+      caniuse-lite: 1.0.30001682
       postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.6(react@18.3.1)
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      react-dom: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
+      styled-jsx: 5.1.6(react@19.0.0-rc-fb9a90fa48-20240614)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.0.3
       '@next/swc-darwin-x64': 15.0.3
@@ -3615,33 +3602,30 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  react-dom@18.3.1(react@18.3.1):
+  react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
-      loose-envify: 1.4.0
-      react: 18.3.1
-      scheduler: 0.23.2
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      scheduler: 0.25.0-rc-fb9a90fa48-20240614
 
   react-fast-compare@3.2.2: {}
 
   react-is@16.13.1: {}
 
-  react-player@2.16.0(react@18.3.1):
+  react-player@2.16.0(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
       deepmerge: 4.3.1
       load-script: 1.0.0
       memoize-one: 5.2.1
       prop-types: 15.8.1
-      react: 18.3.1
+      react: 19.0.0-rc-fb9a90fa48-20240614
       react-fast-compare: 3.2.2
 
-  react-slider@2.0.6(react@18.3.1):
+  react-slider@2.0.6(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
       prop-types: 15.8.1
-      react: 18.3.1
+      react: 19.0.0-rc-fb9a90fa48-20240614
 
-  react@18.3.1:
-    dependencies:
-      loose-envify: 1.4.0
+  react@19.0.0-rc-fb9a90fa48-20240614: {}
 
   read-cache@1.0.0:
     dependencies:
@@ -3705,9 +3689,7 @@ snapshots:
       es-errors: 1.3.0
       is-regex: 1.1.4
 
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
+  scheduler@0.25.0-rc-fb9a90fa48-20240614: {}
 
   semver@6.3.1: {}
 
@@ -3854,10 +3836,10 @@ snapshots:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.3.1
 
-  styled-jsx@5.1.6(react@18.3.1):
+  styled-jsx@5.1.6(react@19.0.0-rc-fb9a90fa48-20240614):
     dependencies:
       client-only: 0.0.1
-      react: 18.3.1
+      react: 19.0.0-rc-fb9a90fa48-20240614
 
   sucrase@3.35.0:
     dependencies:
