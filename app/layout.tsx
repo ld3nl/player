@@ -39,9 +39,9 @@ export const viewport = {
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="group">
       {/* The lang attribute helps set the language for the document (English in this case). */}
-      <body className="h-full">
+      <body className="group-has-open:overscroll-none group-has-open:overflow-hidden">
         {/* Render the children inside the <body> tag, with the full height applied via className. */}
         {children}
       </body>

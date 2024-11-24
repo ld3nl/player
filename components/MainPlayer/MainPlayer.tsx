@@ -400,7 +400,7 @@ const MainPlayer: FC<PlayerProps> = ({
 
                 <Button
                   onClick={handlePlayPause}
-                  className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  className="flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
                   ariaLabel={state.playing ? "Pause" : "Play"}
                 >
                   <Icon

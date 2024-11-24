@@ -11,6 +11,7 @@ import { INITIAL_STATE } from "@/lib/constants"; // Initial state for the player
 import { PlayerState, PlayerAction } from "@/lib/types"; // Types for player state and actions
 
 type MiniPlayerProps = {
+  className?: string;
   title?: string;
   imageSrc?: string;
   slug: string;
@@ -52,6 +53,7 @@ const fetchAudio = async (slug: string) => {
 };
 
 export default function MiniPlayer({
+  className,
   title,
   imageSrc,
   slug,
@@ -113,7 +115,10 @@ export default function MiniPlayer({
 
   return (
     <div
-      className={`fixed inset-x-5 bottom-0 flex ${state.isAnimatingOut ? "translate-y-0" : "translate-y-full"} items-end justify-between gap-4 rounded-t-xl bg-blue-400 p-4 text-xs text-white transition-transform`}
+      className={[
+        `fixed inset-x-5 bottom-0 flex items-end gap-4 rounded-t-xl bg-blue-400 p-4 text-xs text-white`,
+        className,
+      ].join(" ")}
     >
       {audio && (
         <ReactPlayer
@@ -136,7 +141,7 @@ export default function MiniPlayer({
       {imageSrc && (
         <img src={imageSrc} alt={title} className="size-16 rounded-lg" />
       )}
-      {title && <span className="text-gray-200">{title}</span>}
+      {title && <span className={["text-gray-200"].join(" ")}>{title}</span>}
       {children}
       <Button
         ariaLabel="Play"

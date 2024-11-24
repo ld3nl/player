@@ -41,21 +41,21 @@ const INITIAL_STATE_CATEGORY = {
   id: 0,
   title: "",
   slug: "",
-  isFavorite: false,
+  loading: true,
 };
 
 interface CategoryState {
   id: number;
   title: string;
   slug: string;
-  isFavorite: boolean;
+  loading: boolean;
 }
 
 type CategoryAction =
+  | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ID"; payload: number }
   | { type: "SET_SLUG"; payload: string }
-  | { type: "SET_TITLE"; payload: string }
-  | { type: "TOGGLE_FAVORITE" };
+  | { type: "SET_TITLE"; payload: string };
 
 function categoryReducer(
   state: CategoryState,
@@ -68,8 +68,8 @@ function categoryReducer(
       return { ...state, slug: action.payload };
     case "SET_TITLE":
       return { ...state, title: action.payload };
-    case "TOGGLE_FAVORITE":
-      return { ...state, isFavorite: !state.isFavorite };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
     default:
       return state;
   }
@@ -91,41 +91,41 @@ const CategoryAudioListing = ({
 
   // use state for now
   const [moreOptions, setMoreOptions] = useState(false);
-  const [moreOptionsAnimation, setMoreOptionAnimation] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setMoreOptionAnimation(true);
-    }, 300);
-  }, [moreOptions]);
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
   const handleClick = (val: { slug: string; title: any; id: number }) => {
-    dispatch({ type: "SET_ID", payload: val?.id });
-    dispatch({ type: "SET_SLUG", payload: val?.slug });
-    dispatch({ type: "SET_TITLE", payload: val?.title.rendered });
+    dispatch({ type: "SET_LOADING", payload: true });
+
+    setTimeout(() => {
+      dispatch({ type: "SET_ID", payload: val?.id });
+      dispatch({ type: "SET_SLUG", payload: val?.slug });
+      dispatch({ type: "SET_TITLE", payload: val?.title.rendered });
+      dispatch({ type: "SET_LOADING", payload: false });
+    }, 300);
+
     if (typeof callback === "function") {
       callback(val);
     }
   };
 
-  const toggleFavorite = () =>
-    // slug: number
-    {
-      // console.log("toggleFavorite", slug, state.slug);
-      dispatch({ type: "TOGGLE_FAVORITE" });
-      updateMediaState({
-        id: state.id,
-        isFavorite: !state.isFavorite,
-      });
-    };
+  const toggleFavorite = () => {
+    const isCurrentlyFavorite = mediaStates.some(
+      (val) =>
+        (val.id === state.id || val.slug === state.slug) && val.isFavorite,
+    );
+    updateMediaState({
+      id: state.id,
+      slug: state.slug,
+      isFavorite: !isCurrentlyFavorite,
+    });
+  };
 
   return (
     <div>
-      <ul>
+      <ul className="overscroll-none">
         {state?.slug}
         <h1>{state?.title}</h1>
         {posts.map((post: PostData, index) => {
@@ -176,6 +176,7 @@ const CategoryAudioListing = ({
                 className="my-auto ms-auto"
                 ariaLabel="More options"
                 onClick={() => setMoreOptions(true)}
+                popoverTarget="popover-more-options"
               >
                 {" "}
                 <DotsThreeVertical size={24} className="flex size-6" />
@@ -185,39 +186,49 @@ const CategoryAudioListing = ({
         })}
       </ul>
 
-      <MiniPlayer slug={state.slug} title={state.title}>
+      <MiniPlayer
+        slug={state.slug}
+        title={state.title}
+        className={[
+          `${!state.loading ? "translate-y-0" : "translate-y-full"}`,
+          `transition-discrete starting:translate-y-0 transition-transform delay-100 duration-300`,
+        ].join(" ")}
+      >
         <Button
-          ariaLabel="Play"
-          className="flex aspect-square size-9 items-center justify-center rounded-full bg-white"
-          onClick={
-            () => toggleFavorite()
-            // state.slug
-          }
+          ariaLabel="Favorite"
+          className="ms-auto flex aspect-square size-9 items-center justify-center rounded-full bg-white"
+          onClick={() => toggleFavorite()}
         >
-          {state.isFavorite ? (
-            <Heart size={18} color="hotpink" weight="fill" />
-          ) : (
-            <Heart size={18} color="hotpink" weight={"thin"} />
-          )}
+          <Heart
+            size={18}
+            color="hotpink"
+            weight={
+              mediaStates.some(
+                (val) =>
+                  (val.id === state.id || val.slug === state.slug) &&
+                  val.isFavorite,
+              )
+                ? "fill"
+                : "thin"
+            }
+          />
         </Button>
       </MiniPlayer>
 
       {moreOptions && (
         <div
-          className="fixed inset-0 flex backdrop-blur-sm"
-          onClick={() => setMoreOptions(false)}
+          popover={"auto"}
+          id="popover-more-options"
+          className={[
+            "mt-auto h-40 w-full rounded-t-xl bg-black text-white backdrop:bg-black/20 backdrop:backdrop-blur-sm",
+            "transition-discrete starting:open:translate-y-full  translate-y-full  transition-all duration-500 open:translate-y-0",
+          ].join(" ")}
         >
-          <div
-            className={`mt-auto h-40 w-full ${
-              moreOptionsAnimation ? "translate-y-0" : "translate-y-full"
-            } rounded-t-xl bg-black text-white transition-transform delay-300 `}
-          >
-            <ul>
-              <li>option 1</li>
-              <li>option 2</li>
-              <li>option 3</li>
-            </ul>
-          </div>
+          <ul>
+            <li>option 1</li>
+            <li>option 2</li>
+            <li>option 3</li>
+          </ul>
         </div>
       )}
     </div>

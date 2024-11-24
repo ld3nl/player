@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import CategoryAudioListing from "@/components/CategoryAudioListing/CategoryAudioListing";
 
-// Force dynamic rendering for real-time data
-export const dynamic = "force-dynamic";
+// // Force dynamic rendering for real-time data
+// export const dynamic = "force-dynamic";
 
-// Define proper types for params and searchParams
-// type Params = Promise<{ slug: string }>;
-// type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+// // Define proper types for params and searchParams
+// // type Params = Promise<{ slug: string }>;
+// // type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
