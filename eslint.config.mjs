@@ -1,4 +1,3 @@
-import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
@@ -14,16 +13,12 @@ const compat = new FlatCompat({
 
 export default [
   ...compat.extends(
-    "next",
-    "next/core-web-vitals",
     "eslint:recommended",
     "plugin:prettier/recommended",
-    "plugin:tailwindcss/recommended",
+    "plugin:@next/next/recommended",
   ),
   {
-    plugins: {
-      tailwindcss,
-    },
+    plugins: {},
 
     rules: {
       "@next/next/no-duplicate-head": "off",
