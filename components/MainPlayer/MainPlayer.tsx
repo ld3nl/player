@@ -9,6 +9,7 @@ import {
   lazy,
   useReducer,
   startTransition,
+  useRef,
 } from "react";
 import Image from "next/image";
 import he from "he";
@@ -32,7 +33,7 @@ import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard fo
 import Icon from "@/components/Icon/Icon"; // Reusable Icon component
 import Button from "@/components/Button/Button"; // Reusable Button component
 
-import { Duration } from "./Duration"; // Custom component to display audio duration
+import { Duration } from "../Duration/Duration"; // Custom component to display audio duration
 
 // React does not recognize the `fetchPriority` prop on a DOM element.
 // If you want it in the DOM, spell it as lowercase `fetchpriority`.
@@ -70,43 +71,20 @@ const MainPlayer: FC<PlayerProps> = ({
   closeModal,
   stateCallback,
 }) => {
-  // Destructure media item properties for easier access
-  const {
-    title,
-    src,
-    id,
-    link,
-    imageSrc,
-    playedSeconds,
-    duration,
-    isFavorite,
-  } = mediaItem;
+  const memoMediaItem = useMemo(() => ({ ...mediaItem }), [mediaItem]);
 
   const [state, dispatch] = useReducer(playerReducer, {
     ...INITIAL_STATE,
-    id: id || 0,
-    playedSeconds: playedSeconds || 0,
-    duration: duration || 0,
-    isFavorite: isFavorite || false,
+    id: memoMediaItem.id ?? INITIAL_STATE.id,
+    playedSeconds: memoMediaItem.playedSeconds ?? INITIAL_STATE.playedSeconds,
+    duration: memoMediaItem.duration ?? INITIAL_STATE.duration,
+    isFavorite: memoMediaItem.isFavorite ?? INITIAL_STATE.isFavorite,
   });
 
-  // Update ref handling
-  const [audioElement, setAudioElement] = useState<ReactPlayerType | null>(
-    null,
-  );
-
-  const audioRefCallback = useCallback((element: ReactPlayerType | null) => {
-    setAudioElement(element);
-    return () => setAudioElement(null);
-  }, []);
+  const audioRef = useRef<ReactPlayerType | null>(null);
 
   // Replace player ref usage
-  const player = audioElement;
-
-  // Optional: Add type guard for safer ref usage
-  const isReactPlayer = (ref: any): ref is ReactPlayerType => {
-    return ref && typeof ref.seekTo === "function";
-  };
+  // const player = audioRef?.current;
 
   // Manage server-side rendering (SSR) issues
   const [isSSR, setIsSSR] = useState(true);
@@ -125,11 +103,11 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Effect: Handles opening the modal when title and src are available
   useEffect(() => {
-    if (title && src) {
+    if (memoMediaItem.title && memoMediaItem.src) {
       dispatch({ type: "TOGGLE_MODAL", payload: true });
       handleOpen();
     }
-  }, [title, src, handleOpen]);
+  }, [memoMediaItem.title, memoMediaItem.src, handleOpen]);
 
   // Handle modal close with animation
   const handleClose = useCallback(() => {
@@ -150,7 +128,7 @@ const MainPlayer: FC<PlayerProps> = ({
   // Close modal on Escape key press
   useEffect(() => {
     if (!state.isOpen) {
-      if (isReactPlayer(player)) {
+      if (audioRef?.current) {
         handleStop(); // Stop playback if modal closes
       }
     }
@@ -170,7 +148,7 @@ const MainPlayer: FC<PlayerProps> = ({
         window.removeEventListener("keydown", handleKeyDown);
       }
     };
-  }, [state.isOpen, handleClose, handleStop, player, isReactPlayer]); // Dependencies ensure proper execution
+  }, [state.isOpen, handleClose, handleStop, audioRef?.current]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
@@ -178,21 +156,21 @@ const MainPlayer: FC<PlayerProps> = ({
   // Seek forward or backward by a specified number of seconds
   const handleSeekTo = useCallback(
     (action: "backward" | "forward", seconds: number) => {
-      if (!state.duration) return;
+      if (!state.duration || !state?.played) return;
       const sec = seconds / state.duration;
       const seekTo =
         action === "backward"
-          ? Math.max(state.played - sec, 0)
-          : state.played + sec;
+          ? Math.max(state?.played - sec, 0)
+          : state?.played + sec;
       dispatch({ type: "SEEK", payload: seekTo });
 
       // Safer ref usage with type guard
 
-      if (isReactPlayer(player)) {
-        player.seekTo(seekTo);
+      if (audioRef?.current) {
+        audioRef?.current.seekTo(seekTo);
       }
     },
-    [state.duration, state.played],
+    [state.duration, state?.played],
   );
 
   // Handle playback stop
@@ -212,8 +190,8 @@ const MainPlayer: FC<PlayerProps> = ({
   // Handle change in seek progress
   const handleSeekChange = debounce((value: number) => {
     dispatch({ type: "SEEK", payload: value });
-    if (isReactPlayer(player)) {
-      player?.seekTo(parseFloat(value.toString()));
+    if (audioRef?.current) {
+      audioRef?.current?.seekTo(parseFloat(value.toString()));
     }
   }, 300);
 
@@ -221,8 +199,8 @@ const MainPlayer: FC<PlayerProps> = ({
   const handleSeekMouseUp = (newValue: number) => {
     dispatch({ type: "SEEK", payload: newValue });
 
-    if (isReactPlayer(player)) {
-      player.seekTo(parseFloat(newValue.toString())); // Ensure valid number
+    if (audioRef?.current) {
+      audioRef?.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
     }
   };
 
@@ -253,7 +231,7 @@ const MainPlayer: FC<PlayerProps> = ({
     (updatedState: { played: number; playedSeconds: number }) => {
       const { played, playedSeconds } = updatedState;
       dispatch({ type: "SEEK", payload: played });
-      dispatch({ type: "SET_PLAYED_SECONDS", payload: playedSeconds });
+      // dispatch({ type: "SET_PLAYED_SECONDS", payload: playedSeconds });
 
       if (!state.seeking) {
         startTransition(() => {
@@ -271,8 +249,9 @@ const MainPlayer: FC<PlayerProps> = ({
   const handleDuration = useCallback(
     (duration: number) => {
       dispatch({ type: "SET_DURATION", payload: duration });
-      if (isReactPlayer(player)) {
-        player?.seekTo(state.playedSeconds, "seconds");
+
+      if (audioRef?.current && memoMediaItem.playedSeconds) {
+        audioRef?.current?.seekTo(memoMediaItem.playedSeconds, "seconds");
       }
     },
     [state.playedSeconds],
@@ -288,7 +267,7 @@ const MainPlayer: FC<PlayerProps> = ({
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
-            "fixed left-0 top-0 h-full w-full",
+            "fixed top-0 left-0 h-full w-full",
             "transition-all duration-500 ease-in-out",
             state.isOpen && !state.isAnimatingOut
               ? "translate-y-0 opacity-100"
@@ -300,10 +279,10 @@ const MainPlayer: FC<PlayerProps> = ({
         >
           {/* Close button */}
           {typeof closeModal !== "function" ? (
-            <div className="absolute right-0 top-0 z-50 w-full bg-black/50">
+            <div className="absolute top-0 right-0 z-50 w-full bg-black/50">
               <Link href="/">
                 <Button
-                  className="absolute left-0 top-0 w-12 p-3 text-white"
+                  className="absolute top-0 left-0 w-12 p-3 text-white"
                   ariaLabel="Go Back"
                 >
                   <Icon name={SVGIconName.ArrowLeft} />
@@ -311,9 +290,9 @@ const MainPlayer: FC<PlayerProps> = ({
               </Link>
             </div>
           ) : (
-            <div className={`absolute left-0 top-0 z-50 w-full bg-black/50`}>
+            <div className={`absolute top-0 left-0 z-50 w-full bg-black/50`}>
               <Button
-                className="absolute right-0 top-0 w-12 p-3 text-white"
+                className="absolute top-0 right-0 w-12 p-3 text-white"
                 onClick={handleClose}
                 ariaLabel="Close"
               >
@@ -326,12 +305,12 @@ const MainPlayer: FC<PlayerProps> = ({
           <div className="mx-auto flex w-96">
             <Image
               src={
-                imageSrc
-                  ? `https://www.paullowe.org/wp-content/uploads/${imageSrc}`
+                memoMediaItem.imageSrc
+                  ? `https://www.paullowe.org/wp-content/uploads/${memoMediaItem.imageSrc}`
                   : img
               }
-              width={imageSrc ? 400 : undefined}
-              height={imageSrc ? 400 : undefined}
+              width={memoMediaItem.imageSrc ? 400 : undefined}
+              height={memoMediaItem.imageSrc ? 400 : undefined}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
             />
@@ -340,16 +319,16 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Media Title */}
           {state?.duration !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
-              {title ? he.decode(title) : ""}
+              {memoMediaItem.title ? he.decode(memoMediaItem.title) : ""}
             </span>
           )}
 
           {/* Media Player */}
           {isSSR ? null : (
             <ReactPlayer
-              ref={audioRefCallback}
+              ref={audioRef}
               style={{ display: "none" }}
-              url={src}
+              url={memoMediaItem.src}
               pip={state.pip}
               playing={state.playing}
               controls={state.controls}
@@ -367,22 +346,28 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Slider for seeking */}
           {state?.duration !== 0 && (
             <div className="w-full space-y-2">
-              <div className="w-full">
-                <ReactSlider
-                  value={state.played * 100}
-                  step={0.000001}
-                  onChange={(e) => handleSeekChange(e / 100)}
-                  onAfterChange={(e) => handleSeekMouseUp(e / 100)}
-                  className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
-                  thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
-                  trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
-                />
+              <div className="min-h-4 w-full">
+                {state?.played && (
+                  <ReactSlider
+                    value={state?.played * 100}
+                    step={0.000001}
+                    onChange={(e) => handleSeekChange(e / 100)}
+                    onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+                    className={[
+                      "mx-10 h-1 cursor-pointer rounded-full bg-gray-300",
+                    ].join(" ")}
+                    thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
+                    trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
+                  />
+                )}
               </div>
 
-              <div className="mx-10 flex justify-between text-xs text-gray-400">
-                <Duration seconds={state?.duration * state.played} />
-                <Duration seconds={state?.duration * (1 - state.played)} />
-              </div>
+              {state?.played && (
+                <div className="mx-10 flex justify-between text-xs text-gray-400">
+                  <Duration seconds={state?.duration * state?.played} />
+                  <Duration seconds={state?.duration * (1 - state?.played)} />
+                </div>
+              )}
             </div>
           )}
 
@@ -439,11 +424,11 @@ const MainPlayer: FC<PlayerProps> = ({
               </button>
 
               <a
-                href={link}
+                href={memoMediaItem.link}
                 target="_blank"
                 className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
                 aria-label="Open link in new tab"
-                data-testid={link}
+                data-testid={memoMediaItem.link}
               >
                 <Icon
                   name={SVGIconName.Link}
@@ -454,9 +439,9 @@ const MainPlayer: FC<PlayerProps> = ({
                   }}
                 />
               </a>
-              {id && (
+              {memoMediaItem.id && (
                 <Link
-                  href={`/media/${id}`}
+                  href={`/media/${memoMediaItem.id}`}
                   className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
                 >
                   <Icon

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, useState } from "react";
+
 import he from "he";
 // import Link from "next/link";
 import {
@@ -13,6 +14,7 @@ import {
 import { useGetMediaState } from "@/lib/hooks";
 
 import Button from "@/components/Button/Button";
+import { Duration } from "@/components/Duration/Duration";
 import MiniPlayer from "@/components/MiniPlayer/MiniPlayer";
 
 // Type for the title object
@@ -117,6 +119,7 @@ const CategoryAudioListing = ({
         (val.id === state.id || val.slug === state.slug) && val.isFavorite,
     );
     updateMediaState({
+      ...mediaStates.find(({ id }) => id === state.id),
       id: state.id,
       slug: state.slug,
       isFavorite: !isCurrentlyFavorite,
@@ -129,6 +132,12 @@ const CategoryAudioListing = ({
         {state?.slug}
         <h1>{state?.title}</h1>
         {posts.map((post: PostData, index) => {
+          const currentItem = mediaStates.find((val) => val.id === post.id);
+          const { duration, playedSeconds, isFavorite } = currentItem || {
+            duration: 0,
+            isFavorite: false,
+          };
+
           return (
             // Each list item needs a unique key prop
             <li
@@ -152,24 +161,29 @@ const CategoryAudioListing = ({
                 {/* Displaying icons and duration using @phosphor-icons/react */}
                 <div className="flex items-center gap-1">
                   <Headphones size={24} className="flex size-6" />
-                  <span className="text-xs">01:20:22</span>
-                  <CheckCircle size={24} className="flex size-6" />
+
+                  {hasMounted && (
+                    <CheckCircle
+                      size={24}
+                      className="flex size-6"
+                      weight={duration === playedSeconds ? "fill" : "thin"}
+                    />
+                  )}
                   {hasMounted && (
                     <Heart
                       size={24}
                       className="flex"
                       color="hotpink"
-                      weight={
-                        mediaStates.some(
-                          (val) =>
-                            (val.id === post.id || val.slug === post.slug) &&
-                            val.isFavorite,
-                        )
-                          ? "fill"
-                          : "thin"
-                      }
+                      weight={isFavorite ? "fill" : "thin"}
                     />
                   )}
+                  <span className="flex w-20 justify-between text-xs">
+                    {hasMounted && playedSeconds && duration && (
+                      <Duration seconds={playedSeconds} />
+                    )}
+                    {hasMounted && playedSeconds && duration && " - "}
+                    {hasMounted && <Duration seconds={duration} />}
+                  </span>
                 </div>
               </Button>
               <Button
@@ -187,12 +201,27 @@ const CategoryAudioListing = ({
       </ul>
 
       <MiniPlayer
+        id={state.id}
         slug={state.slug}
         title={state.title}
         className={[
           `${!state.loading ? "translate-y-0" : "translate-y-full"}`,
-          `transition-discrete starting:translate-y-0 transition-transform delay-100 duration-300`,
+          `transition-transform transition-discrete delay-100 duration-300 starting:translate-y-0`,
         ].join(" ")}
+        getDuration={(duration) => {
+          updateMediaState({
+            ...mediaStates.find(({ id }) => id === state.id),
+            id: state.id,
+            duration,
+          });
+        }}
+        getProgress={(playedSeconds) => {
+          updateMediaState({
+            ...mediaStates.find(({ id }) => id === state.id),
+            id: state.id,
+            playedSeconds,
+          });
+        }}
       >
         <Button
           ariaLabel="Favorite"
@@ -221,7 +250,7 @@ const CategoryAudioListing = ({
           id="popover-more-options"
           className={[
             "mt-auto h-40 w-full rounded-t-xl bg-black text-white backdrop:bg-black/20 backdrop:backdrop-blur-sm",
-            "transition-discrete starting:open:translate-y-full  translate-y-full  transition-all duration-500 open:translate-y-0",
+            "translate-y-full transition-all transition-discrete duration-500 open:translate-y-0 starting:open:translate-y-full",
           ].join(" ")}
         >
           <ul>

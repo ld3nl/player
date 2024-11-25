@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { Suspense } from "react";
 import CategoryAudioListing from "@/components/CategoryAudioListing/CategoryAudioListing";
 
@@ -7,6 +8,37 @@ import CategoryAudioListing from "@/components/CategoryAudioListing/CategoryAudi
 // // Define proper types for params and searchParams
 // // type Params = Promise<{ slug: string }>;
 // // type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  console.log("resolvedParams", resolvedParams);
+  console.log("resolvedSearchParams", resolvedSearchParams);
+  const slug = resolvedParams?.slug;
+  const audioTitle = resolvedSearchParams?.audioTitle;
+
+  // Fetch the category data
+  const data = await fetchData(slug);
+
+  // Check if data is falsy
+  if (!data) {
+    return {
+      title: "Error loading category data",
+    };
+  }
+
+  // Return the metadata
+  return {
+    title: `${data.category?.name} ${audioTitle ? `| ${audioTitle}` : "| Category"}`,
+  };
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -77,7 +109,7 @@ export default async function CategoryPage({
 
   return (
     <div className="min-h-screen bg-cyan-950 px-5">
-      <h1 className="mb-1 text-base font-bold capitalize text-gray-400">
+      <h1 className="mb-1 text-base font-bold text-gray-400 capitalize">
         {data.category?.name}
       </h1>
       <Suspense fallback={<div>Loading posts...</div>}>

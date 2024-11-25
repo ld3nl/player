@@ -112,7 +112,7 @@ export default function Home({
   const modalFunction = useCallback(
     (post: any, currentItemState: MediaState) => {
       const { title, date, id, audioUrl, link } = post;
-
+      console.log("currentItemState", currentItemState);
       // Set the modal state with the selected item's details.
       setModal({
         isModalActive: true,

@@ -8,8 +8,9 @@ import { ReactNode } from "react"; // Import the ReactNode type for defining the
  * Includes title and description for SEO purposes.
  */
 export const metadata = {
-  title: "My App", // Default title for the application
-  description: "Welcome to my app", // Meta description for SEO and social media previews
+  title: "Paul Lowe Talks source https://www.paullowe.org", // Default title for the application
+  description:
+    "Paul Lowe Talks source https://www.paullowe.org, player stores your progress", // Meta description for SEO and social media previews
 };
 
 /**
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="group">
       {/* The lang attribute helps set the language for the document (English in this case). */}
-      <body className="group-has-open:overscroll-none group-has-open:overflow-hidden">
+      <body className="group-has-open:overflow-hidden group-has-open:overscroll-none">
         {/* Render the children inside the <body> tag, with the full height applied via className. */}
         {children}
       </body>

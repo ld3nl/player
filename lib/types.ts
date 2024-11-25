@@ -148,7 +148,7 @@ export interface SVGProps {
 // Making `className` optional allows flexibility in CSS handling
 export interface DurationProps {
   className?: string;
-  seconds: number;
+  seconds: number | undefined;
 }
 
 // Using union types for safety, especially with `null | undefined`
@@ -211,7 +211,7 @@ export interface PlayerState {
   light: boolean;
   playbackRate: number;
   loop: boolean;
-  played: number;
+  played?: number;
   seeking: boolean;
   isOpen: boolean;
   isAnimatingOut: boolean;
