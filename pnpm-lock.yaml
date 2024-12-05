@@ -87,9 +87,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.2
         version: 18.3.2
-      '@types/react-slider':
-        specifier: ^1.3.6
-        version: 1.3.6
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.49)
@@ -483,9 +480,6 @@ packages:
 
   '@types/react-dom@18.3.2':
     resolution: {integrity: sha512-Fqp+rcvem9wEnGr3RY8dYNvSQ8PoLqjZ9HLgaPUOjJJD120uDyOxOjc/39M4Kddp9JQCxpGQbnhVQF0C0ncYVg==}
-
-  '@types/react-slider@1.3.6':
-    resolution: {integrity: sha512-RS8XN5O159YQ6tu3tGZIQz1/9StMLTg/FCIPxwqh2gwVixJnlfIodtVx+fpXVMZHe7A58lAX1Q4XTgAGOQaCQg==}
 
   '@types/react@18.3.14':
     resolution: {integrity: sha512-NzahNKvjNhVjuPBQ+2G7WlxstQ+47kXZNHlUvFakDViuIEfGY926GqhMueQFZ7woG+sPiQKlF36XfrIUVSUfFg==}
@@ -1975,10 +1969,6 @@ snapshots:
   '@types/prop-types@15.7.14': {}
 
   '@types/react-dom@18.3.2':
-    dependencies:
-      '@types/react': 18.3.14
-
-  '@types/react-slider@1.3.6':
     dependencies:
       '@types/react': 18.3.14
 

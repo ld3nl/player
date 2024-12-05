@@ -13,6 +13,7 @@ import {
 } from "react";
 import Image from "next/image";
 import he from "he";
+
 import ReactSlider from "react-slider";
 import debounce from "lodash/debounce"; // Ensure correct lodash import
 
@@ -351,8 +352,8 @@ const MainPlayer: FC<PlayerProps> = ({
                   <ReactSlider
                     value={state?.played * 100}
                     step={0.000001}
-                    onChange={(e) => handleSeekChange(e / 100)}
-                    onAfterChange={(e) => handleSeekMouseUp(e / 100)}
+                    onChange={(e:any) => handleSeekChange(e / 100)}
+                    onAfterChange={(e:any) => handleSeekMouseUp(e / 100)}
                     className={[
                       "mx-10 h-1 cursor-pointer rounded-full bg-gray-300",
                     ].join(" ")}
