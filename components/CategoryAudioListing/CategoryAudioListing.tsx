@@ -178,11 +178,11 @@ const CategoryAudioListing = ({
                     />
                   )}
                   <span className="flex w-20 justify-between text-xs">
-                    {hasMounted && playedSeconds && duration && (
+                    {hasMounted && playedSeconds !== undefined && duration !== undefined && (
                       <Duration seconds={playedSeconds} />
                     )}
-                    {hasMounted && playedSeconds && duration && " - "}
-                    {hasMounted && <Duration seconds={duration} />}
+                    {hasMounted && playedSeconds !== undefined && duration !== undefined && " - "}
+                    {hasMounted && duration !== undefined && <Duration seconds={duration} />}
                   </span>
                 </div>
               </Button>
@@ -216,8 +216,10 @@ const CategoryAudioListing = ({
           });
         }}
         getProgress={(playedSeconds) => {
+          const existingMediaState = mediaStates.find(({ id }) => id === state.id) || {};
+
           updateMediaState({
-            ...mediaStates.find(({ id }) => id === state.id),
+            ...existingMediaState,
             id: state.id,
             playedSeconds,
           });

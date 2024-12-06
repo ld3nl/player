@@ -342,8 +342,8 @@ const MainPlayer: FC<PlayerProps> = ({
                   ? `https://www.paullowe.org/wp-content/uploads/${memoMediaItem.imageSrc}`
                   : img
               }
-              width={memoMediaItem.imageSrc ? 400 : undefined}
-              height={memoMediaItem.imageSrc ? 400 : undefined}
+              width={400}
+              height={400}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
             />
@@ -384,8 +384,14 @@ const MainPlayer: FC<PlayerProps> = ({
                   <ReactSlider
                     value={state?.played * 100}
                     step={0.000001}
-                    onChange={(e:any) => handleSeekChange(e / 100)}
-                    onAfterChange={(e:any) => handleSeekMouseUp(e / 100)}
+                    onChange={(e: number | number[]) => {
+                      const value = Array.isArray(e) ? e[0] : e;
+                      handleSeekChange(value / 100);
+                    }}
+                    onAfterChange={(e:number | number[]) => {
+                      const value = Array.isArray(e) ? e[0] : e;
+                      handleSeekMouseUp(value / 100)
+                    }}
                     className={[
                       "mx-10 h-1 cursor-pointer rounded-full bg-gray-300",
                     ].join(" ")}
