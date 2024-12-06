@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from "react"; // Import React and its hooks
 import Button from "@/components/Button/Button"; // Button component for interactions
-import Icon from "@/components/Icon/Icon"; // Icon component for rendering SVG icons
+// import Icon from "@/components/Icon/Icon"; // Icon component for rendering SVG icons
 import he from "he"; // Library for decoding HTML entities
 import debounce from "lodash/debounce"; // Debounce function to limit the rate of function calls
+
+import {
+  Heart,
+} from "@phosphor-icons/react";
 
 import { HeaderProps, SVGIconName } from "@/lib/types"; // Types for props and SVG icons
 import { DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants"; // Default constants
@@ -198,7 +202,7 @@ const Header: React.FC<HeaderProps> = ({
           aria-pressed={showFav} // ARIA attribute for accessibility
           ariaLabel={!showFav ? "Show Favorite Items" : "Show All Items"} // ARIA label for screen readers
         >
-          <Icon
+          {/* <Icon
             className="absolute left-0"
             name={SVGIconName.Favorite}
             size="sm"
@@ -207,6 +211,12 @@ const Header: React.FC<HeaderProps> = ({
               active: "fill-purple-600",
               default: "fill-white stroke-purple-600 stroke-2",
             }}
+          /> */}
+          <Heart
+            size={24}
+            className="flex size-6"
+            color={"var(--color-purple-600)"}
+            weight={showFav ? "fill" : "thin"}
           />
           <span>{!showFav ? "Show Favorite Items" : "Show All Items"}</span>
         </Button>

@@ -14,8 +14,13 @@ const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer")); // 
 
 import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
 import Button from "@/components/Button/Button"; // Button component for interactions
-import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
-import { SVGIconName } from "@/lib/types"; // SVG icon types
+// import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
+// import { SVGIconName } from "@/lib/types"; // SVG icon types
+
+import {
+  Heart,
+} from "@phosphor-icons/react";
+
 
 import { HomeProps, Modal, MediaState } from "@/lib/types"; // Type definitions for props and state
 
@@ -190,17 +195,18 @@ export default function Home({
                         isFavorite: !currentItemState.isFavorite,
                       });
                     }}
-                    className="w-10"
+                    className={"w-10 -cursor-pointer-"}
                     ariaLabel="Favorite"
                   >
-                    <Icon
-                      className="me-2.5 size-3"
-                      name={SVGIconName.Favorite}
-                      size={"sm"}
-                      variation={
-                        currentItemState.isFavorite ? "active" : "default"
-                      } // Change icon based on favorite status
+           
+
+                    <Heart
+                      size={24}
+                      className="flex size-6"
+                      color={"var(--color-purple-600)"}
+                      weight={currentItemState.isFavorite ? "fill" : "thin"}
                     />
+
                   </Button>
                 </AudioListing>
               );

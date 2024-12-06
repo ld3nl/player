@@ -2,6 +2,11 @@
 const path = require("path");
 
 const nextConfig = {
+  experimental: {
+    reactCompiler: {
+      compilationMode: 'annotation',
+    },
+  },  
   reactStrictMode: true,
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],

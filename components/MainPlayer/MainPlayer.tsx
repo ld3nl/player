@@ -20,7 +20,6 @@ import debounce from "lodash/debounce"; // Ensure correct lodash import
 import useLockScroll from "@/lib/hooks"; // Custom hook for locking scroll when modal is active
 import {
   PlayerProps,
-  SVGIconName,
   PlayerState,
   PlayerAction,
 } from "@/lib/types"; // Types for props and SVG icon names
@@ -31,8 +30,20 @@ import type { default as ReactPlayerType } from "react-player"; // Add type impo
 const ReactPlayer = lazy(() => import("react-player")); // Lazy load the ReactPlayer component
 import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard focus inside the modal
 
-import Icon from "@/components/Icon/Icon"; // Reusable Icon component
-import Button from "@/components/Button/Button"; // Reusable Button component
+
+import {
+  Heart,
+  LinkSimple,
+  LinkBreak,
+  Spinner,
+  ClockCounterClockwise,
+  ClockClockwise,
+  Pause,
+  Play,
+  ArrowArcLeft,
+  X,
+} from "@phosphor-icons/react";
+
 
 import { Duration } from "../Duration/Duration"; // Custom component to display audio duration
 
@@ -282,23 +293,34 @@ const MainPlayer: FC<PlayerProps> = ({
           {typeof closeModal !== "function" ? (
             <div className="absolute top-0 right-0 z-50 w-full bg-black/50">
               <Link href="/">
-                <Button
+                <button
                   className="absolute top-0 left-0 w-12 p-3 text-white"
-                  ariaLabel="Go Back"
+                  aria-label="Go Back"
                 >
-                  <Icon name={SVGIconName.ArrowLeft} />
-                </Button>
+                  {/* <Icon name={SVGIconName.ArrowLeft} /> */}
+                  <ArrowArcLeft
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+
+                </button>
               </Link>
             </div>
           ) : (
             <div className={`absolute top-0 left-0 z-50 w-full bg-black/50`}>
-              <Button
+              <button
                 className="absolute top-0 right-0 w-12 p-3 text-white"
                 onClick={handleClose}
-                ariaLabel="Close"
+                aria-label="Close"
               >
-                <Icon name={SVGIconName.Close} />
-              </Button>
+                {/* <Icon name={SVGIconName.Close} /> */}
+                <X
+                  size={48}
+                  className="flex size-6"
+                  color={"var(--color-white)"}
+                />
+              </button>
             </div>
           )}
 
@@ -376,32 +398,55 @@ const MainPlayer: FC<PlayerProps> = ({
           {state?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
-                <Button
+                <button
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel="Rewind 15 seconds"
+                  aria-label="Rewind 15 seconds"
                 >
-                  <Icon name={SVGIconName.BackwardRewind} size="twoThirds" />
-                </Button>
+                  {/* <Icon name={SVGIconName.BackwardRewind} size="twoThirds" /> */}
+                  <ClockCounterClockwise
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+                </button>
 
-                <Button
+                <button
                   onClick={handlePlayPause}
                   className="flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel={state.playing ? "Pause" : "Play"}
+                  aria-label={state.playing ? "Pause" : "Play"}
                 >
-                  <Icon
+                  {/* <Icon
                     name={state.playing ? SVGIconName.Pause : SVGIconName.Play}
                     size={"md"}
-                  />
-                </Button>
+                  /> */}
+                  {state.playing ? (
+                    <Pause
+                      size={48} 
+                      className="flex size-6"
+                      color={"var(--color-white)"}
+                    />
+                  ) : (
+                    <Play
+                      size={48}
+                      className="flex size-6"
+                      color={"var(--color-white)"}
+                    />
+                  )}
+                </button>
 
-                <Button
+                <button
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel="Fast forward 15 seconds"
+                  aria-label="Fast forward 15 seconds"
                 >
-                  <Icon name={SVGIconName.ForwardRewind} size="twoThirds" />
-                </Button>
+                  {/* <Icon name={SVGIconName.ForwardRewind} size="twoThirds" /> */}
+                  <ClockClockwise
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+                </button>
               </div>
             </div>
           )}
@@ -413,7 +458,7 @@ const MainPlayer: FC<PlayerProps> = ({
                 onClick={() => toggleFavorite()}
                 className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
-                <Icon
+                {/* <Icon
                   name={SVGIconName.Favorite}
                   size={"sm"}
                   variation={state.isFavorite ? "active" : "default"}
@@ -421,7 +466,14 @@ const MainPlayer: FC<PlayerProps> = ({
                     active: "fill-purple-600",
                     default: "fill-white stroke-purple-600 stroke-2",
                   }}
-                />
+                /> */}
+
+                <Heart
+                  size={48}
+                  className="flex size-6"
+                  color={"var(--color-purple-600)"}
+                  weight={state.isFavorite ? "fill" : "thin"}
+                />                
               </button>
 
               <a
@@ -431,27 +483,39 @@ const MainPlayer: FC<PlayerProps> = ({
                 aria-label="Open link in new tab"
                 data-testid={memoMediaItem.link}
               >
-                <Icon
+                {/* <Icon
                   name={SVGIconName.Link}
                   size="twoThirds"
                   customVariation={{
                     active: "fill-purple-600",
                     default: "fill-purple-600",
                   }}
-                />
+
+                /> */}
+
+                <LinkSimple                 size={48}
+                  className="flex size-6"
+                  color={"var(--color-purple-600)"}
+                />   
               </a>
               {memoMediaItem.id && (
                 <Link
                   href={`/media/${memoMediaItem.id}`}
                   className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
                 >
-                  <Icon
+                  {/* <Icon
                     name={SVGIconName.LinkSimple}
                     size="twoThirds"
                     customVariation={{
                       active: "fill-purple-600",
                       default: "fill-purple-600",
                     }}
+
+                  /> */}
+                  <LinkBreak
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-purple-600)"}
                   />
                 </Link>
               )}
@@ -461,12 +525,17 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Spinner icon when loading */}
           {state?.duration === 0 && (
             <div className="flex p-10">
-              <Icon
+              {/* <Icon
                 name={SVGIconName.Spinner}
                 customVariation={{
                   active: "fill-purple-600",
                   default: "fill-purple-600",
                 }}
+              /> */}
+              <Spinner
+                size={48}
+                className="flex size-6"
+                color={"var(--color-purple-600)"} 
               />
             </div>
           )}
