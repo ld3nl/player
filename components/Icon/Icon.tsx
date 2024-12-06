@@ -30,7 +30,15 @@ const Icon: React.FunctionComponent<IconProps> = ({
 
   // Adjust viewBox based on the specific icon name
   if (name === "Close") viewBox = "0 0 16 16";
-  if (name === "ForwardRewind" || name === "BackwardRewind" || name === "Link")
+  if (
+    name === "ForwardRewind" ||
+    name === "BackwardRewind" ||
+    name === "Link" ||
+    name === "LinkSimple" ||
+    name === "ArrowLeft" ||
+    name === "Headphones" ||
+    name === "CheckedCircle"
+  )
     viewBox = "0 0 256 256";
 
   if (name === "Spinner") {
@@ -40,9 +48,9 @@ const Icon: React.FunctionComponent<IconProps> = ({
 
   // Define the available sizes for the icon
   const sizes = {
-    sm: "h-8 w-8", // Small size (8x8)
-    md: "h-10 w-10", // Medium size (10x10)
-    twoThirds: "h-2/3 w-2/3", // Two-thirds size (relative to parent element)
+    sm: "size-8", // Small size (8x8)
+    md: "size-10", // Medium size (10x10)
+    twoThirds: "size-2/3", // Two-thirds size (relative to parent element)
   };
 
   // Render the icon using the appropriate SVG and styles
@@ -52,7 +60,7 @@ const Icon: React.FunctionComponent<IconProps> = ({
         className, // Apply additional classes if provided
         "relative", // Position relative to allow customizations
         customSize
-          ? `h-${customSize} w-${customSize}` // Custom size if provided
+          ? `size-${customSize}` // Custom size if provided
           : sizes[size as keyof typeof sizes], // Default size based on the "size" prop
       ].join(" ")}
     >

@@ -1,4 +1,4 @@
-import React from "react"; // Importing React for JSX support
+import { FC } from "react"; // Importing React for JSX support
 import { DurationProps } from "@/lib/types"; // Importing the type for the component's props
 
 /**
@@ -10,7 +10,7 @@ import { DurationProps } from "@/lib/types"; // Importing the type for the compo
  * - className: Custom class names for styling the <time> element.
  * - seconds: The duration in seconds to be formatted and displayed.
  */
-export const Duration: React.FC<DurationProps> = ({ className, seconds }) => {
+export const Duration: FC<DurationProps> = ({ seconds }) => {
   /**
    * Helper function to format time into "mm:ss" format.
    * Converts the given time (in seconds) to a string format representing minutes and seconds.
@@ -30,11 +30,12 @@ export const Duration: React.FC<DurationProps> = ({ className, seconds }) => {
     return value < 10 ? `0${value}` : `${value}`; // Pad value if it's less than 10
   };
 
+  if (typeof seconds === "undefined" || Number.isNaN(seconds) || seconds === 0)
+    return null; // Return null if seconds is not a valid number
+
   return (
     // Render the formatted duration within a <time> element for semantic HTML
-    <time dateTime={`P${Math.round(seconds)}S`} className={className}>
-      {format(seconds)}
-    </time>
+    <time dateTime={`P${Math.round(seconds)}S`}>{format(seconds)}</time>
   );
 };
 

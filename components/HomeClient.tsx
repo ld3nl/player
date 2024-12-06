@@ -14,8 +14,12 @@ const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer")); // 
 
 import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
 import Button from "@/components/Button/Button"; // Button component for interactions
-import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
-import { SVGIconName } from "@/lib/types"; // SVG icon types
+
+
+import {
+  Heart,
+} from "@phosphor-icons/react";
+
 
 import { HomeProps, Modal, MediaState } from "@/lib/types"; // Type definitions for props and state
 
@@ -111,14 +115,15 @@ export default function Home({
   // Function: Activates the modal and updates its state with selected post details.
   const modalFunction = useCallback(
     (post: any, currentItemState: MediaState) => {
-      const { title, date, id, audioUrl } = post;
-
+      const { title, date, id, audioUrl, link } = post;
+      console.log("currentItemState", currentItemState);
       // Set the modal state with the selected item's details.
       setModal({
         isModalActive: true,
         selectedItem: {
           title,
           date: date,
+          link,
           src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL
           id: id,
           playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Played seconds or default to 0
@@ -182,24 +187,25 @@ export default function Home({
                 >
                   <Button
                     onClick={() => {
-                      updateMediaState(
-                        currentItemState.id,
-                        currentItemState.playedSeconds,
-                        currentItemState.duration,
-                        !currentItemState.isFavorite,
-                      );
+                      updateMediaState({
+                        id: currentItemState.id,
+                        playedSeconds: currentItemState.playedSeconds,
+                        duration: currentItemState.duration,
+                        isFavorite: !currentItemState.isFavorite,
+                      });
                     }}
-                    className="w-10"
+                    className={"w-10 -cursor-pointer-"}
                     ariaLabel="Favorite"
                   >
-                    <Icon
-                      className="me-2.5 size-3"
-                      name={SVGIconName.Favorite}
-                      size={"sm"}
-                      variation={
-                        currentItemState.isFavorite ? "active" : "default"
-                      } // Change icon based on favorite status
+           
+
+                    <Heart
+                      size={24}
+                      className="flex size-6"
+                      color={"var(--color-purple-600)"}
+                      weight={currentItemState.isFavorite ? "fill" : "thin"}
                     />
+
                   </Button>
                 </AudioListing>
               );
@@ -214,7 +220,7 @@ export default function Home({
               closeModal={closeModal} // Function to close the modal
               stateCallback={(object) => {
                 const { id, playedSeconds, duration, isFavorite } = object;
-                updateMediaState(id, playedSeconds, duration, isFavorite);
+                updateMediaState({ id, playedSeconds, duration, isFavorite });
               }} // Callback for state changes
             />
           )}

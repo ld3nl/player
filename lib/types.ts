@@ -10,11 +10,11 @@ export interface PlayerProps {
     link?: string;
     date?: string;
     id?: number;
-    playedSeconds: number;
-    duration: number;
-    isFavorite: boolean;
+    playedSeconds?: number;
+    duration?: number;
+    isFavorite?: boolean;
   };
-  // eslint-disable-next-line no-unused-vars
+
   // setModalCallback: (modal: Modal) => void;
   setGlobalMediaState?: (
     // eslint-disable-next-line no-unused-vars
@@ -27,16 +27,15 @@ export interface PlayerProps {
     isFavorite: boolean,
   ) => void;
 
-  closeModal: () => void;
+  closeModal?: () => void;
   // eslint-disable-next-line no-unused-vars
   stateCallback?: (item: {
-    // eslint-disable-next-line no-unused-vars
     id: number;
-    // eslint-disable-next-line no-unused-vars
+
     playedSeconds: number;
-    // eslint-disable-next-line no-unused-vars
+
     duration: number;
-    // eslint-disable-next-line no-unused-vars
+
     isFavorite: boolean;
   }) => void;
 }
@@ -55,9 +54,9 @@ export type Modal = {
     id?: number;
     link?: string;
     date?: string;
-    playedSeconds: number;
-    duration: number;
-    isFavorite: boolean;
+    playedSeconds?: number;
+    duration?: number;
+    isFavorite?: boolean;
   };
 };
 
@@ -80,6 +79,10 @@ export enum SVGIconName {
   Favorite = "Favorite",
   Spinner = "Spinner",
   Link = "Link",
+  LinkSimple = "LinkSimple",
+  ArrowLeft = "ArrowLeft",
+  Headphones = "Headphones",
+  CheckedCircle = "CheckedCircle",
 }
 /* eslint-enable no-unused-vars */
 
@@ -107,11 +110,11 @@ export type Category = {
 export type AudioListingProps = {
   title: string;
   date: string;
-  // eslint-disable-next-line no-unused-vars
+
   // favoriteCallback?: (id?: number) => void; // Ensure consistency: id is a number
   categories?: Category[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
-  // eslint-disable-next-line no-unused-vars
+
   setModalCallback?: any;
   playedSeconds: number; // Explicitly typed, good for clarity.
   duration: number; // Explicitly typed, no issues here.
@@ -145,7 +148,7 @@ export interface SVGProps {
 // Making `className` optional allows flexibility in CSS handling
 export interface DurationProps {
   className?: string;
-  seconds: number;
+  seconds: number | undefined;
 }
 
 // Using union types for safety, especially with `null | undefined`
@@ -188,9 +191,10 @@ export type ValueSetter<T> = T | ((value: T) => T);
 
 export type MediaState = {
   id: number;
-  playedSeconds: number;
-  duration: number;
-  isFavorite: boolean;
+  slug?: string;
+  playedSeconds?: number;
+  duration?: number;
+  isFavorite?: boolean;
 };
 
 // TypeScript: Define the player state
@@ -207,7 +211,7 @@ export interface PlayerState {
   light: boolean;
   playbackRate: number;
   loop: boolean;
-  played: number;
+  played?: number;
   seeking: boolean;
   isOpen: boolean;
   isAnimatingOut: boolean;

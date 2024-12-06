@@ -45,7 +45,7 @@ export const INITIAL_STATE: PlayerState = {
   light: false,
   playbackRate: 1.0,
   loop: false,
-  played: 0,
+  // played: 0,
   seeking: false,
   isOpen: false,
   isAnimatingOut: false,

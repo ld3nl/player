@@ -5,7 +5,6 @@ module.exports = {
   },
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
@@ -19,7 +18,7 @@ module.exports = {
         "taller-than-854": { raw: "(min-height: 854px)" },
       },
       backgroundColor: {
-        "track-custom-1": "#e5e7eb", // This is the Tailwind CSS color code for bg-gray-300
+        "track-custom-1": "#e5e7eb",
       },
     },
   },

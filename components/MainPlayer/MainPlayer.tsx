@@ -1,40 +1,56 @@
+"use client"; // Ensures this is a client-side component in Next.js
+
 import {
   FC,
   useEffect,
   useState,
-  useRef,
   useCallback,
   useMemo,
   lazy,
   useReducer,
   startTransition,
+  useRef,
 } from "react";
 import Image from "next/image";
 import he from "he";
+
 import ReactSlider from "react-slider";
 import debounce from "lodash/debounce"; // Ensure correct lodash import
 
 import useLockScroll from "@/lib/hooks"; // Custom hook for locking scroll when modal is active
 import {
   PlayerProps,
-  SVGIconName,
   PlayerState,
   PlayerAction,
 } from "@/lib/types"; // Types for props and SVG icon names
 
 import { INITIAL_STATE } from "@/lib/constants"; // Initial state for the player
 
+import type { default as ReactPlayerType } from "react-player"; // Add type import
 const ReactPlayer = lazy(() => import("react-player")); // Lazy load the ReactPlayer component
 import FocusTrap from "focus-trap-react"; // Focus trap for handling keyboard focus inside the modal
 
-import Icon from "@/components/Icon/Icon"; // Reusable Icon component
-import Button from "@/components/Button/Button"; // Reusable Button component
 
-import { Duration } from "./Duration"; // Custom component to display audio duration
+import {
+  Heart,
+  LinkSimple,
+  LinkBreak,
+  Spinner,
+  ClockCounterClockwise,
+  ClockClockwise,
+  Pause,
+  Play,
+  ArrowArcLeft,
+  X,
+} from "@phosphor-icons/react";
+
+
+import { Duration } from "../Duration/Duration"; // Custom component to display audio duration
 
 // React does not recognize the `fetchPriority` prop on a DOM element.
 // If you want it in the DOM, spell it as lowercase `fetchpriority`.
 import img from "@/public/P1080841.jpg"; // Fallback image if no image source is provided
+import Link from "next/link";
 
 // Reducer function to handle state transitions
 function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
@@ -67,29 +83,20 @@ const MainPlayer: FC<PlayerProps> = ({
   closeModal,
   stateCallback,
 }) => {
-  // Destructure media item properties for easier access
-  const {
-    title,
-    src,
-    id,
-    link,
-    imageSrc,
-    playedSeconds,
-    duration,
-    isFavorite,
-  } = mediaItem;
+  const memoMediaItem = useMemo(() => ({ ...mediaItem }), [mediaItem]);
 
   const [state, dispatch] = useReducer(playerReducer, {
     ...INITIAL_STATE,
-    id: id || 0,
-    playedSeconds: playedSeconds || 0,
-    duration: duration || 0,
-    isFavorite: isFavorite || false,
+    id: memoMediaItem.id ?? INITIAL_STATE.id,
+    playedSeconds: memoMediaItem.playedSeconds ?? INITIAL_STATE.playedSeconds,
+    duration: memoMediaItem.duration ?? INITIAL_STATE.duration,
+    isFavorite: memoMediaItem.isFavorite ?? INITIAL_STATE.isFavorite,
   });
 
-  // Refs to handle the player and audio state
-  const playerRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<any>(null); // audioRef to interact with ReactPlayer
+  const audioRef = useRef<ReactPlayerType | null>(null);
+
+  // Replace player ref usage
+  // const player = audioRef?.current;
 
   // Manage server-side rendering (SSR) issues
   const [isSSR, setIsSSR] = useState(true);
@@ -108,16 +115,11 @@ const MainPlayer: FC<PlayerProps> = ({
 
   // Effect: Handles opening the modal when title and src are available
   useEffect(() => {
-    if (title && src) {
+    if (memoMediaItem.title && memoMediaItem.src) {
       dispatch({ type: "TOGGLE_MODAL", payload: true });
       handleOpen();
     }
-  }, [title, src, handleOpen]);
-
-  useEffect(() => {
-    console.log("isOpen:", state.isOpen);
-    console.log("isAnimatingOut:", state.isAnimatingOut);
-  }, [state.isOpen, state.isAnimatingOut]);
+  }, [memoMediaItem.title, memoMediaItem.src, handleOpen]);
 
   // Handle modal close with animation
   const handleClose = useCallback(() => {
@@ -130,10 +132,15 @@ const MainPlayer: FC<PlayerProps> = ({
     }, 500); // Animation duration for closing
   }, [closeModal]); // Add closeModal as a dependency if needed
 
+  // Memoize handleStop to use in useEffect
+  const handleStop = useCallback(() => {
+    dispatch({ type: "SET_PLAYING", payload: false });
+  }, []);
+
   // Close modal on Escape key press
   useEffect(() => {
     if (!state.isOpen) {
-      if (audioRef.current) {
+      if (audioRef?.current) {
         handleStop(); // Stop playback if modal closes
       }
     }
@@ -146,13 +153,14 @@ const MainPlayer: FC<PlayerProps> = ({
 
     if (state.isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      playerRef.current?.focus(); // Set focus on the player for accessibility
     }
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown); // Cleanup event listener
+      if (state.isOpen) {
+        window.removeEventListener("keydown", handleKeyDown);
+      }
     };
-  }, [state.isOpen, handleClose]); // Dependencies ensure proper execution
+  }, [state.isOpen, handleClose, handleStop, audioRef?.current]); // Dependencies ensure proper execution
 
   // Handle modal open with a delay for smooth rendering
   const [isDelayingOpen, setIsDelayingOpen] = useState(false);
@@ -160,22 +168,27 @@ const MainPlayer: FC<PlayerProps> = ({
   // Seek forward or backward by a specified number of seconds
   const handleSeekTo = useCallback(
     (action: "backward" | "forward", seconds: number) => {
-      if (!state.duration) return;
+      if (!state.duration || !state?.played) return;
       const sec = seconds / state.duration;
       const seekTo =
         action === "backward"
-          ? Math.max(state.played - sec, 0)
-          : state.played + sec;
+          ? Math.max(state?.played - sec, 0)
+          : state?.played + sec;
       dispatch({ type: "SEEK", payload: seekTo });
-      audioRef?.current?.seekTo(seekTo);
+
+      // Safer ref usage with type guard
+
+      if (audioRef?.current) {
+        audioRef?.current.seekTo(seekTo);
+      }
     },
-    [state.duration, state.played],
+    [state.duration, state?.played],
   );
 
   // Handle playback stop
-  const handleStop = () => {
-    dispatch({ type: "SET_PLAYING", payload: false });
-  };
+  // const handleStop = () => {
+  //   dispatch({ type: "SET_PLAYING", payload: false });
+  // };
 
   // Handle playback toggle between play/pause
   const handlePlay = () => {
@@ -189,15 +202,17 @@ const MainPlayer: FC<PlayerProps> = ({
   // Handle change in seek progress
   const handleSeekChange = debounce((value: number) => {
     dispatch({ type: "SEEK", payload: value });
-    audioRef.current?.seekTo(parseFloat(value.toString()));
+    if (audioRef?.current) {
+      audioRef?.current?.seekTo(parseFloat(value.toString()));
+    }
   }, 300);
 
   // Handle when the user stops seeking
   const handleSeekMouseUp = (newValue: number) => {
     dispatch({ type: "SEEK", payload: newValue });
 
-    if (audioRef.current) {
-      audioRef.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
+    if (audioRef?.current) {
+      audioRef?.current.seekTo(parseFloat(newValue.toString())); // Ensure valid number
     }
   };
 
@@ -206,7 +221,7 @@ const MainPlayer: FC<PlayerProps> = ({
     () =>
       debounce((newState) => {
         stateCallback?.(newState); // Call state update callback
-      }, 300),
+      }, 2000),
     [stateCallback],
   );
 
@@ -214,7 +229,16 @@ const MainPlayer: FC<PlayerProps> = ({
   const toggleFavorite = useCallback(() => {
     dispatch({ type: "TOGGLE_FAVORITE" });
 
-    debouncedUpdate({
+    // debouncedUpdate({
+    //   ...{
+    //     id: state.id,
+    //     playedSeconds: state.playedSeconds,
+    //     duration: state.duration,
+    //   },
+    //   isFavorite: !state.isFavorite,
+    // });
+
+    stateCallback?.({
       ...{
         id: state.id,
         playedSeconds: state.playedSeconds,
@@ -222,13 +246,14 @@ const MainPlayer: FC<PlayerProps> = ({
       },
       isFavorite: !state.isFavorite,
     });
+
   }, [state, debouncedUpdate]);
 
   const handleProgress = useCallback(
     (updatedState: { played: number; playedSeconds: number }) => {
       const { played, playedSeconds } = updatedState;
       dispatch({ type: "SEEK", payload: played });
-      dispatch({ type: "SET_PLAYED_SECONDS", payload: playedSeconds });
+      // dispatch({ type: "SET_PLAYED_SECONDS", payload: playedSeconds });
 
       if (!state.seeking) {
         startTransition(() => {
@@ -245,9 +270,11 @@ const MainPlayer: FC<PlayerProps> = ({
   // Handle when the media's total duration is available
   const handleDuration = useCallback(
     (duration: number) => {
-      console.log("Duration: ", duration);
       dispatch({ type: "SET_DURATION", payload: duration });
-      audioRef.current?.seekTo(state.playedSeconds, "seconds");
+
+      if (audioRef?.current && memoMediaItem.playedSeconds) {
+        audioRef?.current?.seekTo(memoMediaItem.playedSeconds, "seconds");
+      }
     },
     [state.playedSeconds],
   );
@@ -262,37 +289,61 @@ const MainPlayer: FC<PlayerProps> = ({
           className={[
             "flex flex-col items-center justify-center",
             "z-50 bg-black/50 backdrop-blur-lg backdrop-filter",
-            "fixed left-0 top-0 h-full w-full",
+            "fixed top-0 left-0 h-full w-full",
             "transition-all duration-500 ease-in-out",
             state.isOpen && !state.isAnimatingOut
               ? "translate-y-0 opacity-100"
               : "translate-y-full opacity-0",
           ].join(" ")}
-          ref={playerRef}
           tabIndex={0}
           role="dialog"
           aria-modal="true"
         >
           {/* Close button */}
-          <div className="absolute left-0 top-0 z-50 w-full bg-black/50">
-            <Button
-              className="absolute right-0 top-0 w-12 p-3 text-white"
-              onClick={handleClose}
-              ariaLabel="Close"
-            >
-              <Icon name={SVGIconName.Close} />
-            </Button>
-          </div>
+          {typeof closeModal !== "function" ? (
+            <div className="absolute top-0 right-0 z-50 w-full bg-black/50">
+              <Link href="/">
+                <button
+                  className="absolute top-0 left-0 w-12 p-3 text-white"
+                  aria-label="Go Back"
+                >
+                  {/* <Icon name={SVGIconName.ArrowLeft} /> */}
+                  <ArrowArcLeft
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className={`absolute top-0 left-0 z-50 w-full bg-black/50`}>
+              <button
+                className="absolute top-0 right-0 w-12 p-3 text-white"
+                onClick={handleClose}
+                aria-label="Close"
+              >
+                {/* <Icon name={SVGIconName.Close} /> */}
+                <X
+                  size={48}
+                  className="flex size-6"
+                  color={"var(--color-white)"}
+                />
+              </button>
+            </div>
+          )}
+
           {/* Media Image */}
           <div className="mx-auto flex w-96">
             <Image
               src={
-                imageSrc
-                  ? `https://www.paullowe.org/wp-content/uploads/${imageSrc}`
+                memoMediaItem.imageSrc
+                  ? `https://www.paullowe.org/wp-content/uploads/${memoMediaItem.imageSrc}`
                   : img
               }
-              width={imageSrc ? 400 : undefined}
-              height={imageSrc ? 400 : undefined}
+              width={400}
+              height={400}
               alt={"Nature Beach"}
               className="h-auto w-full object-cover"
             />
@@ -301,7 +352,7 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Media Title */}
           {state?.duration !== 0 && (
             <span className="my-3 block text-center text-sm text-gray-200">
-              {title ? he.decode(title) : ""}
+              {memoMediaItem.title ? he.decode(memoMediaItem.title) : ""}
             </span>
           )}
 
@@ -310,7 +361,7 @@ const MainPlayer: FC<PlayerProps> = ({
             <ReactPlayer
               ref={audioRef}
               style={{ display: "none" }}
-              url={src}
+              url={memoMediaItem.src}
               pip={state.pip}
               playing={state.playing}
               controls={state.controls}
@@ -328,22 +379,34 @@ const MainPlayer: FC<PlayerProps> = ({
           {/* Slider for seeking */}
           {state?.duration !== 0 && (
             <div className="w-full space-y-2">
-              <div className="w-full">
-                <ReactSlider
-                  value={state.played * 100}
-                  step={0.000001}
-                  onChange={(e) => handleSeekChange(e / 100)}
-                  onAfterChange={(e) => handleSeekMouseUp(e / 100)}
-                  className="mx-10 h-1 cursor-pointer rounded-full bg-gray-300"
-                  thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
-                  trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
-                />
+              <div className="min-h-4 w-full">
+                {state?.played ? (
+                  <ReactSlider
+                    value={state?.played * 100}
+                    step={0.000001}
+                    onChange={(e: number | number[]) => {
+                      const value = Array.isArray(e) ? e[0] : e;
+                      handleSeekChange(value / 100);
+                    }}
+                    onAfterChange={(e:number | number[]) => {
+                      const value = Array.isArray(e) ? e[0] : e;
+                      handleSeekMouseUp(value / 100)
+                    }}
+                    className={[
+                      "mx-10 h-1 cursor-pointer rounded-full bg-gray-300",
+                    ].join(" ")}
+                    thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
+                    trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
+                  />
+                ) : (<></>)}
               </div>
 
-              <div className="mx-10 flex justify-between text-xs text-gray-400">
-                <Duration seconds={state?.duration * state.played} />
-                <Duration seconds={state?.duration * (1 - state.played)} />
-              </div>
+              {state?.played ? (
+                <div className="mx-10 flex justify-between text-xs text-gray-400">
+                  <Duration seconds={state?.duration * state?.played} />
+                  <Duration seconds={state?.duration * (1 - state?.played)} />
+                </div>
+              ): (<></>)}
             </div>
           )}
 
@@ -351,32 +414,55 @@ const MainPlayer: FC<PlayerProps> = ({
           {state?.duration !== 0 && (
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center space-x-6">
-                <Button
+                <button
                   onClick={() => handleSeekTo("backward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel="Rewind 15 seconds"
+                  aria-label="Rewind 15 seconds"
                 >
-                  <Icon name={SVGIconName.BackwardRewind} size="twoThirds" />
-                </Button>
+                  {/* <Icon name={SVGIconName.BackwardRewind} size="twoThirds" /> */}
+                  <ClockCounterClockwise
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+                </button>
 
-                <Button
+                <button
                   onClick={handlePlayPause}
-                  className="mx-2 flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel={state.playing ? "Pause" : "Play"}
+                  className="flex size-12 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
+                  aria-label={state.playing ? "Pause" : "Play"}
                 >
-                  <Icon
+                  {/* <Icon
                     name={state.playing ? SVGIconName.Pause : SVGIconName.Play}
                     size={"md"}
-                  />
-                </Button>
+                  /> */}
+                  {state.playing ? (
+                    <Pause
+                      size={48} 
+                      className="flex size-6"
+                      color={"var(--color-white)"}
+                    />
+                  ) : (
+                    <Play
+                      size={48}
+                      className="flex size-6"
+                      color={"var(--color-white)"}
+                    />
+                  )}
+                </button>
 
-                <Button
+                <button
                   onClick={() => handleSeekTo("forward", 15)}
                   className="flex size-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700"
-                  ariaLabel="Fast forward 15 seconds"
+                  aria-label="Fast forward 15 seconds"
                 >
-                  <Icon name={SVGIconName.ForwardRewind} size="twoThirds" />
-                </Button>
+                  {/* <Icon name={SVGIconName.ForwardRewind} size="twoThirds" /> */}
+                  <ClockClockwise
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-white)"}
+                  />
+                </button>
               </div>
             </div>
           )}
@@ -388,7 +474,7 @@ const MainPlayer: FC<PlayerProps> = ({
                 onClick={() => toggleFavorite()}
                 className="flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
               >
-                <Icon
+                {/* <Icon
                   name={SVGIconName.Favorite}
                   size={"sm"}
                   variation={state.isFavorite ? "active" : "default"}
@@ -396,36 +482,76 @@ const MainPlayer: FC<PlayerProps> = ({
                     active: "fill-purple-600",
                     default: "fill-white stroke-purple-600 stroke-2",
                   }}
-                />
+                /> */}
+
+                <Heart
+                  size={48}
+                  className="flex size-6"
+                  color={"var(--color-purple-600)"}
+                  weight={state.isFavorite ? "fill" : "thin"}
+                />                
               </button>
 
               <a
-                href={link}
+                href={memoMediaItem.link}
                 target="_blank"
                 className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
                 aria-label="Open link in new tab"
+                data-testid={memoMediaItem.link}
               >
-                <Icon
+                {/* <Icon
                   name={SVGIconName.Link}
                   size="twoThirds"
                   customVariation={{
                     active: "fill-purple-600",
                     default: "fill-purple-600",
                   }}
-                />
+
+                /> */}
+
+                <LinkSimple                 size={48}
+                  className="flex size-6"
+                  color={"var(--color-purple-600)"}
+                />   
               </a>
+              {memoMediaItem.id && (
+                <Link
+                  href={`/media/${memoMediaItem.id}`}
+                  className="ms-8 flex size-8 items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+                >
+                  {/* <Icon
+                    name={SVGIconName.LinkSimple}
+                    size="twoThirds"
+                    customVariation={{
+                      active: "fill-purple-600",
+                      default: "fill-purple-600",
+                    }}
+
+                  /> */}
+                  <LinkBreak
+                    size={48}
+                    className="flex size-6"
+                    color={"var(--color-purple-600)"}
+                  />
+                </Link>
+              )}
             </div>
           )}
 
           {/* Spinner icon when loading */}
           {state?.duration === 0 && (
             <div className="flex p-10">
-              <Icon
+              {/* <Icon
                 name={SVGIconName.Spinner}
                 customVariation={{
                   active: "fill-purple-600",
                   default: "fill-purple-600",
                 }}
+              /> */}
+              <Spinner
+                size={48}
+                className="flex size-6"
+                color={"var(--color-purple-600)"} 
               />
             </div>
           )}

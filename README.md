@@ -146,16 +146,16 @@ To install and set up **Cypress** for both e2e and component testing:
 3. Configure Cypress for both e2e and component tests in `cypress.config.ts`:
 
    ```ts
-   import { defineConfig } from 'cypress';
+   import { defineConfig } from "cypress";
 
    export default defineConfig({
      e2e: {
-       baseUrl: 'http://localhost:3000',
+       baseUrl: "http://localhost:3000",
      },
      component: {
        devServer: {
-         framework: 'next',
-         bundler: 'webpack',
+         framework: "next",
+         bundler: "webpack",
        },
      },
    });
