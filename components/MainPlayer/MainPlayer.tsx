@@ -221,7 +221,7 @@ const MainPlayer: FC<PlayerProps> = ({
     () =>
       debounce((newState) => {
         stateCallback?.(newState); // Call state update callback
-      }, 300),
+      }, 1400),
     [stateCallback],
   );
 

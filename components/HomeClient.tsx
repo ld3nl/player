@@ -14,8 +14,7 @@ const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer")); // 
 
 import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
 import Button from "@/components/Button/Button"; // Button component for interactions
-// import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
-// import { SVGIconName } from "@/lib/types"; // SVG icon types
+
 
 import {
   Heart,
