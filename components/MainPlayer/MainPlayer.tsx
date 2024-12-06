@@ -221,7 +221,7 @@ const MainPlayer: FC<PlayerProps> = ({
     () =>
       debounce((newState) => {
         stateCallback?.(newState); // Call state update callback
-      }, 1400),
+      }, 2000),
     [stateCallback],
   );
 
@@ -229,7 +229,16 @@ const MainPlayer: FC<PlayerProps> = ({
   const toggleFavorite = useCallback(() => {
     dispatch({ type: "TOGGLE_FAVORITE" });
 
-    debouncedUpdate({
+    // debouncedUpdate({
+    //   ...{
+    //     id: state.id,
+    //     playedSeconds: state.playedSeconds,
+    //     duration: state.duration,
+    //   },
+    //   isFavorite: !state.isFavorite,
+    // });
+
+    stateCallback?.({
       ...{
         id: state.id,
         playedSeconds: state.playedSeconds,
@@ -237,6 +246,7 @@ const MainPlayer: FC<PlayerProps> = ({
       },
       isFavorite: !state.isFavorite,
     });
+
   }, [state, debouncedUpdate]);
 
   const handleProgress = useCallback(
@@ -370,7 +380,7 @@ const MainPlayer: FC<PlayerProps> = ({
           {state?.duration !== 0 && (
             <div className="w-full space-y-2">
               <div className="min-h-4 w-full">
-                {state?.played && (
+                {state?.played ? (
                   <ReactSlider
                     value={state?.played * 100}
                     step={0.000001}
@@ -382,15 +392,15 @@ const MainPlayer: FC<PlayerProps> = ({
                     thumbClassName="absolute -top-1 w-3 h-3 bg-purple-600 rounded-full shadow-lg cursor-grab"
                     trackClassName="h-1 bg-purple-600 rounded-full bg-track-custom"
                   />
-                )}
+                ) : (<></>)}
               </div>
 
-              {state?.played && (
+              {state?.played ? (
                 <div className="mx-10 flex justify-between text-xs text-gray-400">
                   <Duration seconds={state?.duration * state?.played} />
                   <Duration seconds={state?.duration * (1 - state?.played)} />
                 </div>
-              )}
+              ): (<></>)}
             </div>
           )}
 
