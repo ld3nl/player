@@ -66,17 +66,21 @@ export const useFilteredPosts = (
   const performFiltering = useCallback(() => {
     let newFilteredPosts = [...posts]; // Copy posts to avoid mutation
 
-    // Filter by favorites if any favorite items are selected
+    // Filter by favorites if any favorite items are selected.
+    // A Set makes each post id check O(1) instead of scanning the favorite list.
     if (favoriteItems.length > 0) {
+      const favoriteIdSet = new Set(favoriteItems);
       newFilteredPosts = newFilteredPosts.filter((post) =>
-        favoriteItems.includes(post.id),
+        favoriteIdSet.has(post.id),
       );
     }
 
-    // Filter by selected categories
+    // Filter by selected categories.
+    // Built once per filter pass because every post checks every one of its categories.
     if (categoryIds.length > 0) {
+      const categoryIdSet = new Set(categoryIds);
       newFilteredPosts = newFilteredPosts.filter((post) =>
-        post.categories.some((category) => categoryIds.includes(category.id)),
+        post.categories.some((category) => categoryIdSet.has(category.id)),
       );
     }
 

@@ -1,4 +1,4 @@
-import he from "he"; // Library for HTML entity encoding/decoding
+import { decode } from "he"; // Decode HTML entities using the package's ESM export
 import { useMemo } from "react"; // useMemo hook from React to memoize values
 import { AudioListingProps, Category } from "../../lib/types"; // Importing types for component props
 
@@ -24,13 +24,13 @@ const CategoryDisplay: React.FC<{
 
         return (
           <span
-            key={`category-${index}`} // Unique key for each category
+            key={category.id} // Keep category identity stable when reordered
             className="text-xs font-light italic text-slate-300"
           >
             {/* Add a separator between categories */}
             {index !== 0 && " / "}
             {/* Decode and display category name */}
-            {he.decode(category.name)}
+            {decode(category.name)}
           </span>
         );
       })}
@@ -97,9 +97,9 @@ const AudioListing: React.FC<AudioListingProps> = ({
   playedSeconds,
   duration,
 }) => {
-  // Memoize the formatted date to avoid recalculating on every render
+  // Use the same locale and timezone on the server and browser for hydration.
   const publishDate = useMemo(
-    () => new Date(date).toLocaleDateString("en-AU"),
+    () => new Date(date).toLocaleDateString("en-AU", { timeZone: "UTC" }),
     [date],
   );
 
@@ -117,21 +117,24 @@ const AudioListing: React.FC<AudioListingProps> = ({
       {children} {/* Render any passed children here */}
       <div
         className="w-full cursor-pointer"
+        role="button"
         onClick={() => {
           // Trigger modal callback if defined
           if (typeof setModalCallback === "function") setModalCallback();
         }}
-        onKeyDown={(event) =>
-          event.key === "Enter" &&
-          typeof setModalCallback === "function" &&
-          setModalCallback()
-        } // Handle Enter key for accessibility
+        onKeyDown={(event) => {
+          // Match native button activation and prevent Space from scrolling.
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setModalCallback?.();
+          }
+        }}
         tabIndex={0} // Make the element focusable
       >
         {/* Title */}
         {title && (
           <div>
-            <h2 className="mb-2">{he.decode(title)}</h2>{" "}
+            <h2 className="mb-2">{decode(title)}</h2>{" "}
             {/* Decode HTML entities in title */}
             {/* Render categories */}
             <CategoryDisplay categories={categories} />

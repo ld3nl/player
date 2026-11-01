@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+/* Load the existing custom theme and forms plugin with Tailwind 4. */
+@config "../../tailwind.config.js";
+
+/* Keep non-width queries out of the breakpoints used by the container utility. */
+@custom-variant narrow (@media (max-aspect-ratio: 3 / 2));
+@custom-variant wide (@media (min-aspect-ratio: 3 / 2));
+@custom-variant taller-than-854 (@media (min-height: 854px));
 
 @supports (font: -apple-system-body) and (-webkit-appearance: none) {
   img[loading="lazy"] {

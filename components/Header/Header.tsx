@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"; // Import React and its hooks
 import Button from "@/components/Button/Button"; // Button component for interactions
 import Icon from "@/components/Icon/Icon"; // Icon component for rendering SVG icons
-import he from "he"; // Library for decoding HTML entities
+import { decode } from "he"; // Decode HTML entities using the package's ESM export
 import debounce from "lodash/debounce"; // Debounce function to limit the rate of function calls
 
 import { HeaderProps, SVGIconName } from "@/lib/types"; // Types for props and SVG icons
@@ -178,11 +178,12 @@ const Header: React.FC<HeaderProps> = ({
           aria-label="Categories"
         >
           <option value="all">All</option>
-          {filteredCategoryList.filter(Boolean).map((category, index) => {
+          {filteredCategoryList.filter(Boolean).map((category) => {
             const { name, id } = category;
             return (
-              <option key={`category-${id}-${index}`} value={id}>
-                {he.decode(name)} {/* Decode category names for display */}
+              // Split category names share an id, so include their stable label.
+              <option key={`${id}-${name}`} value={id}>
+                {decode(name)} {/* Decode category names for display */}
               </option>
             );
           })}

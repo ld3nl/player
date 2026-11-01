@@ -1,4 +1,4 @@
-import LRUCache from "lru-cache"; // Importing LRUCache to manage in-memory caching for performance optimization
+import { LRUCache } from "lru-cache"; // Use the named export provided by lru-cache v11
 import {
   getAllPostsFromServer,
   getCategoryCount,

@@ -7,10 +7,11 @@ import {
   Suspense,
   useCallback,
   useMemo,
+  type JSX,
 } from "react"; // React hooks for state and side effects
-import { debounce } from "lodash"; // Utility to throttle search input
+import debounce from "lodash/debounce"; // Path import so the client bundle ships debounce only, not all of lodash
 import AudioListing from "@/components/AudioListing/AudioListing"; // Component to display individual audio posts
-const MainPlayer = lazy(() => import("@/components/MainPlayer/MainPlayer")); // Lazy load the MainPlayer component for better performance
+const MainPlayer = lazy(() => import("@/components/MainPlayer")); // Lazy load the MainPlayer component for better performance
 
 import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
 import Button from "@/components/Button/Button"; // Button component for interactions
