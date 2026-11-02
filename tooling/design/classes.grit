@@ -1,0 +1,12 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+// Fast editor feedback for raw spacing, radii and paint. The AST audit checks the
+// complete scale, including the explicitly reviewed player/viewport utilities.
+or {
+  JsxAttribute() as $value,
+  JsStringLiteralExpression() as $value
+} where {
+  $value <: r".*(?:\s|\"|'|:)(?:!?-?(?:p[xytrblse]?|m[ytrblse]?|gap(?:-[xy])?|rounded(?:-[a-z]+)?|bg|border(?:-[xytrblse])?|ring|outline|fill|stroke|decoration)-(?:\[|\()).*",
+  register_diagnostic(severity="error", span=$value, message="Use approved player spacing and palette utilities. Run bun run lint:design for the exact rule.")
+}

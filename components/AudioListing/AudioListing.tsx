@@ -1,94 +1,12 @@
-import { decode } from "he"; // Decode HTML entities using the package's ESM export
-import { useMemo } from "react"; // useMemo hook from React to memoize values
-import { AudioListingProps, Category } from "../../lib/types"; // Importing types for component props
+import { Button as HeadlessButton } from "@headlessui/react";
+import { PlayIcon } from "@phosphor-icons/react";
+import { cn } from "cnfast";
+import { decode } from "he";
+import { Duration } from "@/components/MainPlayer/Duration";
+import type { AudioListingProps } from "@/lib/types";
 
-/**
- * CategoryDisplay Component
- *
- * Renders a list of categories associated with an audio listing.
- * If no categories are provided, it returns null.
- * Props:
- * - categories: An array of Category objects.
- */
-const CategoryDisplay: React.FC<{
-  categories: Category[];
-}> = ({ categories }) => {
-  // Return null if there are no categories or if the array is empty
-  if (!categories || categories?.length === 0) return null;
-
-  return (
-    <span className="text-xs font-bold text-slate-300">
-      Categories:{" "}
-      {categories.map((category, index) => {
-        if (!category?.name) return null; // Skip categories with null/undefined names
-
-        return (
-          <span
-            key={category.id} // Keep category identity stable when reordered
-            className="text-xs font-light italic text-slate-300"
-          >
-            {/* Add a separator between categories */}
-            {index !== 0 && " / "}
-            {/* Decode and display category name */}
-            {decode(category.name)}
-          </span>
-        );
-      })}
-    </span>
-  );
-};
-
-/**
- * ProgressBar Component
- *
- * Renders an audio progress bar and displays the remaining time in "minutes:seconds" format.
- * Props:
- * - playedSeconds: Number of seconds already played.
- * - duration: Total duration of the audio in seconds.
- */
-const ProgressBar: React.FC<{ playedSeconds: number; duration: number }> = ({
-  playedSeconds,
-  duration,
-}) => {
-  // Calculate remaining time by subtracting playedSeconds from duration
-  const remainingTime = duration - playedSeconds;
-  // Convert remaining time into minutes and seconds
-  const remainingMinutes = Math.floor(remainingTime / 60);
-  const remainingSeconds = Math.floor(remainingTime % 60);
-
-  return (
-    <div>
-      {/* Progress bar container */}
-      <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-200">
-        {/* Progress bar itself, width is percentage of the played time */}
-        <div
-          className="h-1.5 rounded-full bg-purple-600 dark:bg-purple-500"
-          style={{ width: `${(playedSeconds / duration) * 100}%` }} // Calculate width as percentage
-        ></div>
-      </div>
-      {/* Display remaining time in "minutes:seconds" format */}
-      <span className="mb-2 text-xs text-slate-300">
-        {remainingMinutes}m {remainingSeconds.toString().padStart(2, "0")}s left
-      </span>
-    </div>
-  );
-};
-
-/**
- * AudioListing Component
- *
- * Renders a single audio listing item, including the title, publish date, categories, and progress bar.
- * Handles click events to trigger a modal via a callback.
- * Props:
- * - title: The title of the audio content.
- * - date: The publish date of the audio content.
- * - categories: An array of Category objects associated with the audio.
- * - setModalCallback: Callback function to trigger a modal.
- * - children: JSX elements to be rendered inside the component.
- * - playedSeconds: Number of seconds already played.
- * - duration: Total duration of the audio.
- */
-const AudioListing: React.FC<AudioListingProps> = ({
+// A single continuous list keeps long titles readable and topics easy to scan.
+const AudioListing = ({
   title,
   date,
   categories = [],
@@ -96,72 +14,111 @@ const AudioListing: React.FC<AudioListingProps> = ({
   children,
   playedSeconds,
   duration,
-}) => {
-  // Use the same locale and timezone on the server and browser for hydration.
-  const publishDate = useMemo(
-    () => new Date(date).toLocaleDateString("en-AU", { timeZone: "UTC" }),
-    [date],
-  );
-
-  // Boolean to check if the audio has been played (for conditionally rendering the progress bar)
-  const hasPlayed = playedSeconds > 0;
+}: AudioListingProps) => {
+  const has_progress =
+    Number.isFinite(duration) && duration > 0 && playedSeconds > 0;
+  const progress = has_progress
+    ? Math.min(100, Math.max(0, (playedSeconds / duration) * 100))
+    : 0;
+  const publish_date = new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const talk_title = decode(title).replace(/\s*\(audio\)\s*$/i, "");
 
   return (
-    // Main container for the audio listing with hover and focus effects
-    <div
-      className={[
-        "relative inline-flex w-full items-center border-b px-4 py-2 text-sm font-medium focus:z-10 focus:ring-2",
-        "border-gray-600 hover:bg-gray-600 hover:text-white focus:text-white focus:ring-gray-500",
-      ].join(" ")}
+    <li
+      className={cn(
+        "group flex items-center gap-1 border-b border-slate-200 py-2 first:pt-0 last:border-0 last:pb-0 sm:gap-4",
+      )}
     >
-      {children} {/* Render any passed children here */}
       <div
-        className="w-full cursor-pointer"
-        role="button"
-        onClick={() => {
-          // Trigger modal callback if defined
-          if (typeof setModalCallback === "function") setModalCallback();
-        }}
-        onKeyDown={(event) => {
-          // Match native button activation and prevent Space from scrolling.
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setModalCallback?.();
-          }
-        }}
-        tabIndex={0} // Make the element focusable
+        className={cn(
+          "relative flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-4 transition-colors hover:bg-slate-50 motion-reduce:transition-none sm:gap-5 sm:px-4 sm:py-5",
+        )}
       >
-        {/* Title */}
-        {title && (
-          <div>
-            <h2 className="mb-2">{decode(title)}</h2>{" "}
-            {/* Decode HTML entities in title */}
-            {/* Render categories */}
-            <CategoryDisplay categories={categories} />
-          </div>
-        )}
-
-        {/* Publish date */}
-        {publishDate && (
-          <p className="mb-2 text-xs text-slate-300">{publishDate}</p>
-        )}
-
-        {/* Progress bar */}
-        {hasPlayed && (
-          <ProgressBar playedSeconds={playedSeconds} duration={duration} />
-        )}
+        {/* The overlay keeps the heading semantic and the save button independent. */}
+        <HeadlessButton
+          type="button"
+          onClick={setModalCallback}
+          aria-label={`${has_progress && progress < 100 ? "Resume" : "Play"} ${talk_title}`}
+          className={cn(
+            "absolute inset-0 w-full cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 data-focus:outline-solid data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-purple-600",
+          )}
+        />
+        <span
+          className={cn(
+            "pointer-events-none grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:bg-purple-100 group-hover:text-purple-700 motion-reduce:transition-none",
+          )}
+        >
+          <PlayIcon
+            size={18}
+            weight="fill"
+            aria-hidden="true"
+            className={cn("ml-0.5")}
+          />
+        </span>
+        <div className={cn("min-w-0 flex-1")}>
+          <h3
+            className={cn(
+              "text-base font-semibold leading-snug tracking-tight text-slate-900 sm:text-lg",
+            )}
+          >
+            {talk_title}
+          </h3>
+          {categories.length > 0 && (
+            <p className={cn("mt-1.5 text-sm leading-relaxed text-slate-500")}>
+              {categories
+                .map((item) => decode(item.name).replaceAll("/", " / "))
+                .join(", ")}
+            </p>
+          )}
+          <time
+            dateTime={date}
+            className={cn("mt-2 block text-xs text-slate-500 sm:hidden")}
+          >
+            {publish_date}
+          </time>
+          {has_progress && (
+            <div className={cn("mt-3 flex max-w-sm items-center gap-3")}>
+              <div
+                className={cn(
+                  "h-1 flex-1 overflow-hidden rounded-full bg-slate-200",
+                )}
+                aria-hidden="true"
+              >
+                <div
+                  className={cn("h-full rounded-full bg-purple-700")}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span
+                className={cn("shrink-0 text-xs tabular-nums text-slate-500")}
+              >
+                {progress >= 99.5 ? (
+                  "Finished"
+                ) : (
+                  <>
+                    <Duration seconds={Math.max(0, duration - playedSeconds)} />{" "}
+                    left
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
+        <time
+          dateTime={date}
+          className={cn("hidden shrink-0 text-sm text-slate-500 sm:block")}
+        >
+          {publish_date}
+        </time>
       </div>
-    </div>
+      {children}
+    </li>
   );
 };
 
 export default AudioListing;
-
-/**
- * Possible Refactoring Ideas:
- * 1. **Memoization**: Consider memoizing the `CategoryDisplay` and `ProgressBar` components to avoid unnecessary re-renders if their props do not change.
- * 2. **Accessibility Improvements**: Add more ARIA attributes, such as `aria-labels` for interactive elements, and test for screen reader compatibility.
- * 3. **TypeScript Enhancement**: Use stronger TypeScript types for `setModalCallback` and `categories` to improve type safety.
- * 4. **Lazy Load Components**: For performance optimization, consider lazy loading the `ProgressBar` and `CategoryDisplay` components if they are only rendered conditionally.
- * 5. **Error Handling**: Add error handling for cases where the `date` or `duration` props might be undefined or invalid.
- */

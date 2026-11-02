@@ -10,6 +10,8 @@ export const reduce_player = (
       return { ...state, playing: action.payload };
     case "SET_PLAYED_SECONDS":
       return { ...state, playedSeconds: action.payload };
+    case "SET_PLAYBACK_RATE":
+      return { ...state, playbackRate: action.payload };
     case "SET_VOLUME":
       return { ...state, volume: action.payload };
     case "TOGGLE_FAVORITE":
@@ -18,12 +20,6 @@ export const reduce_player = (
       return { ...state, played: action.payload };
     case "SET_DURATION":
       return { ...state, duration: action.payload };
-    case "TOGGLE_MODAL":
-      return { ...state, isOpen: action.payload };
-    case "CLOSE_MODAL":
-      return { ...state, isOpen: false, isAnimatingOut: true };
-    case "ANIMATE_OUT":
-      return { ...state, isAnimatingOut: action.payload };
     default:
       return state;
   }

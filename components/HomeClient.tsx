@@ -1,234 +1,308 @@
-"use client"; // Ensures this is a client-side component in Next.js
+"use client";
 
+import { ArrowDownIcon, HeartIcon } from "@phosphor-icons/react";
+import { cn } from "cnfast";
 import {
-  useEffect,
-  useState,
   lazy,
   Suspense,
+  startTransition,
   useCallback,
+  useDeferredValue,
   useMemo,
-  type JSX,
-} from "react"; // React hooks for state and side effects
-import debounce from "lodash/debounce"; // Path import so the client bundle ships debounce only, not all of lodash
-import AudioListing from "@/components/AudioListing/AudioListing"; // Component to display individual audio posts
-const MainPlayer = lazy(() => import("@/components/MainPlayer")); // Lazy load the MainPlayer component for better performance
+  useState,
+  useSyncExternalStore,
+} from "react";
+import Button from "@/components/Button/Button";
+import Header from "@/components/Header/Header";
+import { TalkResults } from "@/components/Home/TalkResults";
+import { get_empty_state, get_talk_title } from "@/components/Home/utils";
+import { Welcome } from "@/components/Home/Welcome";
+import { DEFAULT_MODAL, DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
+import { useGetMediaState } from "@/lib/hooks";
+import type { HomeProps, homePost, MediaState, Modal } from "@/lib/types";
 
-import Header from "@/components/Header/Header"; // Header component for filtering, search, etc.
-import Button from "@/components/Button/Button"; // Button component for interactions
-import Icon from "@/components/Icon/Icon"; // Icon component for favorite button
-import { SVGIconName } from "@/lib/types"; // SVG icon types
+const MainPlayer = lazy(() => import("@/components/MainPlayer"));
 
-import { HomeProps, Modal, MediaState } from "@/lib/types"; // Type definitions for props and state
+// Browser-backed preferences enter only after the shared hydration snapshot.
+const subscribe_hydration = () => () => {};
+const get_client_snapshot = () => true;
+const get_server_snapshot = () => false;
 
-import { useFilteredPosts, useGetMediaState } from "@/lib/hooks"; // Custom hooks for managing media state and filtering posts
-
-import { DEFAULT_NUMBER_OF_POSTS, DEFAULT_MODAL } from "@/lib/constants"; // Default constants
-
-/**
- * Home Component: The main entry point for the homepage.
- * - Renders the list of audio posts.
- * - Handles filtering, search, favorites, and playback.
- * @param {HomeProps} props - The posts data, total number of posts, and categories.
- * @returns {JSX.Element} - The rendered Home page.
- */
-export default function Home({
-  posts,
-  totalPosts,
-  allCategories,
-}: HomeProps): JSX.Element {
-  // Custom hook to manage media playback states (e.g., isFavorite, playedSeconds, duration).
-  const { mediaStates, updateMediaState, favoriteIds } = useGetMediaState();
-
-  // Local state to manage loading UI.
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Effect: Stops loading once mediaStates are ready.
-  useEffect(() => {
-    if (mediaStates) {
-      setIsLoading(false); // Stop loading when mediaStates are available.
-    }
-  }, [mediaStates]); // Dependency: Re-run this effect when mediaStates change.
-
-  // State: Controls the number of posts to display.
-  const [numberOfPosts, setNumberOfPosts] = useState<number>(
-    DEFAULT_NUMBER_OF_POSTS,
+const Home = ({ posts, allCategories }: HomeProps) => {
+  const { mediaStates, updateMediaState } = useGetMediaState();
+  const is_hydrated = useSyncExternalStore(
+    subscribe_hydration,
+    get_client_snapshot,
+    get_server_snapshot,
   );
-
-  // State: Toggle to show only favorite items.
-  const [showFav, setShowFav] = useState<boolean>(false);
-
-  // State: Stores search terms for filtering posts.
-  const [searchTerms, setSearchTerms] = useState<string[]>([]);
-
-  // State: Stores selected category filters.
-  const [filteredCategory, setFilteredCategory] = useState<number[]>([]);
-
-  // State: Stores the modal state for displaying selected audio.
-  const [modal, setModal] = useState<Modal>(DEFAULT_MODAL);
-
-  // Custom hook to filter posts based on the current search, category, and favorite filters.
-  const { filteredPosts, filterPosts } = useFilteredPosts(
-    posts,
-    showFav ? favoriteIds : [],
-    searchTerms,
-    filteredCategory,
-  );
-
-  // Effect: Updates filtered posts whenever the category, favorites, or search terms change.
-  useEffect(() => {
-    filterPosts(); // Triggers post filtering based on current state.
-  }, [filterPosts, filteredCategory, showFav, searchTerms]); // Runs whenever these states change.
-
-  // Function: Toggles between all posts and favorite posts.
-  const toggleFavorites = useCallback(() => setShowFav((prev) => !prev), []);
-
-  // Function: Resets modal state when the modal is closed.
-  const closeModal = useCallback(() => setModal(DEFAULT_MODAL), []);
-
-  // Use useMemo to properly handle debounce function
-  const debouncedSearch = useMemo(
+  const [search, set_search] = useState("");
+  const deferred_search = useDeferredValue(search);
+  const [category, set_category] = useState<number | null>(null);
+  const [show_favorites, set_show_favorites] = useState(false);
+  const [visible_count, set_visible_count] = useState(DEFAULT_NUMBER_OF_POSTS);
+  const [modal, set_modal] = useState<Modal>(DEFAULT_MODAL);
+  const media_by_id = useMemo(
     () =>
-      debounce((search: string[]) => {
-        setSearchTerms(search); // Update search terms after debounce
-      }, 300), // 300ms debounce delay
-    [],
+      new Map(is_hydrated ? mediaStates.map((item) => [item.id, item]) : []),
+    [mediaStates, is_hydrated],
+  );
+  const favorite_count = posts.filter(
+    (post) => media_by_id.get(post.id)?.isFavorite,
+  ).length;
+
+  // Derived results avoid an extra effect/render and keep typing responsive.
+  const filtered_posts = useMemo(() => {
+    const terms = deferred_search
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    return posts.filter(
+      (post) =>
+        (!show_favorites || media_by_id.get(post.id)?.isFavorite) &&
+        (category === null ||
+          post.categories.some((item) => item.id === category)) &&
+        terms.every((term) => decode(post.title).toLowerCase().includes(term)),
+    );
+  }, [posts, deferred_search, category, show_favorites, media_by_id]);
+  const is_filtering = search !== deferred_search;
+  const has_filters = Boolean(search || category !== null);
+  const featured_post = posts[0];
+  const featured_state = featured_post
+    ? (media_by_id.get(featured_post.id) ?? get_empty_state(featured_post.id))
+    : null;
+
+  const change_search = (value: string) => {
+    set_search(value);
+    set_visible_count(DEFAULT_NUMBER_OF_POSTS);
+  };
+  const change_category = (value: number | null) =>
+    startTransition(() => {
+      set_category(value);
+      set_visible_count(DEFAULT_NUMBER_OF_POSTS);
+    });
+  const change_collection = (favorites: boolean) =>
+    startTransition(() => {
+      set_show_favorites(favorites);
+      set_visible_count(DEFAULT_NUMBER_OF_POSTS);
+    });
+  const reset_filters = () =>
+    startTransition(() => {
+      set_search("");
+      set_category(null);
+      set_show_favorites(false);
+      set_visible_count(DEFAULT_NUMBER_OF_POSTS);
+    });
+  const close_player = useCallback(() => set_modal(DEFAULT_MODAL), []);
+  const save_progress = useCallback(
+    (item: MediaState) =>
+      updateMediaState(
+        item.id,
+        item.playedSeconds,
+        item.duration,
+        item.isFavorite,
+      ),
+    [updateMediaState],
   );
 
-  // Clean up the debounced search on component unmount
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel(); // Cancel debounced function when component unmounts
-    };
-  }, [debouncedSearch]);
-
-  // Handle search input changes with debounce
-  const handleSearchChange = useCallback(
-    (search: string[]) => {
-      debouncedSearch(search); // Call the debounced search function
-    },
-    [debouncedSearch], // Add debouncedSearch as a dependency
-  );
-
-  // Function: Activates the modal and updates its state with selected post details.
-  const modalFunction = useCallback(
-    (post: any, currentItemState: MediaState) => {
-      const { title, date, id, audioUrl } = post;
-
-      // Set the modal state with the selected item's details.
-      setModal({
-        isModalActive: true,
-        selectedItem: {
-          title,
-          date: date,
-          src: `https://www.paullowe.org/wp-content/uploads/${audioUrl}`, // Full audio URL
-          id: id,
-          playedSeconds: currentItemState ? currentItemState.playedSeconds : 0, // Played seconds or default to 0
-          duration: currentItemState ? currentItemState.duration : 0, // Duration or default to 0
-          isFavorite: currentItemState ? currentItemState.isFavorite : false, // Favorite status or default to false
-        },
-      });
-    },
-    [setModal], // Dependencies: setModal to ensure it updates correctly
-  );
+  const open_player = (post: homePost, saved: MediaState) => {
+    set_modal({
+      isModalActive: true,
+      selectedItem: {
+        title: get_talk_title(post.title),
+        link: post.link,
+        imageSrc: post.imageUrl,
+        date: post.date,
+        src: /^https?:\/\//.test(post.audioUrl)
+          ? post.audioUrl
+          : `https://www.paullowe.org/wp-content/uploads/${post.audioUrl}`,
+        id: post.id,
+        playedSeconds: saved.playedSeconds,
+        duration: saved.duration,
+        isFavorite: saved.isFavorite,
+      },
+    });
+  };
 
   return (
-    <>
-      {/* Main layout wrapper */}
-      <div className="flex h-full flex-col">
-        {/* Header: Search, category filtering, and toggle favorites */}
-        <Header
-          totalPosts={totalPosts} // Total posts count for the header
-          numberOfPosts={numberOfPosts} // Number of posts currently displayed
-          setNumberOfPosts={setNumberOfPosts} // Function to set number of posts
-          handleSearchChange={handleSearchChange} // Callback for handling search input
-          handleCategoryChange={setFilteredCategory} // Callback for category filtering
-          toggleFavorites={toggleFavorites} // Function to toggle the favorites filter
-          showFav={showFav} // State controlling whether to show favorites
-          filteredCategoryList={allCategories} // List of all categories for filtering
-        />
+    <div className={cn("min-h-full bg-slate-50 text-slate-900")}>
+      {/* A quiet identity and one real listening invitation introduce the archive. */}
+      <Welcome
+        featured_post={featured_post}
+        featured_state={featured_state}
+        open_player={open_player}
+      />
 
-        {/* Posts List */}
-        <div className="border border-gray-600 bg-gray-700 text-white">
-          {/* Conditional rendering: Show posts when not loading */}
-          {!isLoading &&
-            filteredPosts &&
-            filteredPosts.slice(0, numberOfPosts).map((post) => {
-              const { title, date, id, categories, link } = post;
-
-              // Find the current media state for this post (or set defaults)
-              const currentItem = mediaStates.find((val) => val.id === id) || {
-                id,
-                playedSeconds: 0,
-                duration: 0,
-                isFavorite: false,
-              };
-
-              const currentItemState = {
-                id: currentItem.id,
-                playedSeconds: currentItem.playedSeconds || 0,
-                duration: currentItem.duration || 0,
-                isFavorite: currentItem.isFavorite || false,
-              };
-
-              return (
-                <AudioListing
-                  key={`item-${id}`} // Unique key for each post
-                  title={title} // Post title
-                  date={date} // Post date
-                  categories={categories} // Post categories
-                  link={link} // Post link
-                  playedSeconds={currentItemState.playedSeconds} // Played seconds of the audio
-                  duration={currentItemState.duration} // Duration of the audio
-                  setModalCallback={() => modalFunction(post, currentItemState)} // Function to open modal
-                >
-                  <Button
-                    onClick={() => {
-                      updateMediaState(
-                        currentItemState.id,
-                        currentItemState.playedSeconds,
-                        currentItemState.duration,
-                        !currentItemState.isFavorite,
-                      );
-                    }}
-                    className="w-10"
-                    ariaLabel="Favorite"
-                  >
-                    <Icon
-                      className="me-2.5 size-3"
-                      name={SVGIconName.Favorite}
-                      size={"sm"}
-                      variation={
-                        currentItemState.isFavorite ? "active" : "default"
-                      } // Change icon based on favorite status
-                    />
-                  </Button>
-                </AudioListing>
-              );
-            })}
-        </div>
-
-        {/* Conditional rendering: Show MainPlayer when modal is active */}
-        <Suspense fallback={<div>Loading...</div>}>
-          {modal?.selectedItem && modal.selectedItem.id !== 0 && (
-            <MainPlayer
-              mediaItem={modal.selectedItem} // Pass the selected media item to the player
-              closeModal={closeModal} // Function to close the modal
-              stateCallback={(object) => {
-                const { id, playedSeconds, duration, isFavorite } = object;
-                updateMediaState(id, playedSeconds, duration, isFavorite);
-              }} // Callback for state changes
-            />
+      {/* Browsing stays focused on titles; the filters remain within reach. */}
+      <main
+        id="talks"
+        tabIndex={-1}
+        className={cn(
+          "mx-auto max-w-6xl scroll-mt-6 px-4 py-8 outline-none sm:px-8 sm:py-12 lg:px-12",
+        )}
+      >
+        <div
+          className={cn(
+            "mb-6 flex flex-wrap items-center justify-between gap-5",
           )}
-        </Suspense>
-      </div>
-    </>
+        >
+          <div>
+            <h2
+              className={cn(
+                "text-2xl font-semibold tracking-tight sm:text-3xl",
+              )}
+            >
+              Explore the talks
+            </h2>
+            <p className={cn("mt-1.5 text-sm text-slate-500")}>
+              Follow a subject, or see what catches your attention.
+            </p>
+          </div>
+          <fieldset
+            aria-label="Talk collection"
+            className={cn(
+              "flex rounded-full border border-slate-200 bg-white p-1",
+            )}
+          >
+            <Button
+              size="label"
+              ariaLabel="All talks"
+              aria-pressed={!show_favorites}
+              onClick={() => change_collection(false)}
+              className={cn("rounded-full")}
+            >
+              All talks
+            </Button>
+            <Button
+              size="label"
+              ariaLabel="Favorites"
+              aria-pressed={show_favorites}
+              onClick={() => change_collection(true)}
+              className={cn("rounded-full")}
+            >
+              <HeartIcon
+                size={19}
+                weight={show_favorites ? "fill" : "regular"}
+                aria-hidden="true"
+              />
+              Favorites{" "}
+              <span className={cn("text-xs tabular-nums")}>
+                {favorite_count}
+              </span>
+            </Button>
+          </fieldset>
+        </div>
+        <Header
+          search={search}
+          category={category}
+          categories={allCategories}
+          change_search={change_search}
+          change_category={change_category}
+        />
+        <div
+          className={cn(
+            "flex min-h-16 flex-wrap items-center justify-between gap-2 py-3",
+          )}
+        >
+          <p
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className={cn("text-sm text-slate-500")}
+          >
+            {is_filtering
+              ? "Finding talks…"
+              : `${filtered_posts.length.toLocaleString("en-GB")} ${filtered_posts.length === 1 ? "talk" : "talks"}${show_favorites ? " in your favorites" : " to explore"}`}
+          </p>
+          {has_filters && (
+            <Button
+              size="label"
+              ariaLabel="Reset filters"
+              onClick={reset_filters}
+            >
+              Reset filters
+            </Button>
+          )}
+        </div>
+        <TalkResults
+          posts={filtered_posts}
+          visible_count={visible_count}
+          media_by_id={media_by_id}
+          show_favorites={show_favorites}
+          has_filters={has_filters}
+          is_filtering={is_filtering}
+          is_player_open={modal.isModalActive}
+          open_player={open_player}
+          save_progress={save_progress}
+          reset_filters={reset_filters}
+        />
+        {filtered_posts.length > 0 && (
+          <div className={cn("flex flex-col items-center gap-4 pt-7")}>
+            <p className={cn("text-xs tabular-nums text-slate-500")}>
+              Showing {Math.min(visible_count, filtered_posts.length)} of{" "}
+              {filtered_posts.length} talks
+            </p>
+            {visible_count < filtered_posts.length && (
+              <Button
+                variant="secondary"
+                size="label"
+                ariaLabel="Load more talks"
+                onClick={() =>
+                  startTransition(() =>
+                    set_visible_count(
+                      (count) => count + DEFAULT_NUMBER_OF_POSTS,
+                    ),
+                  )
+                }
+              >
+                Load more talks
+                <ArrowDownIcon size={18} aria-hidden="true" />
+              </Button>
+            )}
+          </div>
+        )}
+      </main>
+      <footer
+        className={cn(
+          "mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 pb-8 pt-6 text-xs leading-relaxed text-slate-500 sm:px-8 lg:px-12",
+        )}
+      >
+        <p>Paul Lowe Talks</p>
+        <p>
+          Audio from{" "}
+          <a
+            href="https://www.paullowe.org/"
+            className={cn(
+              "rounded underline decoration-slate-300 underline-offset-4 hover:text-purple-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple-600",
+            )}
+          >
+            paullowe.org
+          </a>
+          . Favorites and listening progress stay in this browser.
+        </p>
+      </footer>
+      <Suspense
+        fallback={
+          <div
+            role="status"
+            className={cn(
+              "fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-white px-5 py-3 text-sm text-slate-700 shadow-lg",
+            )}
+          >
+            Opening player…
+          </div>
+        }
+      >
+        {modal.isModalActive && modal.selectedItem && (
+          <MainPlayer
+            mediaItem={modal.selectedItem}
+            closeModal={close_player}
+            stateCallback={save_progress}
+          />
+        )}
+      </Suspense>
+    </div>
   );
-}
+};
 
-/**
- * Possible Refactoring Ideas:
- * 1. **Lazy Loading Components**: Lazy load additional components like `Header` and `AudioListing` to further optimize performance.
- * 2. **Error Handling**: Implement better error handling for when posts fail to load, and show fallback content or error messages.
- * 3. **React Query or SWR**: Replace custom hooks for filtering and search with React Query or SWR for more robust state and cache management.
- * 4. **Accessibility**: Enhance accessibility by ensuring all interactive elements, such as buttons and icons, have appropriate ARIA labels.
- */
+export default Home;

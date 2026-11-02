@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes } from "react";
 
 // Consider how many optional props you're passing for component clarity
 export interface PlayerProps {
@@ -41,11 +41,6 @@ export interface PlayerProps {
   }) => void;
 }
 
-export type GlobalContextValue = {
-  isModalActive: boolean;
-  selectedItem: { title: string; date: string; src: string; id: number };
-};
-
 export type Modal = {
   isModalActive: boolean;
   selectedItem?: {
@@ -69,33 +64,6 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClick?: () => void;
 }
 
-// Using a centralized enum for icon names to avoid typos
-/* eslint-disable no-unused-vars */
-export enum SVGIconName {
-  Play = "Play",
-  ForwardRewind = "ForwardRewind",
-  BackwardRewind = "BackwardRewind",
-  Pause = "Pause",
-  Close = "Close",
-  Favorite = "Favorite",
-  Spinner = "Spinner",
-  Link = "Link",
-}
-/* eslint-enable no-unused-vars */
-
-// Ensuring Size and Variation are properly used across the codebase
-export type Size = "sm" | "md" | "twoThirds";
-export type Variation = "active" | "default";
-
-export interface IconProps {
-  className?: string;
-  name: SVGIconName; // Made `name` required, good decision.
-  size?: Size; // Refactored into reusable type alias, very DRY approach.
-  variation?: Variation; // Refactored into reusable type alias, again good for DRY.
-  customVariation?: { active: string; default: string };
-  customSize?: string;
-}
-
 // Using utility type Partial for flexibility with many nullable or optional fields
 export type Category = {
   id: number;
@@ -112,34 +80,19 @@ export type AudioListingProps = {
   categories?: Category[]; // Changed to `Category[]` for better type safety, good practice.
   link: string;
   // eslint-disable-next-line no-unused-vars
-  setModalCallback?: any;
+  setModalCallback?: () => void;
   playedSeconds: number; // Explicitly typed, good for clarity.
   duration: number; // Explicitly typed, no issues here.
   children?: React.ReactNode;
 };
 
-// Explicitly typed for better clarity
-export type Progress = {
-  playedSeconds: number; // Explicitly typed, good for clarity.
-  duration: number; // Explicitly typed, no issues here.
-};
-
 // Using a context provider in React could simplify prop drilling in future
 export interface HeaderProps {
-  totalPosts: number;
-  numberOfPosts: number;
-  setNumberOfPosts: React.Dispatch<React.SetStateAction<number>>;
-  // eslint-disable-next-line no-unused-vars
-  handleSearchChange: (search: string[]) => void;
-  handleCategoryChange: React.Dispatch<React.SetStateAction<number[]>>;
-  toggleFavorites: () => void;
-  showFav: boolean;
-  filteredCategoryList: Category[];
-}
-
-// Making SVGProps extendable for future customizations
-export interface SVGProps {
-  name: SVGIconName; // Simplistic but effective, works well.
+  search: string;
+  category: number | null;
+  categories: Category[];
+  change_search: (value: string) => void;
+  change_category: (value: number | null) => void;
 }
 
 // Making `className` optional allows flexibility in CSS handling
@@ -157,7 +110,25 @@ export type homePost = {
   date: string;
   categories: Category[]; // Updated for better type safety
   link: string;
-  newStructure?: any;
+  newStructure?: ApiPost;
+};
+
+// The API uses normalized field names while the UI keeps its existing post shape.
+export type ApiPost = {
+  id: number;
+  title: string;
+  audio_url: string;
+  image_url: string;
+  published_at: string;
+  categories: Category[];
+  link: string;
+};
+
+type Pagination = {
+  current_page: number;
+  total_pages: number;
+  per_page: number;
+  total_posts: number;
 };
 
 // Consistent usage of `Category[]` is the best approach here
@@ -166,8 +137,14 @@ export type HomeProps = {
   totalPosts: number;
   allCategories: Category[]; // Updated for better type safety
   // Refactoring
-  postNewStructure?: any;
-  pagination?: any;
+  postNewStructure?: ApiPost[];
+  pagination?: Pagination;
+};
+
+// Every fresh server result includes the API payload and pagination.
+export type PostsData = HomeProps & {
+  postNewStructure: ApiPost[];
+  pagination: Pagination;
 };
 
 // Using utility types like `Pick` or `Omit` for deeply nested fields
@@ -182,9 +159,6 @@ export interface Post {
   date: string;
   link: string;
 }
-
-// eslint-disable-next-line no-unused-vars
-export type ValueSetter<T> = T | ((value: T) => T);
 
 export type MediaState = {
   id: number;
@@ -209,8 +183,6 @@ export interface PlayerState {
   loop: boolean;
   played: number;
   seeking: boolean;
-  isOpen: boolean;
-  isAnimatingOut: boolean;
 }
 
 // TypeScript: Define action types
@@ -218,9 +190,7 @@ export type PlayerAction =
   | { type: "SET_PLAYING"; payload: boolean }
   | { type: "SET_PLAYED_SECONDS"; payload: number }
   | { type: "SET_VOLUME"; payload: number }
+  | { type: "SET_PLAYBACK_RATE"; payload: number }
   | { type: "TOGGLE_FAVORITE" }
   | { type: "SEEK"; payload: number }
-  | { type: "SET_DURATION"; payload: number }
-  | { type: "TOGGLE_MODAL"; payload: boolean }
-  | { type: "CLOSE_MODAL" }
-  | { type: "ANIMATE_OUT"; payload: boolean };
+  | { type: "SET_DURATION"; payload: number };

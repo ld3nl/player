@@ -1,0 +1,8 @@
+language css
+
+// Shared stateful controls belong in @layer components. Validate their exact
+// palette and geometry with check.ts; do not replace them with utility aliases.
+CssAtRule() as $rule where {
+  $rule <: r"^@(?:apply|utility)\b.*",
+  register_diagnostic(severity="error", span=$rule, message="Use Tailwind classes in JSX or shared component CSS instead of @apply/@utility aliases.")
+}

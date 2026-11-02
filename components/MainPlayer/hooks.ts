@@ -1,3 +1,5 @@
+import debounce from "lodash/debounce";
+import type { SyntheticEvent } from "react";
 import {
   startTransition,
   useCallback,
@@ -5,13 +7,9 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
 } from "react";
-import type { Dispatch, SyntheticEvent } from "react";
-import debounce from "lodash/debounce";
-import useLockScroll from "@/lib/hooks";
 import { INITIAL_STATE } from "@/lib/constants";
-import type { MediaState, PlayerAction, PlayerProps } from "@/lib/types";
+import type { MediaState, PlayerProps } from "@/lib/types";
 import { reduce_player } from "./utils";
 
 // Own playback state and translate media events into persisted progress.
@@ -25,8 +23,13 @@ export const usePlayerPlayback = (
     playedSeconds: mediaItem.playedSeconds || 0,
     duration: mediaItem.duration || 0,
     isFavorite: mediaItem.isFavorite || false,
+    played:
+      mediaItem.duration > 0
+        ? Math.min(1, Math.max(0, mediaItem.playedSeconds / mediaItem.duration))
+        : 0,
   });
   const audioRef = useRef<HTMLVideoElement>(null);
+  const isSeekingRef = useRef(false);
 
   const update_media = useMemo(
     () => debounce((nextState: MediaState) => stateCallback?.(nextState), 300),
@@ -47,11 +50,14 @@ export const usePlayerPlayback = (
     [state.duration],
   );
 
-  const change_seek = useMemo(() => debounce(seek_media, 300), [seek_media]);
-  useEffect(() => () => change_seek.cancel(), [change_seek]);
+  // Preview every movement immediately; commit the media seek on release.
+  const change_seek = (fraction: number) => {
+    isSeekingRef.current = true;
+    dispatch({ type: "SEEK", payload: Math.min(Math.max(fraction, 0), 1) });
+  };
 
   const finish_seek = (fraction: number) => {
-    change_seek.cancel(); // A pending drag update must not override the release.
+    isSeekingRef.current = false;
     seek_media(fraction);
   };
 
@@ -62,6 +68,9 @@ export const usePlayerPlayback = (
   };
 
   const play_media = () => dispatch({ type: "SET_PLAYING", payload: true });
+  const pause_media = () => dispatch({ type: "SET_PLAYING", payload: false });
+  const change_rate = (rate: number) =>
+    dispatch({ type: "SET_PLAYBACK_RATE", payload: rate });
   const toggle_playback = () =>
     dispatch({ type: "SET_PLAYING", payload: !state.playing });
 
@@ -72,6 +81,8 @@ export const usePlayerPlayback = (
 
   // ReactPlayer v3 exposes an HTML media element and native media events.
   const update_progress = (event: SyntheticEvent<HTMLVideoElement>) => {
+    // Playback events must not move the preview while the user is scrubbing.
+    if (isSeekingRef.current) return;
     const { currentTime, duration } = event.currentTarget;
     const played = duration > 0 ? currentTime / duration : 0;
     dispatch({ type: "SEEK", payload: played });
@@ -97,58 +108,11 @@ export const usePlayerPlayback = (
     finish_seek,
     skip_media,
     play_media,
+    pause_media,
+    change_rate,
     toggle_playback,
     toggle_favorite,
     update_progress,
     load_media,
   };
-};
-
-// Own the modal lifecycle, including animation timers, focus, and Escape.
-export const usePlayerModal = (
-  mediaItem: PlayerProps["mediaItem"],
-  isOpen: boolean,
-  isAnimatingOut: boolean,
-  dispatch: Dispatch<PlayerAction>,
-  closeModal: PlayerProps["closeModal"],
-) => {
-  const { title, src } = mediaItem;
-  const playerRef = useRef<HTMLDivElement>(null);
-  const [isDelayingOpen, setIsDelayingOpen] = useState(false);
-  useLockScroll(isOpen);
-
-  useEffect(() => {
-    if (!title || !src) return;
-    dispatch({ type: "TOGGLE_MODAL", payload: true });
-    setIsDelayingOpen(true);
-    const openTimer = setTimeout(() => setIsDelayingOpen(false), 10);
-    return () => clearTimeout(openTimer);
-  }, [title, src, dispatch]);
-
-  // Repeated close requests share one animation; unmount cancels the timer.
-  const close_player = useCallback(() => {
-    dispatch({ type: "ANIMATE_OUT", payload: true });
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (!isAnimatingOut) return;
-    const closeTimer = setTimeout(() => {
-      dispatch({ type: "TOGGLE_MODAL", payload: false });
-      dispatch({ type: "ANIMATE_OUT", payload: false });
-      closeModal();
-    }, 500);
-    return () => clearTimeout(closeTimer);
-  }, [isAnimatingOut, closeModal, dispatch]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handle_keydown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close_player();
-    };
-    window.addEventListener("keydown", handle_keydown);
-    playerRef.current?.focus();
-    return () => window.removeEventListener("keydown", handle_keydown);
-  }, [isOpen, close_player, dispatch]);
-
-  return { playerRef, isDelayingOpen, close_player };
 };

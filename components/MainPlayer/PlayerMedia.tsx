@@ -1,9 +1,10 @@
-import { lazy, useSyncExternalStore } from "react";
-import type { RefObject, SyntheticEvent } from "react";
-import Image from "next/image";
+import { DialogDescription, DialogTitle } from "@headlessui/react";
+import { cn } from "cnfast";
 import { decode } from "he";
+import Image from "next/image";
+import type { RefObject, SyntheticEvent } from "react";
+import { lazy, useSyncExternalStore } from "react";
 import type { PlayerProps, PlayerState } from "@/lib/types";
-import img from "@/public/P1080841.jpg";
 import {
   get_client_snapshot,
   get_server_snapshot,
@@ -17,6 +18,8 @@ type PlayerMediaProps = {
   state: PlayerState;
   audioRef: RefObject<HTMLVideoElement | null>;
   play_media: () => void;
+  pause_media: () => void;
+  report_error: () => void;
   update_progress: (event: SyntheticEvent<HTMLVideoElement>) => void;
   load_media: (event: SyntheticEvent<HTMLVideoElement>) => void;
 };
@@ -27,6 +30,8 @@ export const PlayerMedia = ({
   state,
   audioRef,
   play_media,
+  pause_media,
+  report_error,
   update_progress,
   load_media,
 }: PlayerMediaProps) => {
@@ -39,24 +44,41 @@ export const PlayerMedia = ({
 
   return (
     <>
-      <div className="mx-auto flex w-96">
+      <div
+        className={cn(
+          "mx-auto w-full max-w-[min(16rem,32dvh)] px-2 sm:max-w-[min(18rem,36dvh)]",
+        )}
+      >
         <Image
           src={
             imageSrc
-              ? `https://www.paullowe.org/wp-content/uploads/${imageSrc}`
-              : img
+              ? /^https?:\/\//.test(imageSrc)
+                ? imageSrc
+                : `https://www.paullowe.org/wp-content/uploads/${imageSrc}`
+              : "/P1080841.jpg"
           }
-          width={imageSrc ? 400 : undefined}
-          height={imageSrc ? 400 : undefined}
-          alt="Nature Beach"
-          className="h-auto w-full object-cover"
+          // A public URL avoids a static import's immutable, content-hashed image cache.
+          width={imageSrc ? 400 : 700}
+          height={imageSrc ? 400 : 700}
+          alt=""
+          className={cn("aspect-square h-auto w-full rounded-2xl object-cover")}
         />
       </div>
-      {state.duration !== 0 && (
-        <span className="my-3 block text-center text-sm text-gray-200">
-          {title ? decode(title) : ""}
-        </span>
-      )}
+      <DialogTitle
+        className={cn(
+          "px-6 pt-5 text-center text-xl font-semibold leading-snug tracking-tight text-slate-900",
+        )}
+      >
+        {title ? decode(title) : "Audio talk"}
+      </DialogTitle>
+      <DialogDescription
+        className={cn("px-6 pb-2 pt-2 text-center text-sm text-slate-500")}
+      >
+        Paul Lowe
+        {mediaItem.date
+          ? `, ${new Date(mediaItem.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}`
+          : ""}
+      </DialogDescription>
       {!isSSR && (
         <ReactPlayer
           ref={audioRef}
@@ -71,6 +93,9 @@ export const PlayerMedia = ({
           volume={state.volume}
           muted={state.muted}
           onPlay={play_media}
+          onPause={pause_media}
+          onEnded={pause_media}
+          onError={report_error}
           onTimeUpdate={update_progress}
           onLoadedMetadata={load_media}
         />

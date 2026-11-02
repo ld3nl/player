@@ -13,7 +13,175 @@
   }
 }
 
-/* this is needed for audio player progress  */
-.bg-track-custom-1 {
-  background-color: white;
+@layer components {
+  .ui-control {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color 150ms,
+      color 150ms,
+      border-color 150ms;
+  }
+
+  .ui-control > svg {
+    flex-shrink: 0;
+  }
+  .ui-control[data-size="icon"] {
+    width: 44px;
+    height: 44px;
+  }
+  .ui-control[data-size="label"] {
+    padding: 0.625rem 1rem;
+    border-radius: 0.75rem;
+  }
+  .ui-control[data-size="play"] {
+    width: 72px;
+    height: 72px;
+  }
+  .ui-control[data-variant="secondary"] {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+  }
+  .ui-control[data-variant="inverse"] {
+    color: #cbd5e1;
+  }
+  .ui-control[aria-pressed="true"] {
+    background: #f3e8ff;
+    border-color: #d8b4fe;
+    color: #7e22ce;
+  }
+  .ui-control[data-variant="inverse"][aria-pressed="true"] {
+    background: #6b21a833;
+    border-color: #c084fc66;
+    color: #e9d5ff;
+  }
+  .ui-control[data-variant="primary"] {
+    background: #7e22ce;
+    color: #fff;
+    box-shadow: 0 4px 12px #7e22ce26;
+  }
+
+  .ui-control:is(:focus-visible, [data-focus]),
+  .catalog-field:focus-visible {
+    outline: 3px solid #a855f7;
+    outline-offset: 3px;
+  }
+  .ui-control:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (hover: hover) {
+    .ui-control:is(:hover, [data-hover]):not(:disabled) {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .ui-control[aria-pressed="true"]:is(:hover, [data-hover]):not(:disabled) {
+      background: #e9d5ff;
+      color: #6b21a8;
+    }
+    .ui-control[data-variant="inverse"]:is(:hover, [data-hover]):not(
+        :disabled
+      ) {
+      background: #ffffff14;
+      color: #fff;
+    }
+    .ui-control[data-variant="primary"]:is(:hover, [data-hover]):not(
+        :disabled
+      ) {
+      background: #6b21a8;
+      color: #fff;
+    }
+  }
+
+  .ui-control:is(:active, [data-active]):not(:disabled) {
+    transform: scale(0.96);
+  }
+  .catalog-field {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    background-color: #fff;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+  .player-timeline {
+    height: 44px;
+    cursor: pointer;
+  }
+  .player-timeline-track {
+    top: 19px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #7e22ce;
+  }
+  .player-timeline-track-1 {
+    background: #e2e8f0;
+  }
+  .player-timeline-thumb {
+    top: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    border-radius: 9999px;
+  }
+  .player-timeline-thumb::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border: 3px solid #fff;
+    border-radius: 9999px;
+    background: #7e22ce;
+    box-shadow: 0 0 0 1px #7e22ce;
+  }
+  .player-timeline-thumb:focus-visible {
+    outline: 3px solid #a855f7;
+    outline-offset: -3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-control {
+      transition: none;
+    }
+    .ui-control:is(:active, [data-active]):not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+/* A short results crossfade keeps filtering changes easy to follow. */
+::view-transition-group(.catalog-results) {
+  animation-duration: 160ms;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(.catalog-results),
+::view-transition-new(.catalog-results) {
+  animation-duration: 160ms;
+  animation-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(.catalog-results),
+  ::view-transition-old(.catalog-results),
+  ::view-transition-new(.catalog-results) {
+    animation: none;
+  }
 }

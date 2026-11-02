@@ -1,11 +1,6 @@
-import axios, { AxiosResponse } from "axios"; // Import axios and AxiosResponse type
-import {
-  POSTS_API_URL,
-  AUTHORS_API_URL,
-  MEDIA_API_URL,
-  CATEGORY_API_URL,
-} from "./constants"; // Import API URLs from constants
-import { Category, Post } from "./types"; // Import necessary types
+import axios, { type AxiosResponse } from "axios"; // Import axios and AxiosResponse type
+import { CATEGORY_API_URL, POSTS_API_URL } from "./constants"; // Import API URLs from constants
+import type { Post } from "./types"; // Type the WordPress post responses
 
 /**
  * Fetches posts from the server.
@@ -23,6 +18,11 @@ export const getAllPostsFromServer = async (
     const response: AxiosResponse<Post[]> = await axios.get<Post[]>(
       `${POSTS_API_URL}`, // API URL for fetching posts
       {
+        // Ask upstream HTTP caches to revalidate and avoid storing this response.
+        headers: {
+          "Cache-Control": "no-cache, no-store, max-age=0",
+          Pragma: "no-cache",
+        },
         params: {
           "categories[terms]": term, // Filter posts by category
           per_page: per_page, // Set number of posts per page
@@ -34,7 +34,8 @@ export const getAllPostsFromServer = async (
     return response.data; // Return the list of posts
   } catch (error) {
     console.error(error); // Log error in case of failure
-    return []; // Return an empty array if the request fails
+    // Reject failed batches so the catalog cache never stores a partial result.
+    throw error;
   }
 };
 
@@ -47,67 +48,18 @@ export const getCategoryCount = async (id: number): Promise<number> => {
   try {
     const response: AxiosResponse<{ count: number }> = await axios.get<{
       count: number;
-    }>(`${CATEGORY_API_URL}/${id}`); // Fetch category by ID
+    }>(`${CATEGORY_API_URL}/${id}`, {
+      // Counts must be fresh too, because they determine the post batch requests.
+      headers: {
+        "Cache-Control": "no-cache, no-store, max-age=0",
+        Pragma: "no-cache",
+      },
+    }); // Fetch category by ID
     return response.data.count; // Return the count of posts in the category
   } catch (error) {
     console.error(error); // Log error in case of failure
-    return 0; // Return 0 if the request fails
-  }
-};
-
-/**
- * Fetches detailed information for a specific category.
- * @param {number} id - The ID of the category.
- * @returns {Promise<Category>} A promise that resolves with the category data.
- */
-export const getCategoryData = async (id: number): Promise<Category> => {
-  try {
-    const response: AxiosResponse<Category> = await axios.get<Category>(
-      `${CATEGORY_API_URL}/${id}`,
-      {
-        params: {
-          _fields: "name,id,slug",
-        },
-      },
-    );
-
-    return response.data; // Return the category data
-  } catch (error) {
-    console.error(error); // Log error in case of failure
-    throw error; // Rethrow the error to be handled by the caller
-  }
-};
-
-/**
- * Fetches the name of an author by their ID.
- * @param {number} id - The ID of the author.
- * @returns {Promise<string>} A promise that resolves with the author's name.
- */
-export const getAuthor = async (id: number): Promise<string> => {
-  try {
-    const response: AxiosResponse<{ name: string }> = await axios.get<{
-      name: string;
-    }>(`${AUTHORS_API_URL}/${id}`); // Fetch author by ID
-    return response.data.name; // Return the author's name
-  } catch (error) {
-    console.error(error); // Log error in case of failure
-    return ""; // Return an empty string if the request fails
-  }
-};
-
-/**
- * Fetches the featured image for a post.
- * @param {number} id - The ID of the media item.
- * @returns {Promise<string>} A promise that resolves with the URL of the image.
- */
-export const getFeaturedImage = async (id: number): Promise<string> => {
-  try {
-    const response: AxiosResponse<{ guid: { rendered: string } }> =
-      await axios.get<{ guid: { rendered: string } }>(`${MEDIA_API_URL}/${id}`); // Fetch media by ID
-    return response.data.guid.rendered; // Return the URL of the image
-  } catch (error) {
-    console.error(error); // Log error in case of failure
-    return ""; // Return an empty string if the request fails
+    // A failed count must not become a successfully cached empty catalog.
+    throw error;
   }
 };
 
@@ -152,6 +104,5 @@ export const StaticCategoryData = [
  * 1. **Environment Variables**: Move the API URLs to environment variables (`process.env`) for better flexibility and security, especially in different environments.
  * 2. **Error Handling Improvements**: Implement a more structured error-handling mechanism. You could introduce custom error types to differentiate between client, server, or network errors.
  * 3. **TypeScript Enhancements**: Use stricter types, especially for response data, to ensure API responses conform to expected structures.
- * 4. **Caching**: Add caching mechanisms (like `SWR` or `React Query`) to avoid repeated API calls for the same data (e.g., categories or authors) and improve performance.
  * 5. **Data Fetching Optimizations**: Batch API requests where possible (e.g., fetching multiple categories in one request) to reduce the number of API calls and improve performance.
  */

@@ -38,10 +38,10 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
 
-You can also format the codebase using Prettier:
+Format the codebase using Biome:
 
 ```bash
-npx prettier --write .
+bun run format
 ```
 
 ## Project Structure
@@ -66,41 +66,63 @@ The project is organized with a clear, scalable architecture:
 - **Lazy Loading**: Utilizes React's `Suspense` and `lazy` for performance optimization, especially for media components.
 - **Client-Side Media State**: Custom hooks manage playback states (e.g., played time, favorites) for seamless user interaction.
 - **Server-Side Rendering (SSR)**: Efficient data fetching and rendering with SSR for improved SEO and faster load times.
-- **Caching**: Implements an LRU cache to reduce redundant server requests and boost performance.
+- **Public Catalog Cache**: Uses Next.js Cache Components to share WordPress data, refresh it in the background after a minute, and expire it after five minutes.
 
 ## Best Practices
 
 - **Atomic Design**: Components are structured following Atomic Design principles, ensuring scalability and reusability.
 - **React 18 Concurrent Features**: Uses `useTransition` and `Suspense` for smooth state transitions and lazy loading.
 - **TypeScript First**: The project is fully typed with TypeScript, ensuring type safety and better developer experience.
-- **ESLint & Prettier**: Enforces coding standards and consistent formatting across the codebase.
+- **Biome & Knip**: Enforce formatting and lint rules, and detect unused code and dependencies.
 - **Error Boundaries**: Handles errors gracefully during rendering, with clear fallbacks for better user experience.
 
 ## Tooling and Scripts
 
-- **Prettier**: Ensures consistent code formatting.
+Run the complete quality check before committing:
 
-  Run Prettier:
+```bash
+bun run check
+```
 
-  ```bash
-  npx prettier --write .
-  ```
+This runs Biome with the custom design plugins, the design audit and regression tests, Knip, and app/tooling TypeScript in sequence, stopping when a check fails.
 
-- **ESLint**: Enforces linting rules to detect errors and maintain code quality.
+| Command               | Purpose                                                             |
+| --------------------- | ------------------------------------------------------------------- |
+| `bun run lint`        | Check formatting, imports, and lint rules; warnings fail the check. |
+| `bun run lint:design` | Audit the player palette, scales, shared CSS, and runtime geometry. |
+| `bun run test:design` | Test the design checker and Biome plugin integration.               |
+| `bun run lint:fix`    | Apply Biome's safe fixes.                                           |
+| `bun run format`      | Format files with Biome.                                            |
+| `bun run knip`        | Find unused files, exports, types, and dependencies.                |
+| `bun run type-check`  | Check TypeScript without emitting files.                            |
 
-  Run ESLint:
+Biome treats unused local variables (including constants and functions), imports,
+parameters, labels, and private class members as errors. Knip checks usage across
+files and automatically discovers Next.js routes and configuration entry points.
+`knip.jsonc` documents the runtime dependency exception for Babel helpers used by
+`react-slider`. Knip runs without automatic deletion;
+review each finding before removing code.
 
-  ```bash
-  npm run lint
-  ```
+The `eslint-lint` script and ESLint/Prettier configuration remain available for
+legacy tooling; the commands above use Biome for linting and formatting.
 
-- **TypeScript**: The project is fully typed with TypeScript for type safety.
+See the [Biome unused-variable rule](https://biomejs.dev/linter/rules/no-unused-variables/)
+and [Knip's Next.js plugin](https://knip.dev/reference/plugins/next) for details.
 
-  To check TypeScript types:
+The [player design policy](tooling/design/README.md) documents the custom GritQL
+plugins, `cnfast` class composition, and reviewed player geometry.
 
-  ```bash
-  npm run type-check
-  ```
+### Icons
+
+Use named icon components from `@phosphor-icons/react` for app icons. Next.js
+optimizes these imports to load only the selected icons. Use `weight="fill"`
+for selected favorites and `weight="regular"` for unselected favorites.
+Decorative icons use `aria-hidden="true"` and `focusable="false"`; their buttons
+and links supply the accessible labels.
+
+Keep `@babel/runtime` installed: the published `react-slider` ESM bundle imports
+Babel 7 helpers without declaring the dependency. This runtime requirement is
+documented in Knip's dependency exceptions.
 
 ## Environment Variables
 
@@ -117,7 +139,7 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 
 - **Lazy Loading**: Key components such as the media player and icons are lazily loaded to improve performance.
 - **Debouncing**: Search functionality is debounced to reduce excessive filtering and improve user experience.
-- **LRU Caching**: Server-side API responses are cached using an LRU cache to reduce server load and improve response times.
+- **Selective Caching**: The public catalog is the only explicit `use cache` boundary. API filters run per request with uncached responses, and image optimization remains disabled. See [caching.md](caching.md) for the policy and framework limits.
 - **Code Splitting**: Uses dynamic imports and code splitting to minimize the bundle size and load only what’s needed.
 
 ## Testing
@@ -146,16 +168,16 @@ To install and set up **Cypress** for both e2e and component testing:
 3. Configure Cypress for both e2e and component tests in `cypress.config.ts`:
 
    ```ts
-   import { defineConfig } from 'cypress';
+   import { defineConfig } from "cypress";
 
    export default defineConfig({
      e2e: {
-       baseUrl: 'http://localhost:3000',
+       baseUrl: "http://localhost:3000",
      },
      component: {
        devServer: {
-         framework: 'next',
-         bundler: 'webpack',
+         framework: "next",
+         bundler: "webpack",
        },
      },
    });

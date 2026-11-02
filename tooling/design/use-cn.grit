@@ -1,0 +1,7 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+JsxAttribute(name=`className`) as $attribute where {
+  $attribute <: not `className={cn($...)}`,
+  register_diagnostic(severity="error", span=$attribute, message="Use className={cn(...)} with cn imported from cnfast for consistent class composition.")
+}

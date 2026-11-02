@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  // Next.js entry points are discovered by Knip's built-in Next.js plugin.
+  // react-slider's published ESM imports Babel 7 helpers without declaring the dependency.
+  "ignoreDependencies": ["@babel/runtime"]
+}

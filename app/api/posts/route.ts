@@ -1,35 +1,27 @@
-import { NextResponse } from "next/server";
+import { unstable_rethrow } from "next/navigation";
+import { type NextRequest, NextResponse } from "next/server";
 import { fetchPosts } from "@/lib/server/fetchPosts";
-import { NextRequest } from "next/server";
+import type { ApiPost } from "@/lib/types";
 
-/**
- * Filters an array of posts based on the provided criteria.
- *
- * @param {Array} posts - The array of posts to filter.
- * @param {Object} criteria - The criteria to filter the posts by.
- * @param {string} [criteria.category] - The category to filter posts by. If not provided, category is not used as a filter.
- * @param {string} [criteria.startDate] - The start date to filter posts by. Posts created before this date will be excluded. If not provided, start date is not used as a filter.
- * @param {string} [criteria.endDate] - The end date to filter posts by. Posts created after this date will be excluded. If not provided, end date is not used as a filter.
- * @returns {Array} The filtered array of posts.
- *
- * @example
- * const posts = [
- *   { category: 'tech', createdAt: '2023-01-01' },
- *   { category: 'health', createdAt: '2023-02-01' },
- * ];
- * const criteria = { category: 'tech', startDate: '2023-01-01', endDate: '2023-12-31' };
- * const filteredPosts = filterPosts(posts, criteria);
- * // filteredPosts will be [{ category: 'tech', createdAt: '2023-01-01' }]
- */
-function filterPosts(posts: any, { category, startDate, endDate }: any) {
+type PostFilters = {
+  category: string | null;
+  startDate: string | null;
+  endDate: string | null;
+};
+
+// Missing query parameters leave the corresponding category or date filter inactive.
+const filter_posts = (
+  posts: ApiPost[],
+  { category, startDate, endDate }: PostFilters,
+) => {
   // console.log("Filtering criteria:", { category, startDate, endDate });
-  return posts.filter((post: any) => {
+  return posts.filter((post) => {
     let isValid = true;
 
     // Check if the post categories include the category filter
     if (category) {
       const categoryMatches = post.categories.some(
-        (cat: any) => cat.slug === category,
+        (cat) => cat.slug === category,
       );
       if (!categoryMatches) {
         isValid = false;
@@ -48,7 +40,7 @@ function filterPosts(posts: any, { category, startDate, endDate }: any) {
 
     return isValid;
   });
-}
+};
 
 /**
  * Handles GET requests to fetch and filter posts.
@@ -61,13 +53,13 @@ function filterPosts(posts: any, { category, startDate, endDate }: any) {
  * The function performs the following steps:
  * 1. Fetches all posts using the `fetchPosts` function.
  * 2. Extracts query parameters (`category`, `startDate`, `endDate`) from the request URL.
- * 3. Filters the fetched posts based on the extracted query parameters using the `filterPosts` function.
+ * 3. Filters the fetched posts based on the extracted query parameters using the `filter_posts` function.
  * 4. Returns a JSON response containing the filtered posts and pagination data.
  * 5. If an error occurs during the process, logs the error and returns a JSON response with an error message and a 500 status code.
  */
 export async function GET(request: NextRequest) {
   try {
-    // Fetch all posts at once
+    // Reuse the public catalog, then apply this request's filters outside the cache.
     const { postNewStructure, pagination } = await fetchPosts();
     // console.log("Fetched posts:", postNewStructure);
 
@@ -80,7 +72,7 @@ export async function GET(request: NextRequest) {
     // console.log("Query parameters:", { category, startDate, endDate });
 
     // Filter posts based on the query parameters
-    const filteredPosts = filterPosts(postNewStructure, {
+    const filteredPosts = filter_posts(postNewStructure, {
       category,
       startDate,
       endDate,
@@ -89,6 +81,8 @@ export async function GET(request: NextRequest) {
     // Return the filtered posts along with pagination data (if applicable)
     return NextResponse.json({ posts: filteredPosts, pagination });
   } catch (error) {
+    // Let Next.js handle prerender interruptions before handling upstream failures.
+    unstable_rethrow(error);
     console.error("Error fetching posts:", error);
 
     if (error instanceof TypeError) {

@@ -1,134 +1,5 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { homePost, MediaState } from "@/lib/types";
-
-/**
- * Custom Hook: useLockScroll
- *
- * This hook locks the scroll when a modal or any other element that needs to disable scrolling is active.
- * It listens for touch and arrow key events to prevent scrolling when `isOpen` is true.
- *
- * @param {boolean} isOpen - Boolean value indicating whether scrolling should be locked.
- */
-export const useLockScroll = (isOpen: boolean): void => {
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    const originalStyle = document.body.style.overflow;
-    const handleTouchMove = (e: TouchEvent) => isOpen && e.preventDefault(); // Prevent touch scrolling
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isOpen && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-        e.preventDefault(); // Prevent scrolling with arrow keys
-      }
-    };
-
-    if (isOpen) {
-      document.body.style.overflow = "hidden"; // Disable scroll by hiding overflow
-      document.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      }); // Disable touch scrolling
-      document.addEventListener("keydown", handleKeyDown); // Disable arrow key scrolling
-    }
-
-    return () => {
-      document.body.style.overflow = originalStyle; // Restore scroll on cleanup
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
-};
-
-export default useLockScroll;
-
-/**
- * Custom Hook: useFilteredPosts
- *
- * This hook filters posts by favorites, selected categories, and search terms.
- * The filtering logic is memoized to optimize performance.
- *
- * @param {homePost[]} posts - Array of all posts.
- * @param {number[]} favoriteItems - Array of favorite post IDs.
- * @param {string[]} searchArray - Array of search terms to filter posts by title.
- * @param {number[]} categoryIds - Array of selected category IDs.
- * @returns {object} - Returns filtered posts, a function to trigger filtering, and filtered category IDs.
- */
-export const useFilteredPosts = (
-  posts: homePost[],
-  favoriteItems: number[],
-  searchArray: string[],
-  categoryIds: number[],
-) => {
-  const [filteredPosts, setFilteredPosts] = useState<homePost[]>(() => posts); // Initialize state with posts
-  const [filteredPostsCategory, setFilteredPostsCategory] = useState<number[]>(
-    [],
-  ); // Store filtered categories
-
-  // Filter logic wrapped in useCallback to ensure it only recalculates when dependencies change
-  const performFiltering = useCallback(() => {
-    let newFilteredPosts = [...posts]; // Copy posts to avoid mutation
-
-    // Filter by favorites if any favorite items are selected.
-    // A Set makes each post id check O(1) instead of scanning the favorite list.
-    if (favoriteItems.length > 0) {
-      const favoriteIdSet = new Set(favoriteItems);
-      newFilteredPosts = newFilteredPosts.filter((post) =>
-        favoriteIdSet.has(post.id),
-      );
-    }
-
-    // Filter by selected categories.
-    // Built once per filter pass because every post checks every one of its categories.
-    if (categoryIds.length > 0) {
-      const categoryIdSet = new Set(categoryIds);
-      newFilteredPosts = newFilteredPosts.filter((post) =>
-        post.categories.some((category) => categoryIdSet.has(category.id)),
-      );
-    }
-
-    // Filter by search terms (debounced for performance)
-    if (searchArray.length > 0) {
-      newFilteredPosts = newFilteredPosts.filter((post) =>
-        searchArray.some((term) =>
-          post.title?.toLowerCase().includes(term.toLowerCase()),
-        ),
-      );
-    }
-
-    return newFilteredPosts; // Return the final filtered list
-  }, [posts, favoriteItems, categoryIds, searchArray]);
-
-  // Memoize unique category IDs from filtered posts
-  const uniqueCategoryIds = useMemo(() => {
-    return Array.from(
-      new Set(
-        filteredPosts.flatMap((post) =>
-          post.categories.map((category) => category.id),
-        ),
-      ),
-    );
-  }, [filteredPosts]);
-
-  // Trigger filtering and update state if necessary
-  const filterPosts = useCallback(() => {
-    const newFilteredPosts = performFiltering();
-
-    if (JSON.stringify(newFilteredPosts) !== JSON.stringify(filteredPosts)) {
-      setFilteredPosts(newFilteredPosts); // Update posts if they've changed
-    }
-    if (
-      JSON.stringify(uniqueCategoryIds) !==
-      JSON.stringify(filteredPostsCategory)
-    ) {
-      setFilteredPostsCategory(uniqueCategoryIds); // Update categories if they've changed
-    }
-  }, [
-    performFiltering,
-    filteredPosts,
-    filteredPostsCategory,
-    uniqueCategoryIds,
-  ]);
-
-  return { filteredPosts, filterPosts, filteredPostsCategory };
-};
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { MediaState } from "@/lib/types";
 
 /**
  * Custom Hook: useGetMediaState
@@ -140,9 +11,19 @@ export const useFilteredPosts = (
 export const useGetMediaState = () => {
   const [mediaStates, setMediaStates] = useState<MediaState[]>(() => {
     if (typeof window !== "undefined") {
-      const storedState = localStorage.getItem("storedMediaState");
       try {
-        return storedState ? JSON.parse(storedState) : []; // Parse state from localStorage or default to an empty array
+        const storedState = localStorage.getItem("storedMediaState");
+        const saved = storedState ? JSON.parse(storedState) : [];
+        return Array.isArray(saved)
+          ? saved.filter(
+              (item) =>
+                item &&
+                Number.isFinite(item.id) &&
+                Number.isFinite(item.playedSeconds) &&
+                Number.isFinite(item.duration) &&
+                typeof item.isFavorite === "boolean",
+            )
+          : [];
       } catch (e) {
         console.error("Error parsing stored media state", e); // Handle JSON parse errors
         return [];
@@ -159,35 +40,42 @@ export const useGetMediaState = () => {
    * @param {number} duration - The total duration of the media.
    * @param {boolean} isFavorite - Whether the media item is marked as a favorite.
    */
-  const updateMediaState = (
-    id: number,
-    playedSeconds: number,
-    duration: number,
-    isFavorite: boolean,
-  ) => {
-    setMediaStates((prevState) => {
-      const existingItemIndex = prevState.findIndex((item) => item.id === id);
+  const updateMediaState = useCallback(
+    (
+      id: number,
+      playedSeconds: number,
+      duration: number,
+      isFavorite: boolean,
+    ) => {
+      setMediaStates((prevState) => {
+        const existingItemIndex = prevState.findIndex((item) => item.id === id);
 
-      if (existingItemIndex !== -1) {
-        const updatedState = [...prevState];
-        updatedState[existingItemIndex] = {
-          ...updatedState[existingItemIndex],
-          playedSeconds,
-          duration,
-          isFavorite,
-        };
-        return updatedState;
-      } else {
-        return [...prevState, { id, playedSeconds, duration, isFavorite }];
-      }
-    });
-  };
+        if (existingItemIndex !== -1) {
+          const updatedState = [...prevState];
+          updatedState[existingItemIndex] = {
+            ...updatedState[existingItemIndex],
+            playedSeconds,
+            duration,
+            isFavorite,
+          };
+          return updatedState;
+        } else {
+          return [...prevState, { id, playedSeconds, duration, isFavorite }];
+        }
+      });
+    },
+    [],
+  );
 
   // Save media state to localStorage, debounced to avoid frequent updates
   useEffect(() => {
     const saveToLocalStorage = setTimeout(() => {
       if (typeof window !== "undefined") {
-        localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
+        try {
+          localStorage.setItem("storedMediaState", JSON.stringify(mediaStates));
+        } catch {
+          // Private browsing/storage limits should not interrupt listening.
+        }
       }
     }, 500); // Save state after 500ms delay
 

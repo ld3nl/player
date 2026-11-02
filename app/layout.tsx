@@ -1,59 +1,33 @@
-// app/layout.tsx
+import { cn } from "cnfast";
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import "./styles/globals.css";
 
-import "./styles/globals.css"; // Import global styles for the entire application
-import { ReactNode } from "react"; // Import the ReactNode type for defining the shape of children props
-
-/**
- * Metadata configuration for the application.
- * Includes title and description for SEO purposes.
- */
-export const metadata = {
-  title: "My App", // Default title for the application
-  description: "Welcome to my app", // Meta description for SEO and social media previews
+export const metadata: Metadata = {
+  title: "Paul Lowe Talks",
+  description:
+    "Listen to conversations with Paul Lowe on awareness, relationships and everyday life.",
 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
-/**
- * Viewport settings to control the scaling and responsiveness of the application on mobile devices.
- * - width: Set to device width for proper scaling on mobile.
- * - initialScale: Ensures the page is scaled correctly when loaded.
- * - maximumScale: Limits the maximum zoom level.
- * - userScalable: Allows users to zoom in and out.
- * - minimalUi: Ensures minimal UI on mobile browsers (available in certain browsers).
- */
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: "yes",
-  minimalUi: true,
-};
-
-/**
- * RootLayout Component
- *
- * This component serves as the layout wrapper for the entire application.
- * It ensures the proper HTML structure and applies necessary attributes like lang and class names.
- *
- * Props:
- * - children: The content of the page that will be rendered inside the layout.
- */
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en" className="h-full">
-      {/* The lang attribute helps set the language for the document (English in this case). */}
-      <body className="h-full">
-        {/* Render the children inside the <body> tag, with the full height applied via className. */}
-        {children}
-      </body>
-    </html>
-  );
-}
-
-/**
- * Possible Refactoring Ideas:
- * 1. **Dynamic Metadata**: Make the metadata (title, description) dynamic based on the specific page being viewed, using Next.js Head or a similar feature.
- * 2. **Accessibility Enhancements**: Ensure better accessibility by adding additional attributes like `aria-label` or `<meta>` tags for viewport and charset if necessary.
- * 3. **TypeScript Enhancements**: Use a stronger type definition for the `children` prop, such as `ReactElement | ReactNode` for stricter type safety.
- * 4. **Performance Optimization**: Implement preloading of critical assets like fonts and scripts to enhance performance.
- * 5. **SEO Enhancements**: Consider adding more meta tags for Open Graph, Twitter Cards, or favicons to further enhance SEO and social media integration.
- */
+// The skip link brings keyboard listeners directly to the catalog.
+const RootLayout = ({ children }: { children: ReactNode }) => (
+  <html lang="en" className={cn("h-full")}>
+    <body
+      className={cn(
+        "h-full bg-slate-50 font-sans text-slate-900 antialiased selection:bg-purple-100 selection:text-purple-900",
+      )}
+    >
+      <a
+        href="#talks"
+        className={cn(
+          "sr-only focus:fixed focus:left-6 focus:top-6 focus:z-50 focus:not-sr-only focus:rounded-xl focus:bg-purple-700 focus:px-6 focus:py-3 focus:text-white focus:outline-2 focus:outline-offset-4 focus:outline-purple-600",
+        )}
+      >
+        Skip to talks
+      </a>
+      {children}
+    </body>
+  </html>
+);
+export default RootLayout;
