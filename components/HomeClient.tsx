@@ -20,6 +20,7 @@ import { Welcome } from "@/components/Home/Welcome";
 import { DEFAULT_MODAL, DEFAULT_NUMBER_OF_POSTS } from "@/lib/constants";
 import { useGetMediaState } from "@/lib/hooks";
 import type { HomeProps, homePost, MediaState, Modal } from "@/lib/types";
+import { decode } from "he";
 
 const MainPlayer = lazy(() => import("@/components/MainPlayer"));
 
